@@ -346,7 +346,8 @@ $(document).ready(function () {
 <li><p>write down prior distributions for the unknowns. These may express prior ignorance, as in the example below.</p></li>
 <li><p>compute the (unique) posterior distribution of the unknown parameters in the joint model, given the observed data.</p></li>
 </ol>
-<p>This approach is used in the DisMod-MR software, as explained by <span class="citation">Flaxman, Vos, and Murray (2015)</span>, however the software itself is undocumented and not fully published. The older (published) DisMod II (<span class="citation">Barendregt et al. (2003)</span>) used an optimisation approach to estimate parameters, which is a less statistically-principled rough approximation. Other advantages of the Bayesian method include</p>
+<p>This approach is used in the DisMod-MR software, as explained by <span class="citation">Flaxman, Vos, and Murray (2015)</span>, however the software itself is undocumented and not fully published. The older (published) DisMod II (<span class="citation">Barendregt et al. (2003)</span>) used an ad-hoc optimisation approach to estimate parameters.</p>
+<p>Advantages of the Bayesian method include</p>
 <ul>
 <li><p>the ease of including multiple sources of direct/indirect data. This is enabled by the computational methods and available software for Bayesian modelling, illustrated below. This allows the approach to generalise to settings with different forms of data available. In contrast, DisMod II only allows limited forms of data.</p></li>
 <li><p>uncertainty about any quantity is quantified automatically through the posterior distribution, given the data, model assumptions and prior distributions supplied.</p></li>
@@ -360,8 +361,7 @@ $(document).ready(function () {
 <li><p><code>inc</code> incidence of IHD by age</p></li>
 <li><p><code>mort</code> IHD-specific mortality by age</p></li>
 </ul>
-<p>and we wish to estimate case fatality by age, given these inputs.</p>
-<p>The first few rows of the full data frame are shown here. The estimates from DisMod II are given in the variable <code>cfout</code>. The other variables are explained below.</p>
+<p>and we wish to estimate case fatality by age, given these inputs. The first few rows of the full data frame are shown here. The estimates of case fatality from DisMod II are given in the variable <code>cfout</code>. The other variables are explained below.</p>
 <pre class="r"><code>load(file=&quot;ihdlondon.rda&quot;)
 head(ihdlondon)</code></pre>
 <pre><code>##   age   inc rem mort  cfout   pop ndieddis prevdenom prevn
@@ -393,7 +393,7 @@ head(ihdlondon)</code></pre>
 <pre class="r"><code>library(rstan)
 options(mc.cores = parallel::detectCores())
 rstan_options(auto_write = TRUE)</code></pre>
-<p>In this example, the theoretical disease model, statistical model and priors are written down in Stan language in the file <a href="gbdcf-unsmoothed.stan" class="uri">gbdcf-unsmoothed.stan</a>.</p>
+<p>In this example, the theoretical disease model, statistical model and priors are written down in Stan language in the file <a href="https://github.com/chjackson/disbayes/blob/master/gbdcf-unsmoothed.stan">gbdcf-unsmoothed.stan</a>.</p>
 <p>The data <span class="math inline">\(\mathbf{y} = \{i_a, r_a, n_a\}\)</span> are supplied in the <code>ihdlondon</code> data frame. These are converted in to the required format for Stan, and initial values are defined for 4 parallel MCMC simulations. Finally, the simulation is run with <code>stan()</code>, which should take less than a minute.</p>
 <pre class="r"><code>datstan &lt;- c(as.list(ihdlondon), nage=nrow(ihdlondon))
 inits &lt;- list(
