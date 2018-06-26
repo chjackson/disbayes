@@ -114,7 +114,7 @@ library(rstan)
 options(mc.cores = parallel::detectCores())
 rstan_options(auto_write = TRUE)
 ```
-In this example, the theoretical disease model, statistical model and priors are written down in Stan language in the file [gbdcf-unsmoothed.stan](gbdcf-unsmoothed.stan).
+In this example, the theoretical disease model, statistical model and priors are written down in Stan language in the file [gbdcf-unsmoothed.stan](https://github.com/chjackson/disbayes/blob/master/gbdcf-unsmoothed.stan).
 
 The data $\mathbf{y} = \{i_a, r_a, n_a\}$ are supplied in the `ihdlondon` data frame.  These are converted in to the required format for Stan, and initial values are defined for 4 parallel MCMC simulations.   Finally, the simulation is run with `stan()`, which should take less than a minute. 
 ```{r, cache=TRUE, warning=FALSE, message=FALSE}
