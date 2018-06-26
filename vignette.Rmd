@@ -56,7 +56,9 @@ Data are observed which give information about some, but not all, of the paramet
 
 4. compute the (unique) posterior distribution of the unknown parameters in the joint model, given the observed data.  
 
-This approach is used in the DisMod-MR software, as explained by @flaxman2015, however the software itself is undocumented and not fully published.  The older (published) DisMod II (@dismod2) used an optimisation approach to estimate parameters, which is a less statistically-principled rough approximation.  Other advantages of the Bayesian method include 
+This approach is used in the DisMod-MR software, as explained by @flaxman2015, however the software itself is undocumented and not fully published.  The older (published) DisMod II (@dismod2) used an ad-hoc optimisation approach to estimate parameters. 
+
+Advantages of the Bayesian method include 
 
 * the ease of including multiple sources of direct/indirect data.  This is enabled by the computational methods and available software for Bayesian modelling, illustrated below.   This allows the approach to generalise to settings with different forms of data available.  In contrast, DisMod II only allows limited forms of data. 
 
@@ -74,9 +76,7 @@ The following data are given in the R data frame `ihdlondon` supplied here.
 
 * `mort` IHD-specific mortality by age
 
-and we wish to estimate case fatality by age, given these inputs.  
-
-The first few rows of the full data frame are shown here.  The estimates from DisMod II are given in the variable `cfout`.  The other variables are explained below.
+and we wish to estimate case fatality by age, given these inputs.  The first few rows of the full data frame are shown here.  The estimates of case fatality from DisMod II are given in the variable `cfout`.  The other variables are explained below.
 
 ```{r}
 load(file="ihdlondon.rda")
