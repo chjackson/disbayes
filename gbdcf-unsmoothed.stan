@@ -4,8 +4,7 @@ functions {
     // From discrete-time solution to the Kolmogorov forward equation given in DISMOD2 paper 
     // 1: healthy;  2: disease;  3: dead from disease
     // i: incidence, f: case fatality, r: remission 
-
-    // TODO handle i=f.  currently causes failure
+    // TODO handle i=f.
     
     matrix trans_probs(real i, real f, real r)  {
 	real l = i + r + f;
@@ -29,6 +28,7 @@ functions {
 
 }
 
+// Declare the data 
 data {
     int<lower=0> nage;
     int<lower=0> pop[nage];
@@ -36,13 +36,15 @@ data {
     int<lower=0> prevdenom[nage];
     int<lower=0> prevn[nage];
     vector<lower=0>[nage] inc;
-    vector<lower=0>[nage] rem;
+    vector<lower=0>[nage] rem; // remission rates assumed to be constant 0 here
 }
 
+// Declare the unknown parameters
 parameters {
     vector<lower=0>[nage] cf;
 }
 
+// Functions of parameters 
 transformed parameters {
     //// range constraints on these cause problems due to floating point fuzz
     matrix[nage+1,3] state_probs; 
@@ -54,12 +56,14 @@ transformed parameters {
     state_probs[1,1] = 1;
     state_probs[1,2] = 0;
     state_probs[1,3] = 0;
-    
+
     for (a in 1:nage){ 
 	P = trans_probs(inc[a], cf[a], rem[a]);
-	prev[a] = state_probs[a,2] / (state_probs[a,1] + state_probs[a,2]);
+	// Calculate state occupancy probabilities at each age by multiplying by the transition probabilities
 	tmp = state_probs[a,1:3] * P;  // temp variable to avoid warning
 	state_probs[a+1,1:3] = tmp;
+	// Deduce the prevalence and disease-specific mortality 
+	prev[a] = state_probs[a,2] / (state_probs[a,1] + state_probs[a,2]);
 	p_die_disease[a] = P[1,3]*(1 - prev[a]) + P[2,3]*prev[a];
 	//// work around floating point fuzz
 	if (p_die_disease[a] < 0) p_die_disease[a] = 0;
@@ -68,20 +72,16 @@ transformed parameters {
 }
 
 model {
+    // Prior for case fatality 
     for (a in 1:nage){
 	cf[a] ~ uniform(0, 0.1); // gamma(0.1, 10); // Why does it not converge with the gamma prior? 
     }
+
+    // Statistical model for number of people dying from IHD at each age
     ndieddis ~ binomial(pop, p_die_disease);
 
+    // Statistical model for prevalence of IHD
     // Doesn't make much difference whether prevalence data are included or not
-    // they're very similar to prevalences forward-calculated from incidence anyway
+    // They're very similar to prevalences forward-calculated from incidence anyway
     prevn ~ binomial(prevdenom, prev);
-
-    // all-cause mortality gives no extra information on case fatality given disease-specific mortality
-    // assuming other-cause mortality indep of disease status 
 }
-
-
-// does this give bigger indents?
-//(add-hook 'c-mode-common-hook
-//	  (lambda () (c-set-style "stroustrup")))
