@@ -92,10 +92,12 @@ disbayes <- function(data,
     S1dummy <- matrix(0, nrow=1, ncol=2)
     datstanu <- c(dat, list(smooth=0, K=2, X=Xdummy, S1=S1dummy, sprior=sprior,
                             beta_fix = rep(0, 2)))
-    initu <- list(cf_par = rep(cf_init, nage), inc = inc_init)
-    fitu <- rstan::sampling(stanmodels$disbayes_unsmoothed, data = datstanu, chains=1, 
-                init = list(initu),
-                include = FALSE, pars=c("beta","lambda"))
+    initu <- function(){
+        list(cf_par = rnorm(nage, mean=cf_init, sd=cf_init/10),
+             inc = rnorm(nage, mean=inc_init, sd=inc_init/10))
+    }
+    fitu <- rstan::sampling(stanmodels$disbayes_unsmoothed, data = datstanu, 
+                            init = initu, include = FALSE, pars=c("beta","lambda"))
 
     if (smooth) {
         jmod <- gam_penalised(fitu, dat)
@@ -110,10 +112,15 @@ disbayes <- function(data,
 #        beta_fix <- coef(lgam_penalised(fitu,dat,knots=c(50,70))) 
 
         datstans <- c(dat, list(smooth=1, X=X, beta_fix=jmod$jags.ini$b, K=ncol(X), sprior=sprior))
-        inits <- list(beta = jmod$jags.ini$b, inc = inc_init,
-                      lambda = jmod$jags.ini$lambda)
-        fits <- rstan::sampling(stanmodels$disbayes, data=datstans, chains=1,
-                     init=list(inits), iter=10000)
+        inits <- function(){
+            inib <- jmod$jags.ini$b
+            lam <- jmod$jags.ini$lambda
+            list(beta = rnorm(length(inib), mean=inib, sd=abs(inib)/10),
+                 inc = rnorm(nage, mean=inc_init, sd=inc_init/10),
+                 lambda = rlnorm(length(lam), mean=log(lam), sd=lam/10))
+        }
+        fits <- rstan::sampling(stanmodels$disbayes, data=datstans, 
+                     init=inits, iter=10000)
         res <- list(fit=fits, fitu=fitu)
     } else res <- list(fit=fitu)
     
