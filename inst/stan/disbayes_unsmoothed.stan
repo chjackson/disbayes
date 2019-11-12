@@ -22,6 +22,7 @@ parameters {
 
 transformed parameters {
     //// range constraints on these cause problems due to floating point fuzz
+    vector<lower=0>[nage] inc_prob;
     matrix[nage+1,3] state_probs; 
     row_vector[3] tmp;
     matrix[3,3] P;
@@ -34,6 +35,7 @@ transformed parameters {
     
     for (a in 1:nage){
 	P = trans_probs(inc[a], cf[a], rem[a]);
+	inc_prob[a] = P[1,2];
 	prev[a] = state_probs[a,2] / (state_probs[a,1] + state_probs[a,2]);
 	tmp = state_probs[a,1:3] * P;  // temp variable to avoid warning
 	state_probs[a+1,1:3] = tmp;
@@ -46,7 +48,7 @@ transformed parameters {
 
 model {
     mort_num ~ binomial(mort_denom, mort);
-    inc_num ~ binomial(inc_denom, inc);
+    inc_num ~ binomial(inc_denom, inc_prob);
     prev_num ~ binomial(prev_denom, prev);
     for (a in 1:nage){
 	cf[a] ~ exponential(1);

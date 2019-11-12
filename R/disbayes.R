@@ -50,12 +50,13 @@
 ##'
 ##' The unsmoothed model is useful for determining how much information is in the data. That is, if the posterior from this model is identical to the prior for a certain age, then there is no information in the data alone about case fatality at that age, indicating that some other structural assumption (such as a smooth function of age) or external data are equired to give more precise estimates.
 ##'
-##' @param cf_init Initial guess at a typical case fatality value, for an average age.
+##' @param cf_init Initial guess at a typical case fatality value, for an average age
 ##' 
 ##' @param eqage Case fatality is assumed to be equal for all ages below this age
 ##'
-##' @param sprior Rate of the exponential prior distribution used to penalise the coefficients of the spline model. 
+##' @param sprior Rate of the exponential prior distribution used to penalise the coefficients of the spline model
 ##'
+##' @param ... Further arguments passed to \pkg{rstan}{sampling} to control running of Stan
 ##' 
 ##' @export
 ##'
@@ -72,7 +73,8 @@ disbayes <- function(data,
                      smooth=TRUE,
                      cf_init = 0.01,
                      eqage = 30,
-                     sprior = 1
+                     sprior = 1,
+                     ...
                      ){
 
     ## Convert all data to numerators and denominators 
@@ -97,7 +99,8 @@ disbayes <- function(data,
              inc = rnorm(nage, mean=inc_init, sd=inc_init/10))
     }
     fitu <- rstan::sampling(stanmodels$disbayes_unsmoothed, data = datstanu, 
-                            init = initu, include = FALSE, pars=c("beta","lambda"))
+                            init = initu, include = FALSE, pars=c("beta","lambda"),
+                            ...)
 
     if (smooth) {
         jmod <- gam_penalised(fitu, dat)
@@ -120,7 +123,7 @@ disbayes <- function(data,
                  lambda = rlnorm(length(lam), mean=log(lam), sd=lam/10))
         }
         fits <- rstan::sampling(stanmodels$disbayes, data=datstans, 
-                     init=inits, iter=10000)
+                     init=inits, iter=5000, ...)
         res <- list(fit=fits, fitu=fitu)
     } else res <- list(fit=fitu)
     
@@ -221,6 +224,9 @@ summary.disbayes <- function(object, vars=NULL, ...){
     summ
 }
 
+##' Summarise estimates from the model  TODO DOC 
+##'
+##' @export
 summary.disbayes.fit <- function(fit, vars=NULL){
     summ <- rstan::summary(fit)$summary
     summ <- as.data.frame(summ[, c("2.5%","50%","97.5%")])
