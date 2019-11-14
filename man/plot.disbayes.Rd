@@ -4,12 +4,14 @@
 \alias{plot.disbayes}
 \title{Plot estimates from the model against age}
 \usage{
-\method{plot}{disbayes}(x, variable = "cf", ...)
+\method{plot}{disbayes}(x, variable = "cf", unsmoothed = TRUE, ...)
 }
 \arguments{
 \item{x}{Object returned by \code{\link{disbayes}}}
 
 \item{variable}{Name of the variable of interest to plot against age}
+
+\item{unsmoothed}{If \code{TRUE}, results from the unsmoothed model are overlaid}
 
 \item{...}{Other arguments. Currently unused}
 }

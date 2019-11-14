@@ -123,7 +123,7 @@ disbayes <- function(data,
                  lambda = rlnorm(length(lam), mean=log(lam), sd=lam/10))
         }
         fits <- rstan::sampling(stanmodels$disbayes, data=datstans, 
-                     init=inits, iter=5000, ...)
+                     init=inits, iter=10000, ...)
         res <- list(fit=fits, fitu=fitu)
     } else res <- list(fit=fitu)
     
@@ -212,22 +212,26 @@ process_data <- function(data, prefix, num_str, denom_str, est_str, lower_str, u
 ##'
 ##' @param object Object returned by \code{\link{disbayes}}
 ##'
-##' @param variable Name of the variable of interest to return.  If not supplied, all estimated quantities are returned. 
+##' @param vars Names of the variables of interest to return.  If not supplied, all estimated quantities are returned. 
 ##'
 ##' @param ... Other arguments. Currently unused
 ##' 
 ##' @export
 summary.disbayes <- function(object, vars=NULL, ...){
     fit <- object$fit
-    summ <- summary.disbayes.fit(fit, vars=vars) 
+    summ <- summary_disbayes_fit(fit, vars=vars) 
     class(summ) <- c("summary.disbayes", class(summ))
     summ
 }
 
 ##' Summarise estimates from the model  TODO DOC 
 ##'
+##' @param fit A Stan fitted model object
+##'
+##' @param vars Names of variables indexed by age, e.g. \code{vars="cf"} if you want the case fatality estimates for all ages.   TODO describe other variables that can be extracted
+##' 
 ##' @export
-summary.disbayes.fit <- function(fit, vars=NULL){
+summary_disbayes_fit <- function(fit, vars=NULL){
     summ <- rstan::summary(fit)$summary
     summ <- as.data.frame(summ[, c("2.5%","50%","97.5%")])
     names(summ) <- c("lower95","med","upper95")
@@ -242,11 +246,13 @@ summary.disbayes.fit <- function(fit, vars=NULL){
 
 ##' Plot estimates from the model against age
 ##'
-##' Posterior medians and 95% credible intervals for a quantity of interest are plotted against year of age. 
+##' Posterior medians and 95% credible intervals for a quantity of interest are plotted against year of age.  
 ##'
 ##' @param x Object returned by \code{\link{disbayes}}
 ##'
 ##' @param variable Name of the variable of interest to plot against age
+##'
+##' @param unsmoothed If \code{TRUE}, results from the unsmoothed model are overlaid
 ##'
 ##' @param ... Other arguments. Currently unused
 ##' 
@@ -256,7 +262,7 @@ plot.disbayes <- function(x, variable="cf", unsmoothed=TRUE, ...){
     summcf$age <- seq_len(x$nage)
     p <- ggplot2::ggplot(summcf, ggplot2::aes_string(x="age"))
     if (!is.null(x$fitu) && unsmoothed){
-        summu <- summary.disbayes.fit(x$fitu, vars=variable)
+        summu <- summary_disbayes_fit(x$fitu, vars=variable)
         summu$age <- seq_len(x$nage)
         p <- p + 
           ggplot2::geom_pointrange(ggplot2::aes_string(y="med", ymin="lower95", ymax="upper95"), data=summu, col="gray")

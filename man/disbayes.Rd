@@ -9,7 +9,7 @@ disbayes(data, inc_num = NULL, inc_denom = NULL, inc = NULL,
   prev_denom = NULL, prev = NULL, prev_lower = NULL,
   prev_upper = NULL, mort_num = NULL, mort_denom = NULL,
   mort = NULL, mort_lower = NULL, mort_upper = NULL, age = "age",
-  smooth = TRUE, cf_init = 0.01, eqage = 30, sprior = 1)
+  smooth = TRUE, cf_init = 0.01, eqage = 30, sprior = 1, ...)
 }
 \arguments{
 \item{data}{Data frame containing some of the variables below.  The variables below are provided as character strings naming columns in this data frame.   For incidence and mortality, one of the three combinations of variables must be specified
@@ -60,11 +60,13 @@ Note that to include extra uncertainty beyond that implied by a published interv
 
 The unsmoothed model is useful for determining how much information is in the data. That is, if the posterior from this model is identical to the prior for a certain age, then there is no information in the data alone about case fatality at that age, indicating that some other structural assumption (such as a smooth function of age) or external data are equired to give more precise estimates.}
 
-\item{cf_init}{Initial guess at a typical case fatality value, for an average age.}
+\item{cf_init}{Initial guess at a typical case fatality value, for an average age}
 
 \item{eqage}{Case fatality is assumed to be equal for all ages below this age}
 
-\item{sprior}{Rate of the exponential prior distribution used to penalise the coefficients of the spline model.}
+\item{sprior}{Rate of the exponential prior distribution used to penalise the coefficients of the spline model}
+
+\item{...}{Further arguments passed to \pkg{rstan}{sampling} to control running of Stan}
 }
 \description{
 Estimates a three-state disease model given data on incidence, prevalence and mortality.

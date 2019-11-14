@@ -4,12 +4,12 @@
 \alias{summary.disbayes}
 \title{Summarise estimates from the model}
 \usage{
-\method{summary}{disbayes}(object, variable = NULL, ...)
+\method{summary}{disbayes}(object, vars = NULL, ...)
 }
 \arguments{
 \item{object}{Object returned by \code{\link{disbayes}}}
 
-\item{variable}{Name of the variable of interest to return.  If not supplied, all estimated quantities are returned.}
+\item{vars}{Names of the variables of interest to return.  If not supplied, all estimated quantities are returned.}
 
 \item{...}{Other arguments. Currently unused}
 }
