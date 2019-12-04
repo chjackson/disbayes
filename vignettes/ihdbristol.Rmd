@@ -1,3 +1,4 @@
+---
 title: "Bayesian estimation of chronic disease epidemiology from incomplete data: the disbayes package"
 author: Chris Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
 date: "`r Sys.Date()`"
