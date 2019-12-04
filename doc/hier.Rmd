@@ -1,0 +1,231 @@
+---
+title: "Hierarchical models for estimating case fatality from multiple areas"
+author: "Chris Jackson <chris.jackson@mrc-bsu.cam.ac.uk>"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Hierarchical models for estimating case fatality from multiple areas}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+
+
+# Motivation
+
+* The main `disbayes` package vignette explains the main model behind the package.  This is a Bayesian multi-state model for estimating case fatality for a disease given information about the mortality, incidence, and optionally also the prevalence, in a _single group_.   In the example, this was defined by area and gender.
+
+* This vignette explains how the method from the main vignette can be generalised to make the best use of data from multiple groups.  This is illustrated for multiple areas. 
+
+* Most simply, the basic method could be employed once for each area to estimate case fatality independently for each area.  However, for some diseases and areas, the information in the data alone is too weak to give meaningful estimates without excessively strong prior assumptions.   This happens for diseases where the numbers of cases of the disease observed in the area is too small to disentangle mortality (rate of death from the disease averaged over the whole population) from case fatality (rate of death from the disease for people with the disease).
+
+* At the other extreme, we could assume that the case fatality is the same in every area, and estimate it by combining the data from multiple areas to form a larger area where there is enough information to provide a useful estimate.   However, there may be systematic variabilities between the areas. 
+
+* A _hierarchical model_ is a way of compromising between these two implausible extremes.
+
+
+# Hierarchical modelling: principles 
+
+* A hierarchical model acknowledges that the data from _other areas_ give useful prior information about what we expect the estimate from one _area of interest_ to be.  If we estimate for each area independently, then this information is neglected. 
+
+* Essentially it produces an area-specific estimate as a _weighted average_ of the area-specific data and the data from the other areas. 
+
+* The consequence is that if the data from the area of interest is weaker, then a higher weight is given to the data from other areas.  This is desirable since an estimate just using the single area's data would be excessively noisy - thus we "borrow strength" from other areas.
+
+* An appropriate weight is constructed automatically under the assumption that the true case fatalities for each area are generated from a between-area distribution of case fatalities, which we call a "random effects" distribution.
+
+* The simplest random effects distributions are "exchangeable", that is, we assume the area case fatalities are conditionally independent given the random effects distribution.   This is what is done in the example below.  In other examples we might want to account for potential correlations arising from the structure of the data - for example:
+
+	* spatial distributions for small-area estimates - which assume that closer areas are expected to be more similar than distant areas
+
+	* random-walk type distributions for data grouped in ordered categories rather than areas, e.g. socioeconomic status / income.
+
+
+# Example
+
+* We want to estimate the case fatality for multiple diseases, for 9 city regions in England (Bristol, Liverpool, London, West Midlands, Sheffield, North East, Greater Manchester, Nottingham, Leeds).
+
+* We have data on incidence, mortality and prevalence from these nine city regions, and additionally from the nine regions of England (East Midlands, North East England, North West England, South West England, West Midlands, Yorkshire and the Humber, East of England, South East England, Greater London)
+
+	* Note that some of these regions contain the city regions of interest.  We can form incidence / mortality / prevalence count data for these regions, that _excludes_ the data from the city regions inside them, by converting all data into count format (using the method described in the main vignette) and subtracting the city region counts from the region counts.   Note that for Greater London the region is identical to the city region, so the region data provide no extra information.
+
+	* This results in disease data from 18 mutually exclusive areas covering the whole of England.  We fit a hierarchical Bayesian multi-state model to estimate the case fatality from all the areas.
+
+* As an example disease and area, take stomach cancer in the Bristol city region.   This plot shows case fatality estimates under the two alternative models described in the main vignette - one where case fatality is estimated independently for each year of age, and another where case fatality is assumed to be a smooth spline function of age, assuming a common value for ages under 50 (this age was arbitrarily chosen - in further work we should seek evidence / expert input on what different assumptions might be used for different diseases) 
+
+* It is clear there is insufficient information -- the results for ages under 80 are implausibly high, as they are dominated by a weak prior that allows case fatality to be high, and no further information is provided by the data.
+
+
+```{r}
+knitr::opts_chunk$set(fig.width=7, echo=FALSE, warning=FALSE)
+```
+
+```{r}
+load(file="cfres.rda")
+library(dplyr)
+library(ggplot2)
+source("constants.R")
+
+p <- cfres %>%
+    filter(disease == "stmc" & 
+           area == "bristol" &
+           model %in% c("unsmoothed", "smoothed")) %>% 
+ggplot(aes(x=age, col=model)) +
+    geom_pointrange(aes(y=med, ymin=lower95, ymax=upper95),
+                    position = position_dodge(0.2)) + 
+    facet_grid(cols=vars(gender)) +  
+    coord_cartesian(ylim=c(0, 4)) +
+    scale_x_continuous(breaks=seq(0,100,10)) + 
+    ylab("Case fatality (median, 95% CrI)")  +
+    xlab("Age (years)") +
+    ggtitle("Bristol, stomach cancer")
+p
+```
+
+* We demonstrate how improved estimates can be obtained with a hierarchical model.
+
+
+# Technical details of the hierarchical model 
+
+* The same three-state stochastic model is used for disease progression, in terms of incidence and case fatality, as described in the main package vignette. 
+
+* In each area, the case fatality is assumed to be a different smooth spline function of age.   The hierarchical model is constructed as follows, following methods described by Wood (REF Generalized Additive Models with R, 2nd Edition).   The log case fatality for area $i$ is the following function of age $a$ 
+
+$$ log(f_i(a)) = \alpha_i + \beta_i  a  + s_i(a)$$
+
+where
+
+* $\alpha_i$ is the random intercept, describing the average log case fatality over different ages in area $i$ 
+
+* $\beta_i$ is a random slope, describing how log case fatality increases with age in area $i$ 
+
+* $s_i(a) = \sum \gamma_{ik} h_k(a)$ is a smooth function describing how log case fatality deviates from a simple linear trend, as a function of age, in area $i$. 
+
+* The sum of the three terms above is defined in exactly the same way as in the area-specific model, to equal a linear function of "basis" terms.  The only difference here is in the presentation - here the parameters defining the intercept and the coefficient of age (the slope) are explicitly labelled, so we can define a model for how they vary between areas.   The function $s_i(a)$ is a linear function of higher-order or nonlinear terms in $a$ (quadratic, cubic and logarithmic functions), each with coefficient $\gamma_{ik}$. As for the single-area example, "thin plate" splines are used - the exact definitions of the basis terms are described by Wood (REF).
+
+* $\alpha_i$ and $\beta_i$ are assumed to be generated from normal "random effects" distributions with mean $\mu_a$ and $\mu_b$ respectively, representing the average intercept and slope over all areas $i$.  Note there is no spatial / geographical information in this model - closer areas are not necessarily assumed to be more similar than distant areas. For an example with smaller/closer areas we might want to build geographical information into the random effects model.
+
+* Weakly informative prior distributions (normal with mean 0, standard deviation 5, and normal with mean 10, standard deviation 10) are placed on $\mu_a$ and $\mu_b$ respectively.
+
+* The $\gamma_{ik}$, for all areas $i$ and basis terms $k$ are assumed to be independent draws from a normal distribution with mean zero and unknown variance $\lambda$.  The parameter $\lambda$ governs the degree of smoothness in the function of age, so that lower values of $\lambda$ imply complete smoothing, thus log case fatality is a linear function of age, and higher values of $\lambda$ imply no smoothing, and no restriction on the wiggliness of the deviation from linearity. 
+
+* $\lambda$ is given a given a vague exponential(1) prior, and estimated along with the other parameters as part of the Bayesian model, so that the optimal level of smoothing is determined from the data. 
+
+* The basis terms are defined to be orthogonal, essentially to avoid collinearity, and make computation more efficient, as described by Wood (REF).
+
+* The joint posterior distribution of the parameters describing case fatality $\alpha_i, \beta_i, \gamma_{ik}, \lambda, \mu_\alpha, \mu_\beta$, and incidence rates $i_{ai}$, for all areas $i$ and basis terms $k$, is estimated using Hamiltonian Monte Carlo sampling in the Stan software, via the `rstan` package.  No interface is provided yet in `disbayes`.
+
+
+
+# Illustration of hierarchical model results
+
+## Variations between ages, within an area 
+
+The estimated case fatality for stomach cancer in Bristol, by age, under two alternative models, is shown below.   The model labelled "smoothed" is the same smooth model as shown before which uses just the data from Bristol, and "hier50" is the corresponding hierarchical model that also borrows information from other areas. 
+
+* For females, the hierarchical model gives no improvement - the estimates for younger ages are still dominated by the vague prior that allows high values, with no data coming in to contradict that. 
+
+* For males, the hierarchical model produces precise estimates - the information in the data seems to have overcome the vague prior. 
+
+* _[ This suggests we might also borrow information about case fatality between genders as well as between areas - should discuss with epidemiologists - how do we expect case fatality for a disease to differ between men and women, given the disease, and given variations between ages and areas? ]_
+
+
+```{r,echo=FALSE}
+
+p <- cfres %>%
+    filter(disease %in% "stmc" & 
+           area == "bristol" &
+           model %in% c("smoothed", "hier50")) %>% 
+ggplot(aes(x=age, col=model)) +
+    geom_pointrange(aes(y=med, ymin=lower95, ymax=upper95),
+                    position = position_dodge(0.2)) + 
+    facet_grid(rows=vars(disease), cols=vars(gender)) +  
+    coord_cartesian(ylim=c(0, 4)) +
+    scale_x_continuous(breaks=seq(0,100,10)) + 
+    ylab("Case fatality (median, 95% CrI)")  +
+    xlab("Age (years)") +
+    ggtitle("Bristol, stomach cancer")
+p
+
+```
+
+## Variations between areas, for a given age 
+
+The plot below shows how the estimates of case fatality, under the same two models, vary between areas. 
+Bristol is shown at the bottom.
+
+* Under the hierarchical model, all estimates become more precise, and the variability between areas in the results is smaller. 
+
+* While we can see that the estimate for Bristol becomes precise when hierarchical between-area information is included, it's not clear how that information gets used.   Typically the area-specific estimates get "shrunk" towards the rest of the data, but in this case, the Bristol estimate after shrinkage is among the lowest of the areas - we'd expect it to be more in the middle. 
+
+
+```{r, echo=FALSE, warning=FALSE}
+
+hierdata <- readRDS("hierdata.rds")
+hdat <- hierdata[["male"]][["stmc"]]
+dat <- data.frame(
+    area = c(cityregions, regions_exc, regions_inc),
+    prevn = hdat$prev_num[60,],
+    prevd = hdat$prev_denom[60,],
+    mortn = hdat$mort_num[60,],
+    mortd = hdat$mort_denom[60,],
+    incn = hdat$inc_num[60,],
+    incd = hdat$prev_denom[60,]
+)
+dat$mortl <- qbeta(0.025, dat$mortn + 0.5, dat$mortd - dat$mortn + 0.5)*1000
+dat$mort <- qbeta(0.5, dat$mortn + 0.5, dat$mortd - dat$mortn + 0.5)*1000
+dat$mortu <- qbeta(0.975, dat$mortn + 0.5, dat$mortd - dat$mortn + 0.5)*1000
+
+p <- cfres %>%
+    filter(age == 60,
+           disease == "stmc", 
+           model %in% c("smoothed", "hier30")) %>%
+    left_join(dat, by="area") %>% 
+ggplot(aes(x=med, y=area, col=model)) +
+    coord_cartesian(xlim=c(0,0.15)) + 
+    facet_grid(rows=vars(disease), cols=vars(gender)) + 
+    geom_point(position=ggstance::position_dodgev(height=0.4),
+               aes(size=mortd)) +
+    geom_errorbarh(aes(xmin=lower95, xmax=upper95),
+                   position=ggstance::position_dodgev(height=0.4)) +
+    labs(size = "Age 60 population") + 
+    xlab(sprintf("Case fatality for age 60") )
+p
+
+```
+
+## Transparency - where do these estimates come from? 
+
+Taking Bristol, male, age 60 as an example, the case fatality estimates from the hierarchical model above come from the following data and assumptions: 
+
+* Mortality for age 60 in Bristol.  These data are very weak in this example.  Given the population size, the published mortality rate is estimated to be based on just 1 observed death out of around 6000 people - see the graph below.
+
+* Incidence for all years up to 60 for Bristol.  Again, given the population sizes, the published incidence rates reflect about one incident case per year of age starting at about age 50. 
+
+* Prevalence for age 60: the published prevalence is again very low (but in this example, it is unclear what data this is based on. If it is cancer registry data, the denominator is the whole population, but the denominator should be smaller for survey data) 
+
+* Mortality/incidence/prevalence for neighbouring ages in Bristol, through smooth spline model for case fatality, and assuming constant case fatality below age 50 
+
+* Data for other areas of England, through the hierarchical model 
+
+Since the data from Bristol, age 60 alone are so sparse, the estimates will be largely based on borrowing strength from other ages and areas.   The information from other areas shrinks down the vague prior for Bristol, but it seems to shrink too far, further down than the estimates from the other areas.   So this result may be biased by some artefact of the model assumptions and how they combine.    For example, the prior assumption of constant case fatality for below age 50 is likely to be influential in all models where it is used in settings of weak data.
+
+
+### "Raw" mortality data for stomach cancer, age 60 in different areas 
+
+Estimated number/denominator of deaths used to produce the published data - presented to the left. 
+
+```{r,echo=FALSE}
+
+dat$numdenom <- sprintf("%s/%s",dat$mortn, dat$mortd)
+ggplot(dat, aes(y=area, x=mort)) +
+    geom_point(aes(size=mortn)) +
+    xlim(-0.1, 0.8) +
+    ylab("") + 
+    geom_errorbar(aes(xmin=mortl, xmax=mortu)) +
+    xlab("Annual mortality per 1000 for age 60" ) +
+    labs(size = "Number of deaths") + 
+    geom_text(aes(x=0, label=numdenom), size=3, hjust=1)
+
+
+```

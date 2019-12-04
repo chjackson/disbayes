@@ -2,9 +2,8 @@ title: "Bayesian estimation of chronic disease epidemiology from incomplete data
 author: Chris Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
-    number_sections: true
 vignette: >
- %\VignetteIndexEntry{Vignette Title}
+ %\VignetteIndexEntry{Bayesian estimation of chronic disease epidemiology from incomplete data: the disbayes package}
  %\VignetteEngine{knitr::rmarkdown}
  \usepackage[utf8]{inputenc}
 bibliography: disbayes.bib
@@ -82,7 +81,7 @@ The use of general-purpose free software for this computation, through the `disb
 
 # Converting data into the required form for the Bayesian model
 
-## Given estimates and denominators 
+## ...Given estimates and denominators 
 
 The following data are given in the R data frame `ihdbristol` supplied in the package, obtained from the Global Burden of Disease (REF) in a typical format:
 
@@ -115,12 +114,12 @@ The data also contain estimates of prevalence, implicitly based on observing the
 ihdbristol[ihdbristol$age %in% 50:55, c("age","prev","prevn","prevdenom")]
 ```
 
-## Given point and interval estimates
+## ...Given point and interval estimates
 
 Sometimes a point estimate $\hat{p}$ for a quantity such as incidence is published alongside an (e.g. 95%) interval estimate $(\hat{p}^{(lower)},\hat{p}^{(upper)})$.   The interval estimate can be assumed to express the uncertainty associated with the estimate.   Such information can be converted to an implicit numerator $r$ and denominator $n$  as follows.   We assume the point and interval estimate are summaries of a Beta posterior distribution which has been obtained by combining a vague prior with an observation of $r$ events occurring out of a sample of $n$ individuals.   If a Beta(0,0) prior is used, then the posterior is known to be Beta(r, n-r).  We can then search for the best-fitting Beta(r,n-r)$ distribution which has median $\hat{p}$ and (2.5,97.5) quantiles $(\hat{p}^{(lower)},\hat{p}^{(upper)})$, and set $r=a, n=a+b$.   A utility to perform this search is provided in the SHELF package for expert elicitation (REF). 
 
 
-## Expressing additional uncertainty
+## ...Expressing additional uncertainty
 
 The uncertainty inherent in the information supplied about each of incidence, prevalence and mortality is measured by the denominator.  In the example above, this is the just size of the population used to produce the estimate.   However, if we also suspected that one of the data sources may be biased, but were unsure about the direction of bias, we could downweight that data source by multiplying both the numerator and denominator by the same amount, e.g. 0.5 if we wanted to give a data source half its original weight.  Note that if counts are scaled in this way, they should then be rounded to the nearest integer.
 
@@ -167,7 +166,7 @@ This information might come from nearby ages that are better-informed, through e
 
 The Stan software ([mc-stan.org](http://mc-stan.org)) allows any Bayesian model to be written down in the Stan language.  The software then enables a sample from the posterior distribution to be drawn, using Hamiltonian Monte Carlo sampling.
 
-The `disbayes` package uses Stan to fit the Bayesian disease model given here to the data $\mathbf{y} = \{i_a, r_a, n_a\}$ supplied in the `ihdbristol` data frame.   The function `disbayes` does the work of converting the data to the required format for Stan, and initializing and a set of Markov Chain Monte Carlo simulations, and calling the Stan software to run the simulations.
+The `disbayes` package uses Stan to fit the Bayesian disease model given here to the data $\mathbf{y} = \{i_a, r_a, n_a\}$ supplied in the `ihdbristol` data frame.   The function `disbayes` does the work of converting the data to the required format for Stan, and calling the Stan software to run the simulations.
 
 The `disbayes` function requires the following arguments
 
@@ -243,7 +242,7 @@ head(summu)
 
 The default `plot` method for objects returned by `disbayes` plots the posterior summaries for case fatality.  Both the smoothed and unsmoothed estimates from age 40 are shown.   This plot also overlays the corresponding estimates from DisMod II are overlaid in purple, included in the `ihdbristol` data in variable `dismod_cf`. 
 
-```{r, eval=TRUE}
+```{r, eval=TRUE, warning=FALSE}
 library(ggplot2)
 plot(dbres) +  ylab("Case fatality") + xlab("Age") + ylim(0,0.5) + xlim(40,100) + 
   geom_line(aes(y=dismod_cf), data=ihdbristol, col="purple")
@@ -260,20 +259,18 @@ The smoothed model agrees with the DisMod II estimates, and has the benefit of c
 
 ## Other things that could be done
 
-For chronic diseases in general:
-
 * More ways of supplying substantive prior information 
 
 * Account for variations between populations in different areas.  Hierarchical modelling might be used here - DISMOD-MR does this, I believe.
 
-* Use data from larger areas as priors for quantities for smaller areas 
+* Hierarchical modelling to account for variations between ordered socioeconomic categories / income groups
 
-* Borrow information between men/women? 
+* Borrow information between men/women
 
 * Jointly model multiple diseases.  i.e. relaxing the assumption that mortality from causes other than the disease is the same for people with and without the disease.  Multimorbidity. 
 
 * Account for variations in incidence and prevalence with time as well as age.  DisMod II allows time trends to be modelled, but assumes that time trends are independent of age.  Relaxing this assumption would be feasible, but possibly computationally expensive. 
-	* For IHD in the UK, data on time trends may come from the Health Survey for England, years 1993, 1994, 1988, 2003, 2006, 2011. 
+	* For IHD in the UK, data on time trends may come from the Health Survey for England, years 1993, 1994, 1988, 2003, 2006, 2011?
 
 * In general, to transparently represent uncertainty, and explicitly build in other sources of information, in situations where we suspect the data may not be representative
 

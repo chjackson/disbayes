@@ -8,8 +8,9 @@ disbayes(data, inc_num = NULL, inc_denom = NULL, inc = NULL,
   inc_lower = NULL, inc_upper = NULL, prev_num = NULL,
   prev_denom = NULL, prev = NULL, prev_lower = NULL,
   prev_upper = NULL, mort_num = NULL, mort_denom = NULL,
-  mort = NULL, mort_lower = NULL, mort_upper = NULL, age = "age",
-  smooth = TRUE, cf_init = 0.01, eqage = 30, sprior = 1, ...)
+  mort = NULL, mort_lower = NULL, mort_upper = NULL, area = NULL,
+  age = "age", smooth = TRUE, cf_init = 0.01, eqage = 30,
+  sprior = 1, basis = "tp", knots = c(50, 70), ...)
 }
 \arguments{
 \item{data}{Data frame containing some of the variables below.  The variables below are provided as character strings naming columns in this data frame.   For incidence and mortality, one of the three combinations of variables must be specified

@@ -69,11 +69,14 @@ disbayes <- function(data,
                      inc_num=NULL, inc_denom=NULL, inc=NULL, inc_lower=NULL, inc_upper=NULL,
                      prev_num=NULL, prev_denom=NULL, prev=NULL, prev_lower=NULL, prev_upper=NULL,
                      mort_num=NULL, mort_denom=NULL, mort=NULL, mort_lower=NULL, mort_upper=NULL,
+                     area = NULL, 
                      age="age",
                      smooth=TRUE,
                      cf_init = 0.01,
                      eqage = 30,
                      sprior = 1,
+                     basis = "tp",
+                     knots = c(50,70), 
                      ...
                      ){
 
@@ -91,8 +94,7 @@ disbayes <- function(data,
 
     ## Call unsmoothed stan model.  
     Xdummy <- matrix(0, nrow=nage, ncol=2)
-    S1dummy <- matrix(0, nrow=1, ncol=2)
-    datstanu <- c(dat, list(smooth=0, K=2, X=Xdummy, S1=S1dummy, sprior=sprior,
+    datstanu <- c(dat, list(smooth=0, K=2, X=Xdummy, sprior=sprior,
                             beta_fix = rep(0, 2)))
     initu <- function(){
         list(cf_par = rnorm(nage, mean=cf_init, sd=cf_init/10),
@@ -103,27 +105,34 @@ disbayes <- function(data,
                             ...)
 
     if (smooth) {
-        jmod <- gam_penalised(fitu, dat)
-        X <- jmod$jags.data$X
-        S1 <- jmod$jags.data$S1
+        gmod <- gam_penalised(fitu, basis=basis, knots=knots)
+        if (basis=="tp"){
+            X <- gmod$jags.data$X
+            beta_init <- gmod$jags.ini$b
+            lam_init <- gmod$jags.ini$lambda
+            stanmod <- stanmodels$disbayes
+        } else if (basis=="linear"){
+            X <- linear_basis(1:nage, knots=knots)
+            beta_init <- coef(gmod)
+            lam_init <- 1
+            stanmod <- stanmodels$disbayes_linear
+        } else stop(sprintf("Unknown basis type `%s`", basis))
         for (i in 1:(eqage-1)){
             X[i,] <- X[eqage,]
         }
-
-# if need a linear basis         
-#        X <- linear_basis(knots=c(50,70))
-#        beta_fix <- coef(lgam_penalised(fitu,dat,knots=c(50,70))) 
-
-        datstans <- c(dat, list(smooth=1, X=X, beta_fix=jmod$jags.ini$b, K=ncol(X), sprior=sprior))
+        
+        datstans <- c(dat, list(smooth=1, X=X,
+                                beta_fix = beta_init,
+                                K=ncol(X), sprior=sprior))
         inits <- function(){
-            inib <- jmod$jags.ini$b
-            lam <- jmod$jags.ini$lambda
-            list(beta = rnorm(length(inib), mean=inib, sd=abs(inib)/10),
+            list(beta = rnorm(length(beta_init), mean=beta_init, sd=abs(beta_init)/10),
                  inc = rnorm(nage, mean=inc_init, sd=inc_init/10),
-                 lambda = rlnorm(length(lam), mean=log(lam), sd=lam/10))
+                 lambda = rlnorm(length(lam_init), mean=log(lam_init), sd=lam_init/10))
         }
-        fits <- rstan::sampling(stanmodels$disbayes, data=datstans, 
-                     init=inits, iter=10000, ...)
+
+###        fits <- stan("disbayes/inst/stan/disbayes_linear.stan", data=datstans, init=inits, iter=3000)
+
+        fits <- rstan::sampling(stanmod, data=datstans, init=inits, iter=10000, ...)
         res <- list(fit=fits, fitu=fitu)
     } else res <- list(fit=fitu)
     
@@ -132,31 +141,25 @@ disbayes <- function(data,
     res
 }
 
-## Default basis (thin plate) as in jagam, orthogonalised so no S needed
+## Fit spline model to unsmoothed estimates to generate initial values for spline coefs
 
-gam_penalised <- function(fitu, dat){
-    nage <- dat$nage 
-    summ <- rstan::summary(fitu)$summary
-    cfest <- summ[sprintf("cf[%s]",1:nage), "50%"]
-    datspl <- data.frame(logcfest = log(cfest), age = 1:nage) 
-    jmod <- mgcv::jagam(logcfest ~ s(age),
-                        data=datspl, diagonalize=TRUE, file=tempfile())
-    jmod
+gam_penalised <- function(fitu, basis, knots){
+    summ <- summary_disbayes_fit(fitu, vars="cf")
+    cfest <- summ[, "med"]
+    datspl <- data.frame(logcfest = log(cfest), age = seq(along=cfest))
+    if (basis=="tp"){ 
+        gmod <- mgcv::jagam(logcfest ~ s(age),
+                            data=datspl, diagonalize=TRUE, file=tempfile())
+    } else if (basis=="linear"){
+        X <- linear_basis(age=datspl$age, knots=knots)
+        gmod <- lm(logcfest ~ X - 1, data=datspl)
+    }
+    gmod
 }
 
-## Unpenalised linear basis
+## Construct truncated linear basis
 
-lgam_penalised <- function(fitu, dat, knots=knots){
-    nage <- dat$nage 
-    summ <- rstan::summary(fitu)$summary
-    cfest <- summ[sprintf("cf[%s]",1:nage), "50%"]
-    datspl <- data.frame(logcfest = log(cfest), age = 1:nage) 
-    X <- linear_basis(knots=knots)
-    lmod <- lm(logcfest ~ X - 1, data=datspl)
-    lmod
-}
-
-linear_basis <- function(age=0:100, knots=c(40,60,80)){
+linear_basis <- function(age=1:101, knots=c(40,60,80)){
     knots <- c(0,knots)
     K <- length(knots)
     nage <- length(age)
@@ -237,8 +240,8 @@ summary_disbayes_fit <- function(fit, vars=NULL){
     names(summ) <- c("lower95","med","upper95")
     if (!is.null(vars)) {
         vrex <- paste(vars, collapse="|")
-        rex <- sprintf("(%s)\\[.+\\]", vrex)
-        rows <- grep(vrex, rownames(summ))
+        rex <- sprintf("%s\\[.+\\]", vrex)
+        rows <- grep(rex, rownames(summ))
         summ <- summ[rows,,drop=FALSE]
     }
     summ

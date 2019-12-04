@@ -10,12 +10,10 @@ data {
     int<lower=0> inc_num[nage];
     int<lower=0> inc_denom[nage];
     vector<lower=0>[nage] rem;
-//    vector<lower=0>[nage] inc;
-//    vector<lower=0>[nage] cfest;
 
     // only in smoothed model 
     int<lower=0> K; // number of spline basis variables including the intercept
-    vector[K] beta_fix; 
+//    vector[K] beta_fix; 
     matrix[nage,K] X;
     /* matrix[K-1,2*(K-1)] S1; */
     real<lower=0> sprior; 
@@ -47,10 +45,6 @@ transformed parameters {
     
     /// Case fatality as smooth spline function of age
     /// Spline basis X passed from R
-//	for (i in 1:K) {
-//	    beta[i] = beta_fix[i] + 100*beta_raw[i];
-//	}
-
     cf = exp(X*beta);
     
     state_probs[1,1] = 1;
@@ -75,17 +69,13 @@ model {
     inc_num ~ binomial(inc_denom, inc_prob);
     prev_num ~ binomial(prev_denom, prev);
 
-    // FIXME binomial prob for inc should be inc_prob[a] defined as P[1,2]
-
-    // copy jagam code for now 
+    // use jagam defaults for now 
     beta[1] ~ normal(0, 100); 
 //	beta[2:10] ~ multi_normal(zero[2:K],K1);
 
     // diagonalised version
     /* beta ~ normal(beta_fix, 100); // lambda[1]); */
     for (i in 2:(K-1)) {
-//	    beta_raw[i] ~ std_normal();
-//	    beta[i] = beta_fix[i] + 100*beta_raw[i];
 	beta[i] ~ normal(0, lambda[1]);
     }
     for (i in K:K) {

@@ -37,7 +37,7 @@ stan::io::program_reader prog_reader__() {
     reader.add_event(3, 0, "start", "/include/trans_probs.stan");
     reader.add_event(78, 75, "end", "/include/trans_probs.stan");
     reader.add_event(78, 4, "restart", "model_disbayes_unsmoothed");
-    reader.add_event(130, 54, "end", "model_disbayes_unsmoothed");
+    reader.add_event(132, 56, "end", "model_disbayes_unsmoothed");
     return reader;
 }
 template <typename T0__, typename T1__, typename T2__>
@@ -627,80 +627,90 @@ public:
                 cf = in__.vector_lb_constrain(0, nage);
             // transformed parameters
             current_statement_begin__ = 99;
+            validate_non_negative_index("inc_prob", "nage", nage);
+            Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> inc_prob(nage);
+            stan::math::initialize(inc_prob, DUMMY_VAR__);
+            stan::math::fill(inc_prob, DUMMY_VAR__);
+            current_statement_begin__ = 100;
             validate_non_negative_index("state_probs", "(nage + 1)", (nage + 1));
             validate_non_negative_index("state_probs", "3", 3);
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, Eigen::Dynamic> state_probs((nage + 1), 3);
             stan::math::initialize(state_probs, DUMMY_VAR__);
             stan::math::fill(state_probs, DUMMY_VAR__);
-            current_statement_begin__ = 100;
+            current_statement_begin__ = 101;
             validate_non_negative_index("tmp", "3", 3);
             Eigen::Matrix<local_scalar_t__, 1, Eigen::Dynamic> tmp(3);
             stan::math::initialize(tmp, DUMMY_VAR__);
             stan::math::fill(tmp, DUMMY_VAR__);
-            current_statement_begin__ = 101;
+            current_statement_begin__ = 102;
             validate_non_negative_index("P", "3", 3);
             validate_non_negative_index("P", "3", 3);
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, Eigen::Dynamic> P(3, 3);
             stan::math::initialize(P, DUMMY_VAR__);
             stan::math::fill(P, DUMMY_VAR__);
-            current_statement_begin__ = 102;
+            current_statement_begin__ = 103;
             validate_non_negative_index("prev", "nage", nage);
             std::vector<local_scalar_t__> prev(nage, local_scalar_t__(0));
             stan::math::initialize(prev, DUMMY_VAR__);
             stan::math::fill(prev, DUMMY_VAR__);
-            current_statement_begin__ = 103;
+            current_statement_begin__ = 104;
             validate_non_negative_index("mort", "nage", nage);
             std::vector<local_scalar_t__> mort(nage, local_scalar_t__(0));
             stan::math::initialize(mort, DUMMY_VAR__);
             stan::math::fill(mort, DUMMY_VAR__);
             // transformed parameters block statements
-            current_statement_begin__ = 105;
+            current_statement_begin__ = 106;
             stan::model::assign(state_probs, 
                         stan::model::cons_list(stan::model::index_uni(1), stan::model::cons_list(stan::model::index_uni(1), stan::model::nil_index_list())), 
                         1, 
                         "assigning variable state_probs");
-            current_statement_begin__ = 106;
+            current_statement_begin__ = 107;
             stan::model::assign(state_probs, 
                         stan::model::cons_list(stan::model::index_uni(1), stan::model::cons_list(stan::model::index_uni(2), stan::model::nil_index_list())), 
                         0, 
                         "assigning variable state_probs");
-            current_statement_begin__ = 107;
+            current_statement_begin__ = 108;
             stan::model::assign(state_probs, 
                         stan::model::cons_list(stan::model::index_uni(1), stan::model::cons_list(stan::model::index_uni(3), stan::model::nil_index_list())), 
                         0, 
                         "assigning variable state_probs");
-            current_statement_begin__ = 109;
+            current_statement_begin__ = 110;
             for (int a = 1; a <= nage; ++a) {
-                current_statement_begin__ = 110;
-                stan::math::assign(P, trans_probs(get_base1(inc, a, "inc", 1), get_base1(cf, a, "cf", 1), get_base1(rem, a, "rem", 1), pstream__));
                 current_statement_begin__ = 111;
+                stan::math::assign(P, trans_probs(get_base1(inc, a, "inc", 1), get_base1(cf, a, "cf", 1), get_base1(rem, a, "rem", 1), pstream__));
+                current_statement_begin__ = 112;
+                stan::model::assign(inc_prob, 
+                            stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
+                            get_base1(P, 1, 2, "P", 1), 
+                            "assigning variable inc_prob");
+                current_statement_begin__ = 113;
                 stan::model::assign(prev, 
                             stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
                             (get_base1(state_probs, a, 2, "state_probs", 1) / (get_base1(state_probs, a, 1, "state_probs", 1) + get_base1(state_probs, a, 2, "state_probs", 1))), 
                             "assigning variable prev");
-                current_statement_begin__ = 112;
+                current_statement_begin__ = 114;
                 stan::math::assign(tmp, multiply(stan::model::rvalue(state_probs, stan::model::cons_list(stan::model::index_uni(a), stan::model::cons_list(stan::model::index_min_max(1, 3), stan::model::nil_index_list())), "state_probs"), P));
-                current_statement_begin__ = 113;
+                current_statement_begin__ = 115;
                 stan::model::assign(state_probs, 
                             stan::model::cons_list(stan::model::index_uni((a + 1)), stan::model::cons_list(stan::model::index_min_max(1, 3), stan::model::nil_index_list())), 
                             tmp, 
                             "assigning variable state_probs");
-                current_statement_begin__ = 114;
+                current_statement_begin__ = 116;
                 stan::model::assign(mort, 
                             stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
                             ((get_base1(P, 1, 3, "P", 1) * (1 - get_base1(prev, a, "prev", 1))) + (get_base1(P, 2, 3, "P", 1) * get_base1(prev, a, "prev", 1))), 
                             "assigning variable mort");
-                current_statement_begin__ = 116;
+                current_statement_begin__ = 118;
                 if (as_bool(logical_lt(get_base1(mort, a, "mort", 1), 0))) {
-                    current_statement_begin__ = 116;
+                    current_statement_begin__ = 118;
                     stan::model::assign(mort, 
                                 stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
                                 0, 
                                 "assigning variable mort");
                 }
-                current_statement_begin__ = 117;
+                current_statement_begin__ = 119;
                 if (as_bool(logical_gt(get_base1(mort, a, "mort", 1), 1))) {
-                    current_statement_begin__ = 117;
+                    current_statement_begin__ = 119;
                     stan::model::assign(mort, 
                                 stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
                                 1, 
@@ -711,6 +721,16 @@ public:
             const char* function__ = "validate transformed params";
             (void) function__;  // dummy to suppress unused var warning
             current_statement_begin__ = 99;
+            size_t inc_prob_j_1_max__ = nage;
+            for (size_t j_1__ = 0; j_1__ < inc_prob_j_1_max__; ++j_1__) {
+                if (stan::math::is_uninitialized(inc_prob(j_1__))) {
+                    std::stringstream msg__;
+                    msg__ << "Undefined transformed parameter: inc_prob" << "(" << j_1__ << ")";
+                    stan::lang::rethrow_located(std::runtime_error(std::string("Error initializing variable inc_prob: ") + msg__.str()), current_statement_begin__, prog_reader__());
+                }
+            }
+            check_greater_or_equal(function__, "inc_prob", inc_prob, 0);
+            current_statement_begin__ = 100;
             size_t state_probs_j_1_max__ = (nage + 1);
             size_t state_probs_j_2_max__ = 3;
             for (size_t j_1__ = 0; j_1__ < state_probs_j_1_max__; ++j_1__) {
@@ -722,7 +742,7 @@ public:
                     }
                 }
             }
-            current_statement_begin__ = 100;
+            current_statement_begin__ = 101;
             size_t tmp_j_1_max__ = 3;
             for (size_t j_1__ = 0; j_1__ < tmp_j_1_max__; ++j_1__) {
                 if (stan::math::is_uninitialized(tmp(j_1__))) {
@@ -731,7 +751,7 @@ public:
                     stan::lang::rethrow_located(std::runtime_error(std::string("Error initializing variable tmp: ") + msg__.str()), current_statement_begin__, prog_reader__());
                 }
             }
-            current_statement_begin__ = 101;
+            current_statement_begin__ = 102;
             size_t P_j_1_max__ = 3;
             size_t P_j_2_max__ = 3;
             for (size_t j_1__ = 0; j_1__ < P_j_1_max__; ++j_1__) {
@@ -743,7 +763,7 @@ public:
                     }
                 }
             }
-            current_statement_begin__ = 102;
+            current_statement_begin__ = 103;
             size_t prev_k_0_max__ = nage;
             for (size_t k_0__ = 0; k_0__ < prev_k_0_max__; ++k_0__) {
                 if (stan::math::is_uninitialized(prev[k_0__])) {
@@ -752,7 +772,7 @@ public:
                     stan::lang::rethrow_located(std::runtime_error(std::string("Error initializing variable prev: ") + msg__.str()), current_statement_begin__, prog_reader__());
                 }
             }
-            current_statement_begin__ = 103;
+            current_statement_begin__ = 104;
             size_t mort_k_0_max__ = nage;
             for (size_t k_0__ = 0; k_0__ < mort_k_0_max__; ++k_0__) {
                 if (stan::math::is_uninitialized(mort[k_0__])) {
@@ -762,15 +782,15 @@ public:
                 }
             }
             // model body
-            current_statement_begin__ = 122;
-            lp_accum__.add(binomial_log<propto__>(mort_num, mort_denom, mort));
-            current_statement_begin__ = 123;
-            lp_accum__.add(binomial_log<propto__>(inc_num, inc_denom, inc));
             current_statement_begin__ = 124;
-            lp_accum__.add(binomial_log<propto__>(prev_num, prev_denom, prev));
+            lp_accum__.add(binomial_log<propto__>(mort_num, mort_denom, mort));
             current_statement_begin__ = 125;
+            lp_accum__.add(binomial_log<propto__>(inc_num, inc_denom, inc_prob));
+            current_statement_begin__ = 126;
+            lp_accum__.add(binomial_log<propto__>(prev_num, prev_denom, prev));
+            current_statement_begin__ = 127;
             for (int a = 1; a <= nage; ++a) {
-                current_statement_begin__ = 126;
+                current_statement_begin__ = 128;
                 lp_accum__.add(exponential_log<propto__>(get_base1(cf, a, "cf", 1), 1));
             }
         } catch (const std::exception& e) {
@@ -795,6 +815,7 @@ public:
         names__.resize(0);
         names__.push_back("inc");
         names__.push_back("cf");
+        names__.push_back("inc_prob");
         names__.push_back("state_probs");
         names__.push_back("tmp");
         names__.push_back("P");
@@ -804,6 +825,9 @@ public:
     void get_dims(std::vector<std::vector<size_t> >& dimss__) const {
         dimss__.resize(0);
         std::vector<size_t> dims__;
+        dims__.resize(0);
+        dims__.push_back(nage);
+        dimss__.push_back(dims__);
         dims__.resize(0);
         dims__.push_back(nage);
         dimss__.push_back(dims__);
@@ -861,80 +885,90 @@ public:
         try {
             // declare and define transformed parameters
             current_statement_begin__ = 99;
+            validate_non_negative_index("inc_prob", "nage", nage);
+            Eigen::Matrix<double, Eigen::Dynamic, 1> inc_prob(nage);
+            stan::math::initialize(inc_prob, DUMMY_VAR__);
+            stan::math::fill(inc_prob, DUMMY_VAR__);
+            current_statement_begin__ = 100;
             validate_non_negative_index("state_probs", "(nage + 1)", (nage + 1));
             validate_non_negative_index("state_probs", "3", 3);
             Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> state_probs((nage + 1), 3);
             stan::math::initialize(state_probs, DUMMY_VAR__);
             stan::math::fill(state_probs, DUMMY_VAR__);
-            current_statement_begin__ = 100;
+            current_statement_begin__ = 101;
             validate_non_negative_index("tmp", "3", 3);
             Eigen::Matrix<double, 1, Eigen::Dynamic> tmp(3);
             stan::math::initialize(tmp, DUMMY_VAR__);
             stan::math::fill(tmp, DUMMY_VAR__);
-            current_statement_begin__ = 101;
+            current_statement_begin__ = 102;
             validate_non_negative_index("P", "3", 3);
             validate_non_negative_index("P", "3", 3);
             Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> P(3, 3);
             stan::math::initialize(P, DUMMY_VAR__);
             stan::math::fill(P, DUMMY_VAR__);
-            current_statement_begin__ = 102;
+            current_statement_begin__ = 103;
             validate_non_negative_index("prev", "nage", nage);
             std::vector<double> prev(nage, double(0));
             stan::math::initialize(prev, DUMMY_VAR__);
             stan::math::fill(prev, DUMMY_VAR__);
-            current_statement_begin__ = 103;
+            current_statement_begin__ = 104;
             validate_non_negative_index("mort", "nage", nage);
             std::vector<double> mort(nage, double(0));
             stan::math::initialize(mort, DUMMY_VAR__);
             stan::math::fill(mort, DUMMY_VAR__);
             // do transformed parameters statements
-            current_statement_begin__ = 105;
+            current_statement_begin__ = 106;
             stan::model::assign(state_probs, 
                         stan::model::cons_list(stan::model::index_uni(1), stan::model::cons_list(stan::model::index_uni(1), stan::model::nil_index_list())), 
                         1, 
                         "assigning variable state_probs");
-            current_statement_begin__ = 106;
+            current_statement_begin__ = 107;
             stan::model::assign(state_probs, 
                         stan::model::cons_list(stan::model::index_uni(1), stan::model::cons_list(stan::model::index_uni(2), stan::model::nil_index_list())), 
                         0, 
                         "assigning variable state_probs");
-            current_statement_begin__ = 107;
+            current_statement_begin__ = 108;
             stan::model::assign(state_probs, 
                         stan::model::cons_list(stan::model::index_uni(1), stan::model::cons_list(stan::model::index_uni(3), stan::model::nil_index_list())), 
                         0, 
                         "assigning variable state_probs");
-            current_statement_begin__ = 109;
+            current_statement_begin__ = 110;
             for (int a = 1; a <= nage; ++a) {
-                current_statement_begin__ = 110;
-                stan::math::assign(P, trans_probs(get_base1(inc, a, "inc", 1), get_base1(cf, a, "cf", 1), get_base1(rem, a, "rem", 1), pstream__));
                 current_statement_begin__ = 111;
+                stan::math::assign(P, trans_probs(get_base1(inc, a, "inc", 1), get_base1(cf, a, "cf", 1), get_base1(rem, a, "rem", 1), pstream__));
+                current_statement_begin__ = 112;
+                stan::model::assign(inc_prob, 
+                            stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
+                            get_base1(P, 1, 2, "P", 1), 
+                            "assigning variable inc_prob");
+                current_statement_begin__ = 113;
                 stan::model::assign(prev, 
                             stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
                             (get_base1(state_probs, a, 2, "state_probs", 1) / (get_base1(state_probs, a, 1, "state_probs", 1) + get_base1(state_probs, a, 2, "state_probs", 1))), 
                             "assigning variable prev");
-                current_statement_begin__ = 112;
+                current_statement_begin__ = 114;
                 stan::math::assign(tmp, multiply(stan::model::rvalue(state_probs, stan::model::cons_list(stan::model::index_uni(a), stan::model::cons_list(stan::model::index_min_max(1, 3), stan::model::nil_index_list())), "state_probs"), P));
-                current_statement_begin__ = 113;
+                current_statement_begin__ = 115;
                 stan::model::assign(state_probs, 
                             stan::model::cons_list(stan::model::index_uni((a + 1)), stan::model::cons_list(stan::model::index_min_max(1, 3), stan::model::nil_index_list())), 
                             tmp, 
                             "assigning variable state_probs");
-                current_statement_begin__ = 114;
+                current_statement_begin__ = 116;
                 stan::model::assign(mort, 
                             stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
                             ((get_base1(P, 1, 3, "P", 1) * (1 - get_base1(prev, a, "prev", 1))) + (get_base1(P, 2, 3, "P", 1) * get_base1(prev, a, "prev", 1))), 
                             "assigning variable mort");
-                current_statement_begin__ = 116;
+                current_statement_begin__ = 118;
                 if (as_bool(logical_lt(get_base1(mort, a, "mort", 1), 0))) {
-                    current_statement_begin__ = 116;
+                    current_statement_begin__ = 118;
                     stan::model::assign(mort, 
                                 stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
                                 0, 
                                 "assigning variable mort");
                 }
-                current_statement_begin__ = 117;
+                current_statement_begin__ = 119;
                 if (as_bool(logical_gt(get_base1(mort, a, "mort", 1), 1))) {
-                    current_statement_begin__ = 117;
+                    current_statement_begin__ = 119;
                     stan::model::assign(mort, 
                                 stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
                                 1, 
@@ -945,8 +979,14 @@ public:
             // validate transformed parameters
             const char* function__ = "validate transformed params";
             (void) function__;  // dummy to suppress unused var warning
+            current_statement_begin__ = 99;
+            check_greater_or_equal(function__, "inc_prob", inc_prob, 0);
             // write transformed parameters
             if (include_tparams__) {
+                size_t inc_prob_j_1_max__ = nage;
+                for (size_t j_1__ = 0; j_1__ < inc_prob_j_1_max__; ++j_1__) {
+                    vars__.push_back(inc_prob(j_1__));
+                }
                 size_t state_probs_j_2_max__ = 3;
                 size_t state_probs_j_1_max__ = (nage + 1);
                 for (size_t j_2__ = 0; j_2__ < state_probs_j_2_max__; ++j_2__) {
@@ -1019,6 +1059,12 @@ public:
         }
         if (!include_gqs__ && !include_tparams__) return;
         if (include_tparams__) {
+            size_t inc_prob_j_1_max__ = nage;
+            for (size_t j_1__ = 0; j_1__ < inc_prob_j_1_max__; ++j_1__) {
+                param_name_stream__.str(std::string());
+                param_name_stream__ << "inc_prob" << '.' << j_1__ + 1;
+                param_names__.push_back(param_name_stream__.str());
+            }
             size_t state_probs_j_2_max__ = 3;
             size_t state_probs_j_1_max__ = (nage + 1);
             for (size_t j_2__ = 0; j_2__ < state_probs_j_2_max__; ++j_2__) {
@@ -1076,6 +1122,12 @@ public:
         }
         if (!include_gqs__ && !include_tparams__) return;
         if (include_tparams__) {
+            size_t inc_prob_j_1_max__ = nage;
+            for (size_t j_1__ = 0; j_1__ < inc_prob_j_1_max__; ++j_1__) {
+                param_name_stream__.str(std::string());
+                param_name_stream__ << "inc_prob" << '.' << j_1__ + 1;
+                param_names__.push_back(param_name_stream__.str());
+            }
             size_t state_probs_j_2_max__ = 3;
             size_t state_probs_j_1_max__ = (nage + 1);
             for (size_t j_2__ = 0; j_2__ < state_probs_j_2_max__; ++j_2__) {
