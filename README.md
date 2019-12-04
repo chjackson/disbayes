@@ -1,7 +1,7 @@
 disbayes
 ======
 
-The development repository for the [disbayes](http://cran.r-project.org/package=disbayes) R package for the Focused Information Criterion and related methods for model comparison. 
+The development repository for the [disbayes](http://cran.r-project.org/package=disbayes) R package for chronic disease epidemiology estimation with incomplete data. 
 
 The `disbayes` package is work in progress! 
 
