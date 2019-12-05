@@ -10,6 +10,12 @@ vignette: >
 bibliography: disbayes.bib
 ---
 
+
+```{r}
+knitr::opts_chunk$set(fig.width=7)
+```
+
+
 This document illustrates how case fatality can be estimated given incidence and mortality, using Bayesian modelling. 
 
 This also serves to illustrate a general approach for estimating quantities describing disease epidemiology, based on indirect / incomplete data or multiple data sources.
@@ -56,11 +62,11 @@ Data are observed which give information about some, but not all, of the paramet
 
 2. write down a statistical model for the observed data given the parameters of the underlying disease model.    In this model, observed data need to be expressed as counts of individuals and associated denominators, e.g. 
    
-  * (incidence): $n_a^{(inc)}, r_a^{(inc)}$: given a population of size $n_a$^{(mort)}, $r_a^{(inc)}$ of these are observed to get the disease within the next year 
+  * (incidence): given a population of size $n_a^{(mort)}$, $r_a^{(inc)}$ of these are observed to get the disease within the next year 
    
-  * (mortality): $n_a^{(mort)}, r_a^{(mort)}$: given a population of size $n_a^{(mort)}$ (with or without the disease), $r_a^{(mort)}$ of these are observed to die from the disease within the next year 
+  * (mortality): given a population of size $n_a^{(mort)}$ (with or without the disease), $r_a^{(mort)}$ of these are observed to die from the disease within the next year 
   
-  * (prevalence): $n_a^{(prev)}, r_a^{(prev)}$: from a sample of $n_a^{(prev)}$ individuals, $r_a^{(prev)}$ are known to have the disease at age $a$ (and $n_a^{(prev)} - r_a^{(prev)} are known to not have the disease. 
+  * (prevalence): from a sample of $n_a^{(prev)}$ individuals, $r_a^{(prev)}$ are known to have the disease at age $a$ (and $n_a^{(prev)} - r_a^{(prev)}$ are known to not have the disease. 
   
 The next section discusses how these data can be derived, given the typical forms of data available from burden of disease studies.   A denominator is required because it enables uncertainty associated with each estimate to be quantified, as we will discuss later. 
 
@@ -278,3 +284,4 @@ The smoothed model agrees with the DisMod II estimates, and has the benefit of c
 All of these would be theoretically feasible in the above framework. The limits will be computational, and difficult to tell before getting hands on.
 
 
+## References

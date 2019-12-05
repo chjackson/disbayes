@@ -1,3 +1,6 @@
+## ------------------------------------------------------------------------
+knitr::opts_chunk$set(fig.width=7)
+
 ## ----show=FALSE----------------------------------------------------------
 library(disbayes)
 ihdbristol[ihdbristol$age %in% 50:55, c("age","pop","inc","mort")]
@@ -7,6 +10,17 @@ ihdbristol[ihdbristol$age %in% 50:55, c("age","prev","prevn","prevdenom")]
 
 ## ------------------------------------------------------------------------
 options(mc.cores = parallel::detectCores())
+
+## ---- eval=TRUE, cache=TRUE, warning=FALSE, message=FALSE----------------
+dbres <- disbayes(dat = ihdbristol,
+                 inc = "inc", 
+                 inc_denom = "pop", 
+                 prev_num = "prevn", 
+                 prev_denom = "prevdenom",
+                 mort = "mort",
+                 mort_denom = "pop",
+                 eqage = 40
+                 )
 
 ## ----eval=TRUE-----------------------------------------------------------
 rstan::traceplot(dbres$fit, pars=paste0("cf[", 60:65, "]"))
