@@ -17,7 +17,7 @@ The `disbayes` package is work in progress!
 
 * Fully Bayesian estimation is used, based on the Stan software 
 
-* It is inspired by [DIsMod II](https://www.epigear.com/index_files/dismod_ii.html) and related packages used for the Global Burden of Disease studies, except that it follows the formal, fully Bayesian framework described in the [book by Flaxman:](http://www.combinedacademic.co.uk/integrated-meta-regression-framework-for-descriptive-epidemiology)
+* It is inspired by [DIsMod II](https://www.epigear.com/index_files/dismod_ii.html) and related packages used for the Global Burden of Disease studies, except that it follows the formal, fully Bayesian framework described in the [book by Flaxman](http://www.combinedacademic.co.uk/integrated-meta-regression-framework-for-descriptive-epidemiology)
 
 
 ## Installation
