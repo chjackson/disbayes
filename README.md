@@ -9,7 +9,7 @@ The `disbayes` package is work in progress!
 
   - published information on age-specific incidence and mortality
 
-- some indication of the uncertainty associated with the published estimates
+  - some indication of the uncertainty associated with the published estimates - that could be a credible interval, or estimates given as a numerator and a denominator.
 
 * The underlying model is a three-state multi-state model with states given by no disease, disease and death, and assuming no remission from the disease.
 
