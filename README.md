@@ -17,7 +17,7 @@ The `disbayes` package is work in progress!
 
 * Fully Bayesian estimation is used, based on the Stan software 
 
-* It is inspired by [DIsMod II](https://www.epigear.com/index_files/dismod_ii.html) and related packages used for the Global Burden of Disease studies, except that it follows the formal, fully Bayesian framework described in the [book by Flaxman](http://www.combinedacademic.co.uk/integrated-meta-regression-framework-for-descriptive-epidemiology)
+* It is inspired by [DisMod II](https://www.epigear.com/index_files/dismod_ii.html) and related packages used for the Global Burden of Disease studies, except that it follows the formal, fully Bayesian framework described in the [book by Flaxman](http://www.combinedacademic.co.uk/integrated-meta-regression-framework-for-descriptive-epidemiology)
 
 
 ## Installation
@@ -27,6 +27,8 @@ install.packages("devtools") # if devtools not already installed
 library(devtools)
 install_github("chjackson/disbayes")
  ```
+
+If this fails, make sure that the `rstan` package is set up properly - if you are on Windows, then follow these instructions for [installing rstan from source on Windows](https://github.com/stan-dev/rstan/wiki/Installing-RStan-from-source-on-Windows)
 
 See the package vignette for an introduction:
 
