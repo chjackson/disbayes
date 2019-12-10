@@ -9,7 +9,7 @@ The `disbayes` package is work in progress!
 
   - published information on age-specific incidence and mortality
 
-  - some indication of the uncertainty associated with the published estimates
+- some indication of the uncertainty associated with the published estimates
 
 * The underlying model is a three-state multi-state model with states given by no disease, disease and death, and assuming no remission from the disease.
 
@@ -19,6 +19,7 @@ The `disbayes` package is work in progress!
 
 * It is inspired by [DisMod II](https://www.epigear.com/index_files/dismod_ii.html) and related packages used for the Global Burden of Disease studies, except that it follows the formal, fully Bayesian framework described in the [book by Flaxman](http://www.combinedacademic.co.uk/integrated-meta-regression-framework-for-descriptive-epidemiology)
 
+* Source code is at the [GitHub repository](https://github.com/chjackson/disbayes)
 
 ## Installation
 
@@ -30,8 +31,9 @@ install_github("chjackson/disbayes")
 
 If this fails, make sure that the `rstan` package is set up properly - if you are on Windows, then follow these instructions for [installing rstan from source on Windows](https://github.com/stan-dev/rstan/wiki/Installing-RStan-from-source-on-Windows)
 
-See the package vignette for an introduction:
+
+## Introduction and worked example
 
 [Bayesian estimation of chronic disease epidemiology from incomplete data: the disbayes package](https://chjackson.github.io/disbayes/doc/ihdbristol.html)
 
-Source code [GitHub repository](https://github.com/chjackson/disbayes)
+
