@@ -163,21 +163,22 @@ Bristol is shown at the bottom.
 
 hierdata <- readRDS("hierdata.rds")
 hdat <- hierdata[["male"]][["stmc"]]
+tage <- 60 
 dat <- data.frame(
     area = c(cityregions, regions_exc, regions_inc),
-    prevn = hdat$prev_num[60,],
-    prevd = hdat$prev_denom[60,],
-    mortn = hdat$mort_num[60,],
-    mortd = hdat$mort_denom[60,],
-    incn = hdat$inc_num[60,],
-    incd = hdat$prev_denom[60,]
+    prevn = hdat$prev_num[tage,],
+    prevd = hdat$prev_denom[tage,],
+    mortn = hdat$mort_num[tage,],
+    mortd = hdat$mort_denom[tage,],
+    incn = hdat$inc_num[tage,],
+    incd = hdat$inc_denom[tage,]
 )
 dat$mortl <- qbeta(0.025, dat$mortn + 0.5, dat$mortd - dat$mortn + 0.5)*1000
 dat$mort <- qbeta(0.5, dat$mortn + 0.5, dat$mortd - dat$mortn + 0.5)*1000
 dat$mortu <- qbeta(0.975, dat$mortn + 0.5, dat$mortd - dat$mortn + 0.5)*1000
 
 p <- cfres %>%
-    filter(age == 60,
+    filter(age == tage,
            disease == "stmc", 
            model %in% c("smoothed", "hier30")) %>%
     left_join(dat, by="area") %>% 

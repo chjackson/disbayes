@@ -81,10 +81,10 @@ disbayes <- function(data,
                      ){
 
     ## Convert all data to numerators and denominators 
-    inc_data <- process_data(data, "inc", inc_num, inc_denom, inc, inc_lower, inc_upper)
-    prev_data <- process_data(data, "prev", prev_num, prev_denom, prev, prev_lower, prev_upper)
-    mort_data <- process_data(data, "mort", mort_num, mort_denom, mort, mort_lower, mort_upper)
     nage <- nrow(data)
+    inc_data <- process_data(data, "inc", inc_num, inc_denom, inc, inc_lower, inc_upper, nage)
+    prev_data <- process_data(data, "prev", prev_num, prev_denom, prev, prev_lower, prev_upper, nage)
+    mort_data <- process_data(data, "mort", mort_num, mort_denom, mort, mort_lower, mort_upper, nage)
     dat <- c(inc_data, prev_data, mort_data,
              list(rem=rep(0, nage)), nage=nage)
     inc_init <- pmax(0.001, dat$inc_num / dat$inc_denom)
@@ -187,7 +187,7 @@ get_column <- function(data, str){
 ## (c) If est, lower and upper supplied then convert 
 ## Else return error 
 
-process_data <- function(data, prefix, num_str, denom_str, est_str, lower_str, upper_str){
+process_data <- function(data, prefix, num_str, denom_str, est_str, lower_str, upper_str, nage){
     num <- get_column(data, num_str)
     denom <- get_column(data, denom_str)
     est <- get_column(data, est_str)
@@ -205,7 +205,9 @@ process_data <- function(data, prefix, num_str, denom_str, est_str, lower_str, u
     }
     else {
         pnames <- list(inc="incidence", prev="prevalence", mort="mortality")
-        stop(sprintf("Not enough information supplied to obtain numerator and denominator for %s.\nNeed either numerator and denominator, estimate and denominator, or estimate with lower and upper credible limit", pnames[[prefix]]))
+        if (prefix=="prev")
+            res <- list(num=rep(0,nage), denom=rep(0,nage))
+        else stop(sprintf("Not enough information supplied to obtain numerator and denominator for %s.\nNeed either numerator and denominator, estimate and denominator, or estimate with lower and upper credible limit", pnames[[prefix]]))
     }
     names(res) <- paste(prefix, names(res), sep="_")
     res
