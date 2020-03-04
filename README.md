@@ -37,3 +37,9 @@ If this fails, make sure that the `rstan` package is set up properly - if you ar
 [Bayesian estimation of chronic disease epidemiology from incomplete data: the disbayes package](https://chjackson.github.io/disbayes/doc/ihdbristol.html)
 
 
+## Work in progress
+
+[Hierarchical modelling](https://chjackson.github.io/disbayes/doc/hier.html)
+
+[METAHIT application](https://chjackson.github.io/disbayes/doc/metahit_results.html)
+
