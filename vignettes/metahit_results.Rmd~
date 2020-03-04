@@ -1,0 +1,76 @@
+---
+title: "METAHIT city regions disease case fatality estimates"
+author: "Chris Jackson <chris.jackson@mrc-bsu.cam.ac.uk>"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{METAHIT city regions disease case fatality estimates}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+
+## Assumptions used for all diseases 
+
+1. Constant case fatality for age 50 and below
+
+2. Case fatality is a smooth spline function of age
+
+
+## Alternative models
+
+
+### Model for area dependence 
+
+1. Independent, area-specific estimates
+
+   explained in main disbayes vignette 
+
+2. Hierarchical model 
+
+   explained in hierarchical model vignette 
+
+
+### Model for age dependence 
+
+1. unrestricted and smooth, with constant below age 50 
+
+2. non-decreasing and smooth, with constant below age 50 
+
+
+
+## Assumptions that differ between diseases 
+
+Because the amount of information varies between areas
+
+Some areas there is insufficient information for meaningful estimates of case fatality.  This happens particularly at younger ages where the prevalence of the disease is low.
+
+
+1. All diseases apart from liver, colon, lung cancer 
+
+	* Independent, area-specific estimates work 
+
+	* Hierarchical model also works and gives more precise estimates 
+
+2. Stomach and liver cancer 
+
+	* Independent, area-specific estimates don't work 
+
+	* Hierarchical model works, showing the borrowing of information between areas. 
+
+2. Lung/trachea/bronchus cancer 
+
+    * Assuming that case fatality is a non-decreasing function of age 
+
+    * Under this assumption, area-specific estimates and hierarchical model both work, and hierarchical model gives more precise estimates. 
+
+
+
+
+
+
+## todo
+
+Do we also present the gender model here? 
+
+stats paper will want it 

@@ -27,4 +27,4 @@ vignettes/*.pdf
 rsconnect/
 .Rproj.user
 Meta
-doc
+vignettes/metahit_results_*

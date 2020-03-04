@@ -1,6 +1,8 @@
-##' Estimate binomial numerator and denominator given an estimate and uncertainty interval for a proportion
+##' Estimate binomial numerator and denominator given an estimate and uncertainty interval for a proportion.  
 ##' 
 ##' Based on least squares method provided by the SHELF package TODO REF
+##'
+##' Requires that the estimate and upper and lower limits are all distinct. 
 ##'
 ##' @param est Point estimate
 ##'
