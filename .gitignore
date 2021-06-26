@@ -28,3 +28,9 @@ rsconnect/
 .Rproj.user
 Meta
 vignettes/metahit_results_*
+*~
+inst/stan/*.rds
+.o
+src/*.o
+src/*.so
+src/*.dll
