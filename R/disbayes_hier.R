@@ -48,7 +48,9 @@ disbayes_hier <- function(data,
                           nfold_slope_guess = 5, 
                           nfold_slope_upper = 100,
                           mean_int_prior = c(0,10), 
-                          mean_slope_prior = c(5,5), 
+                          mean_slope_prior = c(5,5),
+                          gender_int_priorsd = 0.82,
+                          gender_slope_priorsd = 0.82, 
                           iter = 10000,
                           iter_train = 1000,
                           s_opts = NULL, 
@@ -105,9 +107,6 @@ disbayes_hier <- function(data,
     lam_in <- 0.5 
     X <- sicf$X
     K <- ncol(X)
-    for (i in 1:(eqage-1)){
-        X[i,] <- X[eqage,]
-    }
     
    if (sicf$beta[K-1] < 0) { 
         beta_mu <- c(0.01, mean(log(cfcrude)))
@@ -153,7 +152,10 @@ disbayes_hier <- function(data,
                             mism = mean_slope_prior[1], 
                             miss = mean_slope_prior[2], 
                             gpint_a = gpint["a"], gpint_b =  gpint["b"],
-                            gpslope_a = gpslope["a"], gpslope_b =  gpslope["b"]))
+                            gpslope_a = gpslope["a"], gpslope_b =  gpslope["b"],
+                            gender_int_priorsd = gender_int_priorsd,
+                            gender_slope_priorsd = gender_slope_priorsd
+                            ))
 
     fits <- rstan::sampling(stanmodels$disbayes_hier, data=datstans, init=inits_hier_fn, iter=iter, ...)
     loo <- if (loo) get_loo(fits, remission=remission) else NULL
@@ -170,6 +172,8 @@ disbayes_hier <- function(data,
 ##' @param x Object returned by \code{\link{disbayes_hier}}
 ##'
 ##' @inheritParams tidy.disbayes
+##'
+##' @seealso \code{\link{tidy.disbayes}}
 ##' 
 ##' @export
 tidy.disbayes_hier <- function(x,...) {

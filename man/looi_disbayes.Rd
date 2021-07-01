@@ -13,5 +13,8 @@ looi_disbayes(x, looname = "loo")
 }
 \description{
 Return observation-level leave-one-out cross-validatory statistics from a disbayes fit
-as a tidy data frame.
+as a tidy data frame. 
+The data frame has one row per observed age-specific mortality, incidence, prevalence and/or
+remission data-point, containing leave-one-out cross validation statistics for that observation. 
+These are computed with the \pkg{loo} package.
 }

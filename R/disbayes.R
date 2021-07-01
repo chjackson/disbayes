@@ -115,7 +115,7 @@
 ##'   average age.
 ##'
 ##' @param eqage Case fatality and incidence are assumed to be equal for all ages
-##' below this age.
+##' below this age when using the smoothed model
 ##'
 ##' @param loo Compute leave-one-out cross validation statistics. 
 ##'
@@ -135,7 +135,30 @@
 ##'
 ##' @param ... Further arguments passed to \pkg{rstan}{sampling} to control
 ##'   running of Stan, that are applied to both the "training" (unsmoothed) model
-##'   fit and the smoothed model fit. 
+##'   fit and the smoothed model fit.
+##'
+##' @return A list with the following components
+##'
+##' \code{fits}: An object containing posterior samples from the fitted model,
+##' in the \code{stanfit} format returned by the \code{\link[rstan]{stan}}
+##' function in the \pkg{rstan} package.
+##'
+##' \code{fitu}: Another \code{stanfit} object containing the equivalent "unsmoothed" model results
+##' where case fatality and incidence are given independent priors per year of age.
+##'
+##' \code{loos}: A list of objects containing leave-one-out cross-validation statistics.  There is
+##' one list component for each of the observed outcomes informing the model: incidence, prevalence,
+##' mortality and remission.   The component for each outcome is an object
+##' in the form returned by the \code{\link[loo]{loo}} function in the \pkg{loo} package. This can
+##' be used to assess how well the model predicts the data for that outcome, compared to other models. 
+##'
+##' The \code{\link{looi_disbayes}} function can be used to extract from this list
+##' a single tidy data frame with one row per observation. 
+##'
+##' \code{loou}: Equivalent cross-validation statistics for the unsmoothed model. 
+##'
+##' Use the \code{\link{tidy.disbayes}} method to return summary statistics from the
+##' fitted models. 
 ##'   
 ##' @export
 disbayes <- function(data,
@@ -207,10 +230,6 @@ disbayes <- function(data,
         inccrude <- summary_disbayes_fit(fitu, vars="inc")[, "med"]
         si <- init_smooth(log(inccrude), eqage, s_opts)
         betainc_init <- si$beta
-
-        for (i in 1:(eqage-1)){
-            X[i,] <- X[eqage,]
-        }
         
         datstans <- c(dat, list(smooth_cf=as.numeric(smooth_cf),
                                 increasing_cf=as.numeric(increasing_cf),
@@ -275,6 +294,9 @@ get_loo <- function(fits, remission=FALSE) {
 ##' 
 ##' Return observation-level leave-one-out cross-validatory statistics from a disbayes fit
 ##' as a tidy data frame. 
+##' The data frame has one row per observed age-specific mortality, incidence, prevalence and/or
+##' remission data-point, containing leave-one-out cross validation statistics for that observation. 
+##' These are computed with the \pkg{loo} package.
 ##'
 ##' @param x Object returned by \code{\link{disbayes}}
 ##'
@@ -470,12 +492,23 @@ plot.summary.disbayes <- function(summ, variable="cf"){
 }
 
 ##' Form a tidy data frame from the estimates from a disbayes fit
+##'
+##' Simply call this after fitting disbayes, as, e.g.
+##' ```
+##' res <- disbayes(...)
+##' tidy(res)
+##' ```
 ##' 
 ##' @importFrom generics tidy
 ##'
 ##' @param x Object returned by \code{\link{disbayes}}
 ##'
 ##' @param ... Other arguments (currently unused)
+##'
+##' @return A data frame with one row per model parameter, giving summary statistics
+##' for the posterior distribution for that parameter.   For array parameters, e.g. those
+##' that depend on age or area, then the age and area are returned in separate columns,
+##' to make it easier to summarise and plot the results, e.g. using \pkg{ggplot2}. 
 ##' 
 ##' @export
 tidy.disbayes <- function(x,...) {

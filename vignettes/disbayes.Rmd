@@ -223,7 +223,7 @@ The `disbayes` function returns a list with components `fit` and `fitu`, contain
 
 # IHD example: Results 
 
-The results could be summarised and manipulated using functions provided by rstan, e.g. the `summary` and `extract` method for `stanfit` objects.    For example, we can check the MCMC simulations have converged, by examining the "trace plot" of the simulation progress for selected parameters. The simulated chains should mix together and look like white noise.
+The results could be summarised and manipulated using functions provided by rstan, e.g. the `summary` and `extract` method for `stanfit` objects.    For example, we can check the MCMC simulations have converged, by examining the "trace plot" of the simulation progress for selected parameters. The simulated chains should mix together and look like white noise.   Also if the `disbayes` call resulted in many reports of "divergent transitions", then the chains are unlikely to have converged to a valid posterior.  If convergence hasn't occurred, then the model probably needs to be simplified (e.g. by increasing `eqage`), or the data are insufficient. 
 
 ```{r,eval=TRUE}
 rstan::traceplot(dbres$fit, pars=paste0("cf[", 60:65, "]"))

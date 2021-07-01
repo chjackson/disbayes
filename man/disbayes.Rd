@@ -187,6 +187,30 @@ default "thin plate" spline to a cubic spline.  Currently not implemented!}
 running of Stan, that are applied to both the "training" (unsmoothed) model
 fit and the smoothed model fit.}
 }
+\value{
+A list with the following components
+
+\code{fits}: An object containing posterior samples from the fitted model,
+in the \code{stanfit} format returned by the \code{\link[rstan]{stan}}
+function in the \pkg{rstan} package.
+
+\code{fitu}: Another \code{stanfit} object containing the equivalent "unsmoothed" model results
+with independent priors per year of age.
+
+\code{loos}: A list of objects containing leave-one-out cross-validation statistics.  There is
+one list component for each of the observed outcomes informing the model: incidence, prevalence,
+mortality and remission.   The component for each outcome is an object
+in the form returned by the \code{\link[loo]{loo}} function in the \pkg{loo} package. This can
+be used to assess how well the model predicts the data for that outcome, compared to other models. 
+
+The \code{\link{looi_disbayes}} function can be used to extract from this list
+a single tidy data frame with one row per observation. 
+
+\code{loou}: Equivalent cross-validation statistics for the unsmoothed model. 
+
+Use the \code{\link{tidy.disbayes}} method to return summary statistics from the
+fitted models.
+}
 \description{
 Estimates a three-state disease model given data on incidence, prevalence
 and mortality.

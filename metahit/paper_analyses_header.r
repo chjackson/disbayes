@@ -34,7 +34,8 @@ rundf <- data.frame(
          eqage = case_when(disease == "Ischemic heart disease" ~ 30, 
                            disease == "Stroke" ~ 30, 
                            disease == "Alzheimer's disease and other dementias" ~ 70, 
-                           disease == "Stomach cancer" ~ 80, 
+                           disease == "Uterine cancer" ~ 70, 
+                           disease == "Stomach cancer" ~ 70, 
                            TRUE ~ 50))
 rundf$eqage[c(101,117)] <- 75 # ADAOD, london, northeast cr, male 
 
@@ -48,7 +49,8 @@ hierrundf <- data.frame(gender = rep(c("Male","Female"), c(length(diseases_male)
                            TRUE  ~  "interceptonly"),
          remission = disease %in% cancers,
          eqage = case_when(disease == "Alzheimer's disease and other dementias" ~ 70, 
-                           disease == "Stomach cancer" ~ 80, 
+                           disease == "Uterine cancer" ~ 70, 
+                           disease == "Stomach cancer" ~ 70, 
                            TRUE ~ 50)
   )
 
@@ -60,7 +62,8 @@ hierrungdf <- data.frame(disease = diseases_male) %>%
                            TRUE  ~  "interceptonly"),
          remission = disease %in% cancers,
          eqage = case_when(disease == "Alzheimer's disease and other dementias" ~ 70, 
-                           disease == "Stomach cancer" ~ 80, 
+                           disease == "Uterine cancer" ~ 70, 
+                           disease == "Stomach cancer" ~ 70, 
                            TRUE ~ 50))
 
 trendrundf <- rundf %>% 

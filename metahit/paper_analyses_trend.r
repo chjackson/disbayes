@@ -33,8 +33,8 @@ db <- disbayes(data = mhi,
                increasing_cf = trendrundf$increasing[i], 
                const_cf = FALSE,
                age="ageyr", smooth_cf=TRUE,
-               inc_trend_mult = trends, 
-               cf_trend_mult = cftrends, 
+               inc_trend = trends, 
+               cf_trend = cftrends, 
                eqage= trendrundf$eqage[i], 
                chains=nchains, iter=1000)
 

@@ -42,6 +42,8 @@ disbayes_hier(
   nfold_slope_upper = 100,
   mean_int_prior = c(0, 10),
   mean_slope_prior = c(5, 5),
+  gender_int_priorsd = 0.82,
+  gender_slope_priorsd = 0.82,
   iter = 10000,
   iter_train = 1000,
   s_opts = NULL,

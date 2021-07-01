@@ -14,3 +14,6 @@
 \description{
 Return summary statistics from a hierarchical disbayes model as a tidy data frame.
 }
+\seealso{
+\code{\link{tidy.disbayes}}
+}

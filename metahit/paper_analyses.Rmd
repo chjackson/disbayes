@@ -196,6 +196,9 @@ loonh <- loonh %>%
   dplyr::filter(!(disease %in% c("Stomach cancer", "Uterine cancer"))) %>%
   full_join(loonat)
 
+res %>% filter(disease=="Uterine cancer", var=="cf", between(age, 58, 70))
+res_utrc %>% filter(disease=="Uterine cancer", var=="cf", between(age, 90, 100))
+## Smoothed hasn't worked 
 
 reslist <- loolist <- vector(nrow(hierrundf), mode="list")
 for (i in setdiff(1:nrow(hierrundf), c())){
@@ -286,10 +289,11 @@ gbd %>% filter(cause=="Uterine cancer", location %in% cityregions) %>% pull(num_
 
 ## Age curves for all diseases and areas 
 
-pdf("../write/all_cf_indep.pdf",width=6,height=6)
+pdf("../../write/all_cf_indep.pdf",width=6,height=6)
 
 gg <- resall %>% 
   dplyr::filter(model %in% c("Independent areas","National"), var=="cf") %>%
+  dplyr::filter(! (disease=="Uterine cancer" & age > 90)) %>%
   mutate(p50 = 1 - exp(-`50%`),
          plow = 1 - exp(-`2.5%`),
          pupp = 1 - exp(-`97.5%`)) %>%

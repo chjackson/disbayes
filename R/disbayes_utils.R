@@ -21,8 +21,8 @@ train_rate <- function(dat,
     Xdummy <- matrix(0, nrow=nage, ncol=2)
     datstanu <- c(dat, list(smooth_cf=0, smooth_inc = 0, const_cf=0, trend=0, nyr = 1,
                             increasing_cf=0, K=2, X=Xdummy, sprior=dat$sprior,
-                            inc_trend_mult = array(1, dim=c(nage,1)),
-                            cf_trend_mult = array(1, dim=c(nage,1)) 
+                            inc_trend = array(1, dim=c(nage,1)),
+                            cf_trend = array(1, dim=c(nage,1)) 
                             ))
     initu <- function(){
         list(cf_par = rnorm(nage, mean=cf_init, sd=cf_init/10),

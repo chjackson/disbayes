@@ -27,8 +27,10 @@ data {
   real<lower=0> gpint_a; 
   real<lower=0> gpint_b; 
   real<lower=0> gpslope_a; 
-  real<lower=0> gpslope_b; 
-
+  real<lower=0> gpslope_b;
+  real<lower=0> gender_int_priorsd;
+  real<lower=0> gender_slope_priorsd;
+ 
   // alternative models
   int interceptonly;
   int increasing;
@@ -201,9 +203,9 @@ model {
       bmale[i] ~ normal(0, lambda_smooth_male); // smoothness variance par shared 
     }
     // ...on slopes 
-    bmale[K-1] ~ normal(0, 0.2);
+    bmale[K-1] ~ normal(0, gender_slope_priorsd);
     // ...on intercepts
-    bmale[K] ~ normal(0, 0.35); 
+    bmale[K] ~ normal(0, gender_int_priorsd); 
     // five fold difference between men and women is log(5)=1.6 on log scale 
     // want sd such that 95% prob that bmale is between -log(5) and log(5)
     // sd = log(5) / qnorm(0.975) = 0.82 

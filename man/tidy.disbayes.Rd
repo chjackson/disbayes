@@ -11,6 +11,16 @@
 
 \item{...}{Other arguments (currently unused)}
 }
+\value{
+A data frame with one row per model parameter, giving summary statistics
+for the posterior distribution for that parameter.   For array parameters, e.g. those
+that depend on age or area, then the age and area are returned in separate columns,
+to make it easier to summarise and plot the results, e.g. using \pkg{ggplot2}.
+}
 \description{
-Form a tidy data frame from the estimates from a disbayes fit
+Simply call this after fitting disbayes, as, e.g.
+```
+res <- disbayes(...)
+tidy(res)
+```
 }

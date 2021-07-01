@@ -23,7 +23,7 @@ db <- disbayes(data = gbdeng %>% filter(cause==natrundf$disease[i],
                remission = natrundf$remission[i],
                increasing_cf = natrundf$increasing[i],
                const_cf = FALSE,
-               age="ageyr", smooth_cf=FALSE,
+               age="ageyr", smooth_cf=TRUE,
                eqage= natrundf$eqage[i], 
                chains=nchains, iter=1000)
 
