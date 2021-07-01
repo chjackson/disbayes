@@ -2,7 +2,7 @@
 % Please edit documentation in R/disbayes.R
 \name{summary.disbayes}
 \alias{summary.disbayes}
-\title{Summarise estimates from the model}
+\title{Summarise estimates from a disbayes model.  Deprecated in favour of the "tidy" method".}
 \usage{
 \method{summary}{disbayes}(object, vars = NULL, ...)
 }
@@ -11,8 +11,10 @@
 
 \item{vars}{Names of the variables of interest to return.  If not supplied, all estimated quantities are returned.}
 
-\item{...}{Other arguments. Currently unused}
+\item{...}{Other arguments. Currently unused
+
+Deprecated in favour of \code{\link{tidy.disbayes}}.}
 }
 \description{
-Summarise estimates from the model
+Summarise estimates from a disbayes model.  Deprecated in favour of the "tidy" method".
 }

@@ -2,15 +2,17 @@
 % Please edit documentation in R/disbayes.R
 \name{summary_disbayes_fit}
 \alias{summary_disbayes_fit}
-\title{Summarise estimates from the model  TODO DOC}
+\title{Summarise estimates from the model.  Deprecated in favour of the "tidy" method.}
 \usage{
 summary_disbayes_fit(fit, vars = NULL)
 }
 \arguments{
 \item{fit}{A Stan fitted model object}
 
-\item{vars}{Names of variables indexed by age, e.g. \code{vars="cf"} if you want the case fatality estimates for all ages.   TODO describe other variables that can be extracted}
+\item{vars}{Names of variables indexed by age, e.g. \code{vars="cf"} if you want the case fatality estimates for all ages.
+
+Deprecated in favour of \code{\link{tidy.disbayes}}.}
 }
 \description{
-Summarise estimates from the model  TODO DOC
+Summarise estimates from the model.  Deprecated in favour of the "tidy" method.
 }

@@ -1,0 +1,550 @@
+---
+title:  "Preparing data from the Global Burden of Disease for METAHIT modelling"
+author:
+- "Jackson, Chris <chris.jackson@mrc-bsu.cam.ac.uk>"
+date:   "`r Sys.time()`"
+output:
+    html_document:
+        code_folding: show
+params:
+    date:   !r Sys.Date() - 1
+editor_options: 
+  chunk_output_type: console
+---
+
+
+# Read in and combine data
+
+First load required packages and specify local file paths 
+
+```{r}
+library(tidyverse)
+library(progress)
+library(tempdisagg)
+relative_path_gbd <- "~/scratch/chronic/metahit_data"
+
+```
+
+
+Read look-up table mapping between local authorities and city regions, and add names for regions that are not city regions.  No need to bother with matching regions to countries.
+
+```{r,eval=FALSE}
+regions <- c("East Midlands", "East of England", "Greater London", "North East England", 
+                  'North West England', "South East England", "South West England", "Yorkshire and the Humber", "West Midlands")
+
+# LTLAs to city regions and regions 
+local_government_areas <- read_csv(file.path(relative_path_gbd, "mh_regions_lad_lookup.csv")) %>% rename(region="gordet")
+lad <- 
+    read.csv("~/work/chronic/belen/Local_Authority_District_to_Region__December_2017__Lookup_in_England_.csv")
+utla <- 
+  read.csv("~/work/chronic/belen/Lower_Tier_Local_Authority_to_Upper_Tier_Local_Authority__December_2017__Lookup_in_England_and_Wales.csv")
+
+## Make UTLA to region lookup
+lad_wales <- c("Isle of Anglesey", "Gwynedd", "Conwy", "Denbighshire", "Flintshire", 
+"Wrexham", "Ceredigion", "Pembrokeshire", "Carmarthenshire", 
+"Swansea", "Neath Port Talbot", "Bridgend", "Vale of Glamorgan", 
+"Cardiff", "Rhondda Cynon Taf", "Caerphilly", "Blaenau Gwent", 
+"Torfaen", "Monmouthshire", "Newport", "Powys", "Merthyr Tydfil")
+utlareg <- utla %>% 
+  filter(!duplicated(UTLA17NM)) %>%
+  select(LTLA17NM, UTLA17NM) %>%
+  rename("LAD17NM"=LTLA17NM) %>%
+  left_join(lad, by="LAD17NM") %>%
+  filter(!(LAD17NM %in% lad_wales))
+
+```
+
+Read Global Burden of Disease 2017 data 
+
+```{r,eval=FALSE}
+gbd1 <- read_csv(file.path(relative_path_gbd, "IHME-GBD_2017_DATA-3e0b192d-1.csv"))
+
+gbd2 <- read_csv(file.path(relative_path_gbd, "IHME-GBD_2017_DATA-3e0b192d-2.csv"))
+
+gbd3 <- read_csv(file.path(relative_path_gbd, "IHME-GBD_2017_DATA-3e0b192d-3.csv"))
+
+gbd4 <- read_csv(file.path(relative_path_gbd, "IHME-GBD_2017_DATA-3e0b192d-4.csv"))
+
+gbd5 <- read_csv(file.path(relative_path_gbd, "IHME-GBD_2017_DATA-3e0b192d-5.csv"))
+
+gbd <- rbind(gbd1, gbd2, gbd3, gbd4, gbd5) 
+
+## Attach geographical info to each GBD estimate
+## Manual step - this should cover them all 
+gbd$location_name[gbd$location_name=="St Helens"] <- "St. Helens"
+gbd <- gbd %>% mutate(
+  areatype = case_when(location_name %in% c("United Kingdom","Australia")  ~ "country",
+                       location_name %in% c("England","Scotland","Wales","Northern Ireland")  ~ "nation",
+                       location_name %in% regions  ~ "region",
+                       location_name %in% unique(utla$LTLA17NM) ~ "ltla",
+                       location_name %in% unique(utla$UTLA17NM) ~ "utla"
+  )
+)
+stopifnot(all(!is.na(gbd$areatype)))
+
+## Determine which estimates are in city regions 
+gbd <- gbd %>%
+  left_join(local_government_areas, by=c("location_name"="lad11nm")) %>%
+  mutate(in_cityregion = !is.na(cityregion)) %>%
+  filter(areatype %in% c("ltla","utla"))
+
+## Next we want to decide whether to use LTLA/UTLA or region for areas not in city regions
+
+```
+
+Read disease coding table
+
+```{r,eval=FALSE}
+disease_names_execute <- read_csv(file.path(relative_path_gbd, "disease_outcomes_lookup.csv")) %>%
+    select(GBD_name, acronym) %>%
+    mutate(disease = tolower(GBD_name))
+    
+DISEASE_SHORT_NAMES <- data.frame(disease = tolower(as.character(unique(gbd$cause_name))), 
+                                  sname = tolower(abbreviate(unique(gbd$cause_name, max = 2))),
+                                  stringsAsFactors = F) %>%
+    mutate(is_not_dis = ifelse((str_detect(disease, "injuries") |
+                                str_detect(disease, "All causes") |
+                                str_detect(disease, "Lower respiratory infections")), 
+                               1, 0) ) %>%
+    mutate(is_not_dis = case_when(sname == "allc"  ~  2,
+                                  sname == "lwri"  ~  1,
+                                  ## Code for major depressive disorder (no deaths) and hypertensive heart disease (no incidence)
+                                  sname == "hyhd"  ~  3,
+                                  sname == "mjdd"  ~  3,
+                                  TRUE  ~  is_not_dis)) %>%
+    left_join(disease_names_execute, by="disease") %>%
+    mutate(acronym = ifelse(str_detect(disease, "injuries"), disease, acronym),
+           acronym = word(acronym, 1),
+           males = ifelse(disease %in% c("uterine cancer", "breast cancer"), 0, 1),
+           females = ifelse(disease %in% "prostate cancer", 0, 1),
+           sname = gsub("'", '', sname),
+           acronym = ifelse(is.na(acronym), "no_pif", acronym))
+```    
+
+
+Join geographical data to GBD data 
+
+```{r,eval=FALSE}
+names(gbd) <- gsub(pattern = "_name", replacement = "", x = names(gbd))
+gbd <- gbd %>%
+    select(-contains("id")) %>%
+    mutate(cause = tolower(cause))
+
+saveRDS(gbd, file=file.path(relative_path_gbd, "GBD2017.rds"))
+
+gbd <- readRDS(file=file.path(relative_path_gbd, "GBD2017.rds"))
+```
+
+
+
+
+# Determining "effective sample sizes" behind estimates
+
+
+<!-- NOTE COUNTS FOR AREAS CONTAINING CITY REGIONS ARE NOT CONSTRAINED TO BE GREATER THAN TOTAL COUNTS FOR CITY REGIONS WITHIN THAT AREA. we will exclude non-city region data from this analysis.  see notes in noncityregions.Rmd -->
+
+This part is the most computationally intensive.  For each estimated "rate" published by the GBD (actually a proportion), the associated credible interval is converted to an "effective sample size" that describes the amount of information that the estimate is based on.
+
+For example, for prevalence estimates, these are assumed to be based on a survey of n people in the area, and observing r people with the disease.   The point estimate is assumed to equal r/n, and the credible interval is interpreted as the posterior interval we would get from a Bayesian analysis of these data with a vague (Beta(0,0)) prior.    The implied values of r and n can then be computed based on the point estimate and credible interval. 
+
+n is referred to as the "effective sample size".   Note that this is generally not equal to the actual population of the area.    They would only be equal if a survey of the full population had been conducted.  We do not have access to the underlying data or methods that GBD used to calculate the credible interval, so we do not know the true value of n. 
+
+Before determining the effective sample sizes, we filter the data to include only the "Rate" estimates for specific diseases (excluding "all causes" results).   Note the published "Rates" are actually the expected number of events (e.g. prevalent cases at the start of a year, incident events within a year or deaths within a year) among a population of 100000 that includes all people in the demographic subgroup of interest, not just those at risk of the event.  The "Rates" are divided by 100000 so they can be interpreted as proportions.
+
+Lower limits published as 0 and upper limits published as 1 are modified to be close but not equal to these bounds, while remaining consistent with the point estimate, since values of exactly 0 and 1 are inconsistent with the Beta distribution (TODO put this in disbayes::ci2num). 
+
+
+```{r,eval=FALSE}
+gbdp <- 
+    gbd %>%
+    filter(metric == "Rate") %>% 
+    filter(cause != "all causes") %>% 
+    mutate(num = NA, denom = NA) %>%
+    mutate(val = val/100000, lower = lower / 100000, upper = upper / 100000) %>%
+    mutate(lower = if_else(lower==0, pmin(val/2, 0.00001), lower)) %>% 
+    mutate(upper = if_else(upper==1, pmax((1+val)/2, 0.99999), upper))
+```
+
+The function `ci2num` in the `disbayes` package is then used to calculate the effective sample sizes.  This takes about 40 minutes on a fairly fast laptop.   It could be made a lot faster by using parallel processing.
+
+
+```{r,eval=FALSE,cache=TRUE}
+nest <- nrow(gbdp) 
+pb <- progress_bar$new(total = nest) # show progress of computation
+for (i in 1:nest){
+  if (gbdp$val[i] < gbdp$upper[i] &
+      gbdp$val[i] > gbdp$lower[i]) { 
+    pb$tick()
+    counts <- disbayes::ci2num(gbdp$val[i], gbdp$lower[i], gbdp$upper[i])
+    gbdp$num[i] <- counts$num
+    gbdp$denom[i] <- counts$denom
+  }
+}
+saveRDS(gbdp, file=file.path(relative_path_gbd, "gbdp.rds"))
+```
+
+```{r,echo=FALSE}
+gbdp <- readRDS(file=file.path(relative_path_gbd, "gbdp.rds"))
+```
+
+
+The estimates are very close to the implicit numerator divided by the implicit denominator in all cases - so those implicit counts can be used in place of the point estimates. 
+
+```{r}
+summary(gbdp$num/gbdp$denom - gbdp$val)
+```
+
+The remaining counts still to be filled in are those where the point estimate is exactly 0 or 1, which is incompatible with a beta distribution.
+
+There are also many estimates for which the implicit denominator is implausibly large.  These correspond to disease events which are very rare in particular subgroups, thus the estimates of the effective sample size are unstable.
+
+```{r}
+gbdp %>% select(val, num, denom) %>% arrange(desc(denom)) %>% head
+```
+
+If the point estimate is 0 or 1, or if the denominator obtained from `ci2num` is larger than the actual population size, we will simply use the actual population size of the subgroup as the denominator, which will be closer to the amount of information contributing the estimate. 
+
+
+# Determining actual population sizes
+
+Therefore we reconstruct the actual population sizes of each subgroup, assumed to be equal to the estimates published by GBD as the estimated "Number" of cases, divided by the estimated "rates" per person.
+
+
+```{r,eval=FALSE}
+gbdnum <- gbd %>%
+  filter(metric=="Number") %>%
+  select(measure, location, sex, age, cause, Number=val)
+gbdp <- gbdp %>%
+  left_join(gbdnum, by=c("measure","location","sex","age","cause")) %>%
+  mutate(pop = Number / val)
+saveRDS(gbdp, file=file.path(relative_path_gbd, "gbdp.rds"))
+gbdp <- readRDS(file=file.path(relative_path_gbd, "gbdp.rds"))
+
+```
+
+We can then use these to fill in the effective sample sizes "d"  that were missing or implausible, and deduce the effective numerators "n" by multipling "d" by the point estimate of the proportion.
+
+```{r}
+gbdp <- gbdp %>%
+  mutate(pop = if_else(is.na(pop), 5000, pop)) %>% 
+  mutate(nodenom = is.na(denom) | (denom > pop),
+         denom = if_else(is.na(denom), pop, denom),
+         denom = if_else(denom > pop, pop, denom),
+         num = ifelse(nodenom, round(val*denom), num))
+```
+
+Note that the data are still grouped as originally published - estimates by five-year age groups (not one year) and local authorities (not city regions), as well as by gender and disease measure. 
+
+Now we have reconstructed the implicit count "data" on which these estimates are based, these counts can now be easily aggregated or disaggregated to produce estimates for smaller or larger subgroups.  The counts will retain their meaning as the implicit number of events, or number of individuals, observed in the subgroup.
+
+#  Disaggregating by age groups 
+
+Firstly we can disaggregate the five year age groups to single years of age.   If we assume that there was an equal amount of information from each single year contributing to the five-year result, we can simply divide the numerators r and denominators n for the five-year estimates by 5 (and round to the nearest integer).
+
+However a smarter method involves a temporal disaggregation model, using the `tempdisagg` package (Sax and Steiner, 2020).  For each measure, location, sex, and cause, the five year counts are disaggregated to one-year counts in a way that preserves the five year totals, but the resulting one-year counts vary smoothly. 
+
+```{r} 
+# Working with the data that has one row per five-year age group, 
+# first construct 1-year counts as an extra column. 
+gbdp <- gbdp %>%
+  extract(age, c("from_age", "to_age"), "(.+) to (.+)", remove=FALSE, convert=TRUE) %>%
+  mutate(from_age = case_when(age=="95 plus"  ~  95L,
+                              age=="Under 5"  ~  0L,
+                              TRUE  ~  from_age),
+         to_age = case_when(age=="95 plus"  ~  99L,
+                            age=="Under 5"  ~  4L,
+                            TRUE  ~  to_age),
+         agediff = to_age - from_age + 1,  # this will equal 5 
+         num1yr = round(num/agediff),
+         denom1yr = round(denom/agediff)) %>%
+  rename(agegroup = age)
+
+## Now stretch the data out using an index, to create a data frame with 1 row per year of age and create a variable for year of age. 
+index <- rep(1:nrow(gbdp), gbdp$agediff)
+gbdpyrd5 <- gbdp[index,] %>%
+    mutate(ageyr = from_age + sequence(gbdp$agediff) - 1)
+gbdpyrd5 <- gbdpyrd5 %>% 
+  select(measure, location, ageyr, sex, agegroup, from_age, to_age, cause, year, areatype, cityregion, region, in_cityregion, num1yr, denom1yr) 
+saveRDS(gbdpyrd5, file=file.path(relative_path_gbd, "gbdpyrd5.rds"))
+
+## More advanced method for smooth disaggregation 
+## using the tempdisagg package 
+# tmp <- gbdp %>% group_by(measure, location, sex, cause) %>% filter(cur_group_id()==1)
+gbdp_grp <- gbdp %>% 
+  group_by(measure, location, sex, cause,
+           areatype, cityregion, region, in_cityregion) %>%  # filter(cur_group_id() %in% 1:3) %>%
+  arrange(measure, location, sex, cause, from_age)
+
+disagg <- function(dat, key){ 
+  res <- with(dat, { 
+    data.frame( 
+      ageyr = rep(from_age,agediff) + sequence(agediff) - 1,
+      num = predict(td(num ~ 1, to=5, method="fast")),
+      denom = predict(td(denom ~ 1, to=5, method="fast"))
+    ) } )
+  res 
+}
+
+# This takes about a minute 
+gbdpyr <- group_modify(gbdp_grp, disagg) %>% 
+  ungroup %>%
+  left_join(gbdpyrd5, by=c("measure","location","ageyr","sex","cause",
+                           "areatype", "cityregion", "region", "in_cityregion"))
+
+# Sometimes the results are negative.  
+# Revert to dividing by 5 for all agegroups that contain a negative result 
+neg_num <- gbdpyr %>%
+  filter(num<0) %>%
+  select("measure","location","sex","cause","agegroup") %>%
+  distinct() %>%
+  mutate(zeronum = TRUE)
+neg_denom <- gbdpyr %>%
+  filter(denom<0) %>%
+  select("measure","location","sex","cause","agegroup") %>%
+  distinct() %>%
+  mutate(zerodenom = TRUE)
+gbdpyr <- gbdpyr %>% 
+  left_join(neg_num, by=c("measure", "location","sex","cause","agegroup")) %>%
+  left_join(neg_denom, by=c("measure", "location","sex","cause","agegroup")) %>%
+  mutate(zeronum = replace_na(zeronum, FALSE)) %>%
+  mutate(zerodenom = replace_na(zerodenom, FALSE)) %>%
+  mutate(num = if_else(zeronum, num1yr, round(num)),
+         denom = if_else(zerodenom, denom1yr, round(denom)))
+
+saveRDS(gbdpyr, file=file.path(relative_path_gbd, "gbdpyr.rds"))
+
+## Check for a few cases that the series match with the naive dividing by 5 method and the smooth methods
+tloc <- sample(unique(gbd_disagg$location), 3)
+test2 <- gbdpyrd5 %>%
+  filter(cause=="ischemic heart disease", sex=="Male", measure=="Deaths",
+         location %in% tloc)
+gbdpyr %>% 
+  filter(cause=="ischemic heart disease", sex=="Male", measure=="Deaths",
+         location %in% tloc) %>%
+  ggplot(aes(x=ageyr, y=denom, col=location, group=location)) + 
+  geom_line() + geom_point() + 
+  geom_line(data=test2, aes(y=denom1yr))
+
+
+```
+
+#### Example
+
+Data by 5-year age groups for one location/cause/measure of interest
+
+```{r}
+gbdp %>%
+  filter(measure=="Incidence", location=="Bristol, City of", cause=="ischemic heart disease",
+         agegroup %in% c("40 to 44", "45 to 49"), sex=="Female") %>% 
+  select(agegroup, sex, num, denom, num1yr, denom1yr)
+```
+
+Equivalent data by single year of age.  Note due to rounding errors, the one-year counts will not always add up exactly to the five-year counts. 
+
+```{r}
+gbdpyr %>%
+  filter(measure=="Incidence", location=="Bristol, City of", cause=="ischemic heart disease",
+         ageyr %in% 40:49, sex=="Female") %>% 
+  select(ageyr, sex, num, denom)
+```
+
+
+
+
+# Aggregating by area
+
+Secondly we can aggregate the data from local authorities to produce data by city regions (defined as groups of local authorities), and regions excluding city regions.   This covers the whole of England with mutually exclusive areas.   No extra assumptions are required to do this.   It doesn't matter whether this is done before or after converting from 5-year to 1-year age groups. 
+
+
+```{r}
+options(dplyr.summarise.inform = FALSE) 
+
+
+## City regions
+gbdpyrcr <- gbdpyr %>% 
+  filter(in_cityregion) %>%
+  group_by(measure, sex, ageyr, cause, cityregion) %>%
+  summarise(num = sum(num), denom = sum(denom)) %>%
+  mutate(areatype = "cityregion") %>%
+  rename(location = cityregion) %>%
+  ungroup %>%
+  select(measure, sex, ageyr, cause, location, areatype, num, denom)
+
+## UTLAs with estimates in GBD 
+gbdpyru <- gbdpyr  %>%
+  filter(!in_cityregion, areatype=="utla") %>%
+  select(measure, sex, ageyr, cause, location, areatype, num, denom)
+
+## LTLAs from GBD aggregated to UTLAs
+gbdpyrlagg  <- gbdpyr  %>%
+  filter(!in_cityregion, areatype=="ltla") %>%
+  left_join(utla, by=c("location"="LTLA17NM")) %>%
+  group_by(measure, sex, ageyr, cause, UTLA17NM) %>%
+  summarise(num=sum(num), denom=sum(denom)) %>%
+  rename(location = "UTLA17NM") %>%
+  mutate(areatype = "utla_agg") %>%
+  ungroup %>%
+  select(measure, sex, ageyr, cause, location, areatype, num, denom)
+
+## don't use this aggregation for now, but save for later if needed
+gbdmodu <- rbind(gbdpyrcr, gbdpyru, gbdpyrlagg)
+
+## LTLAs and UTLAs from GBD aggregated to regions, excluding areas that are in city regions
+gbdpyrreg  <- gbdpyr  %>%
+  mutate(region = case_when(areatype=="ltla"  ~  lad$RGN17NM[match(location, lad$LAD17NM)],
+                            areatype=="utla"  ~  utlareg$RGN17NM[match(location, utlareg$UTLA17NM)],
+                            TRUE  ~  region
+                              )) %>%
+  filter(!in_cityregion) %>%
+  group_by(measure, sex, ageyr, cause, region) %>%
+  summarise(num=sum(num), denom=sum(denom)) %>%
+  rename(location = "region") %>%
+  mutate(areatype = "region") %>%
+  ungroup %>%
+  select(measure, sex, ageyr, cause, location, areatype, num, denom)
+
+gbdmod <- rbind(gbdpyrcr, gbdpyrreg)
+
+saveRDS(gbdmod, file=file.path(relative_path_gbd, "gbdmod.rds"))
+gbdmod <- readRDS(file=file.path(relative_path_gbd, "gbdmod.rds"))
+
+```
+
+#### Example
+
+Data by local authority for one cause/measure/demography of interest
+
+```{r}
+gbdpyr %>%
+  filter(measure=="Incidence", cityregion=="bristol", ageyr==44, cause=="ischemic heart disease") %>% 
+  arrange(sex) %>% 
+  select(location, areatype, sex, num, denom)
+```
+
+Equivalent data by city region: the numbers and denominators for each local authority are just added up
+
+```{r}
+gbdpyrcr %>%
+  filter(measure=="Incidence", location=="bristol", ageyr==44, cause=="ischemic heart disease") %>% 
+  select(location, sex, num, denom)
+```
+
+
+### Spreading so one row by area x subgroup
+
+Put numerators and denominators for incidence, prevalence and mortality in different columns
+
+```{r}
+
+gbdmod <- readRDS(file=file.path(relative_path_gbd, "gbdmod.rds"))
+
+gbddb <- gbdmod %>%
+  filter(measure %in% c("Deaths","Incidence", "Prevalence")) %>%
+  mutate(measure = fct_recode(measure, mort="Deaths", inc="Incidence", prev="Prevalence")) %>% 
+  pivot_wider(names_from=measure,
+              values_from=c("num","denom"),
+              values_fill = list(num=0, denom=5000)) %>% 
+  mutate(location = fct_recode(str_to_title(location),
+                                 `Greater Manchester`="Greatermanchester",
+                                 `North East (city region)`="Northeast",
+                                 `North East (region)`="North East",
+                                 `West Midlands (city region)`="Westmidlands",
+                                 `West Midlands (region)`="West Midlands",
+                                 `East of England`="East Of England")) %>%
+  mutate(cause = str_to_sentence(cause)) %>%
+  arrange(location, cause, sex, ageyr) %>%
+  filter(! cause %in% c("Hypertensive heart disease"))
+
+saveRDS(gbddb, file=file.path(relative_path_gbd, "gbddb.rds"))
+
+gbdmod %>% 
+  filter(ageyr==60, sex=="Male", cause=="ischemic heart disease", measure=="Incidence")  %>% 
+  filter(areatype=="cityregion") %>%
+  select(location, num, denom)
+
+# Some age groups are not available.  Assume count zero, denom 5000 for these 
+# Note again that counts for the wider regions / countries are not constrained to be consistent with the smaller areas
+# but doesn't affect our analysis
+  
+```
+
+
+
+# Cancer remission rates
+
+10-year survival to use to inform remission rates, from the [ONS](https://www.ons.gov.uk/peoplepopulationandcommunity/healthandsocialcare/conditionsanddiseases/bulletins/cancersurvivalinengland/nationalestimatesforpatientsfollowedupto201).  These are not published by age.  They are aggregated over ages 15-99, whereas 1, 5 year survival is published by age group.
+
+Methods [here](https://www.ons.gov.uk/peoplepopulationandcommunity/healthandsocialcare/conditionsanddiseases/methodologies/cancersurvivalstatisticalbulletinsqmi).   Assumes "conditional probabilities of surviving for patients diagnosed in current year are equal to those diagnosed over the full 10-year period of available data."  Caveats about trends through time.
+
+Our approach allows uncertainty around this - could represent expected variations between age groups, given variations for 5 year survival.
+
+Annual remission probability is computed from the 10 year survival probability.  Assumes that remission happened in one of the 10 years, with some unknown annual probability r such that the probability of remission in 10 years is equal to the 10 year survival probability s = 1 - (1-r)^10, so that r = 1 -(1-s)^(1/10). 
+
+Convert remission "rates" to numerators and denominators by assuming a denominator defined by the number of cancer cases over all ages and areas, but dividing all numerators and denominators by 100 to represent uncertainty about the true area-specific prevalence. For example, this gives a 95% credible interval for the annual breast cancer remission probability of 0.11 to 0.16. 
+ 
+
+```{r}
+library(readxl)
+rem <- read_excel("~/work/chronic/Figure_10__Predicted_10-year_net-survival_using_the_hybrid_approach_for_men_and_women_(aged_15_to_99_years).xls", range="A7:C26", na=":") %>%
+  pivot_longer(cols=c("Men","Women"), names_to = "sex", values_to = "surv10") %>% 
+  mutate(prem1 = 1 - (1 - surv10/100)^(1/10)) %>% 
+  filter(Cancer %in% c("Breast","Uterus","Colorectal","Liver","Stomach","Lung"),
+         !is.na(prem1)) %>%
+  mutate(Cancer = fct_recode(Cancer, 
+                             "Breast cancer"="Breast",
+                             "Uterine cancer"="Uterus",
+                             "Colon and rectum cancer"="Colorectal",
+                             "Stomach cancer"="Stomach",
+                             "Tracheal, bronchus, and lung cancer"="Lung"
+                             #,
+                             #"Liver cancer"="Liver"
+                             ),
+         sex = fct_recode(sex, "Male"="Men", "Female"="Women")) %>% 
+  rename(cause = Cancer)
+
+cancers <- c("Tracheal, bronchus, and lung cancer", "Colon and rectum cancer", "Stomach cancer", "Liver cancer", "Breast cancer", "Uterine cancer")
+
+num_cancer <- gbddb %>% 
+  filter(cause %in% cancers, 
+         ageyr %in% 15:99) %>% 
+  group_by(sex, cause) %>% 
+  summarise(ncases = sum(num_prev)) %>% 
+  left_join(rem, by=c("cause","sex")) %>%
+  mutate(num_rem = round(ncases*prem1 / 100),
+         denom_rem = round(ncases / 100)) %>% 
+  select(sex, cause, num_rem, denom_rem)
+num_cancer
+
+gbddb <- gbddb %>% 
+  left_join(num_cancer) %>% 
+  mutate(num_rem = replace_na(num_rem, 0),
+         denom_rem = replace_na(denom_rem, 0))
+
+saveRDS(gbddb, file=file.path(relative_path_gbd, "gbddb.rds"))
+saveRDS(gbddb, file=file.path("~/work/chronic", "gbddb.rds"))
+
+qbeta(c(0.025, 0.975), 128, 940-128) # 0.11 to 0.16.more plausible
+
+```
+
+
+# Population of city regions 
+
+23872000 in English city regions , just over half of the population of England 
+
+https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates/articles/populationdynamicsofukcityregionssincemid2011/2016-10-11
+
+54786300  for England.  
+
+```{r}
+#Greater London 8,674,000	 
+#West Midlands	2,834,000	 
+#Greater Manchester	2,756,000	 
+#West Yorkshire	2,282,000	 
+#North East	1,957,000	 
+#Liverpool	1,525,000
+#Sheffield	1,375,000	 
+#Edinburgh	1,350,000	 
+#Bristol	1,119,000	
+```
+

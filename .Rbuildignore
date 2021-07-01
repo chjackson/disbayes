@@ -1,2 +1,10 @@
 ^doc$
 ^Meta$
+data-raw
+^.*\.Rproj$
+^\.Rproj\.user$
+^metahit$
+vignettes/render.r
+src/*
+dbh.rds
+vignettes/dbh.rds

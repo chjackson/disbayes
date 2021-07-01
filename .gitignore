@@ -34,3 +34,9 @@ inst/stan/*.rds
 src/*.o
 src/*.so
 src/*.dll
+src/*.cc
+src/*.cpp
+src/*.h
+src/Makevars
+src/Makevars.win
+metahit/TODO.md
