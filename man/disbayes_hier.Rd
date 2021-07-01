@@ -130,7 +130,7 @@ for incidence, mortality and prevalence.}
 average age.}
 
 \item{eqage}{Case fatality and incidence are assumed to be equal for all ages
-below this age.}
+below this age when using the smoothed model}
 
 \item{model}{Three alternative models for case fatality are supported:
 

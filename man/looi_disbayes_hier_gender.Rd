@@ -7,7 +7,8 @@
 looi_disbayes_hier_gender(x)
 }
 \arguments{
-\item{x}{Object returned by \code{\link{disbayes_hier_gender}}}
+\item{x}{Object returned by \code{\link{disbayes_hier}} with an additive gender effect, so that
+the object has class \code{"disbayes_hier_gender"}}
 }
 \description{
 Return observation-level leave-one-out cross-validatory statistics from a disbayes_hier_gender fit

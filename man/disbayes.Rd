@@ -165,7 +165,7 @@ for incidence, mortality and prevalence.}
 average age.}
 
 \item{eqage}{Case fatality and incidence are assumed to be equal for all ages
-below this age.}
+below this age when using the smoothed model}
 
 \item{loo}{Compute leave-one-out cross validation statistics.}
 
@@ -195,7 +195,7 @@ in the \code{stanfit} format returned by the \code{\link[rstan]{stan}}
 function in the \pkg{rstan} package.
 
 \code{fitu}: Another \code{stanfit} object containing the equivalent "unsmoothed" model results
-with independent priors per year of age.
+where case fatality and incidence are given independent priors per year of age.
 
 \code{loos}: A list of objects containing leave-one-out cross-validation statistics.  There is
 one list component for each of the observed outcomes informing the model: incidence, prevalence,

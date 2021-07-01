@@ -339,7 +339,8 @@ tidy.disbayes_hier_gender <- function(x,...) {
 ##' Return observation-level leave-one-out cross-validatory statistics from a disbayes_hier_gender fit
 ##' as a tidy data frame. 
 ##'
-##' @param x Object returned by \code{\link{disbayes_hier_gender}}
+##' @param x Object returned by \code{\link{disbayes_hier}} with an additive gender effect, so that
+##' the object has class \code{"disbayes_hier_gender"}
 ##'
 ##' 
 ##' @export

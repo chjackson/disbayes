@@ -40,3 +40,5 @@ src/*.h
 src/Makevars
 src/Makevars.win
 metahit/TODO.md
+dbh.rds
+vignettes/dbh.rds
