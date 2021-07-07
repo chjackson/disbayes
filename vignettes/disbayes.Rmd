@@ -24,8 +24,6 @@ This also serves to illustrate a general approach for estimating quantities desc
 
 The method is implemented in the R package `disbayes`, and could easily be adapted to novel situations.
 
-A brief overview is given in this vignette, but a fuller explanation will be given in the paper _Bayesian multi-state modelling of incomplete chronic disease epidemiology data for health impact simulation models_ (Jackson et al., in progress). 
-
 
 # Theoretical disease model 
 
@@ -85,8 +83,6 @@ Advantages of the Bayesian method, implemented in `disbayes`, include
 * uncertainty about any quantity is quantified automatically through the posterior distribution, given the data, model assumptions and prior distributions supplied.
 
 * the ease of including multiple sources of direct/indirect data.  This is enabled by the generic computational methods and available software for Bayesian modelling, specifically the Stan package, illustrated below.   This allows the approach to generalise to settings with different forms of data available.  Currently implemented models include hierarchical models, models with additive area and gender effects, and models with age-specific time trends.  In contrast, DisMod II only allows limited forms of data. 
-
-Further discussion of the differences between `disbayes` and DisMod-MR are given in the paper [Jackson et al, to appear].
 
 # Data required by the Bayesian model
 
@@ -263,7 +259,7 @@ The smoothed model givese more precise estimates, aided by the assumption that c
 
 # Advanced models 
 
-`disbayes` provides a selection of more advanced models for more complex data structures.   These are substantially more computationally intensive than the basic model shown in this vignette, typically taking over an hour for applications similar to the one shown here.   See the paper for further information about how they are defined mathematically, and their R help pages for further information on how to invoke the functions.  
+`disbayes` provides a selection of more advanced models for more complex data structures.   These are substantially more computationally intensive than the basic model shown in this vignette, typically taking over an hour for applications similar to the one shown here.  Further information about how they are defined mathematically will be given in a forthcoming paper. See the R help pages for further information on how to invoke the functions.
 
 
 ## Hierarchical models 
@@ -279,7 +275,7 @@ The smoothed model givese more precise estimates, aided by the assumption that c
 
 ## Trends through time (non-hierarchical models only)
 
-`disbayes` can include information about trends through calendar time, which can be age dependent.  The ratio of incidence between previous years and the current year (the one represented by the data) can be supplied as a matrix, with one row per year of age and one column per calendar year.   See the help page, arguments `inc_trend_cf` and `cf_trend_mat`. 
+`disbayes` can include information about trends through calendar time, which can be age dependent.  The ratio of incidence between previous years and the current year (the one represented by the data) can be supplied as a matrix, with one row per year of age and one column per calendar year.   See the help page, arguments `inc_trend` and `cf_trend`. 
 
 
 

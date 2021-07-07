@@ -171,7 +171,6 @@ div.csl-indent {
 <p>This document illustrates how case fatality can be estimated given incidence and mortality, using Bayesian modelling.</p>
 <p>This also serves to illustrate a general approach for estimating quantities describing disease epidemiology, based on indirect / incomplete data or multiple data sources.</p>
 <p>The method is implemented in the R package <code>disbayes</code>, and could easily be adapted to novel situations.</p>
-<p>A brief overview is given in this vignette, but a fuller explanation will be given in the paper <em>Bayesian multi-state modelling of incomplete chronic disease epidemiology data for health impact simulation models</em> (Jackson et al., in progress).</p>
 <div id="theoretical-disease-model" class="section level1">
 <h1>Theoretical disease model</h1>
 <p>We represent a disease as a continuous-time, multi-state process with three states:</p>
@@ -217,7 +216,6 @@ div.csl-indent {
 <li><p>uncertainty about any quantity is quantified automatically through the posterior distribution, given the data, model assumptions and prior distributions supplied.</p></li>
 <li><p>the ease of including multiple sources of direct/indirect data. This is enabled by the generic computational methods and available software for Bayesian modelling, specifically the Stan package, illustrated below. This allows the approach to generalise to settings with different forms of data available. Currently implemented models include hierarchical models, models with additive area and gender effects, and models with age-specific time trends. In contrast, DisMod II only allows limited forms of data.</p></li>
 </ul>
-<p>Further discussion of the differences between <code>disbayes</code> and DisMod-MR are given in the paper [Jackson et al, to appear].</p>
 </div>
 <div id="data-required-by-the-bayesian-model" class="section level1">
 <h1>Data required by the Bayesian model</h1>
@@ -385,7 +383,7 @@ div.csl-indent {
 </div>
 <div id="advanced-models" class="section level1">
 <h1>Advanced models</h1>
-<p><code>disbayes</code> provides a selection of more advanced models for more complex data structures. These are substantially more computationally intensive than the basic model shown in this vignette, typically taking over an hour for applications similar to the one shown here. See the paper for further information about how they are defined mathematically, and their R help pages for further information on how to invoke the functions.</p>
+<p><code>disbayes</code> provides a selection of more advanced models for more complex data structures. These are substantially more computationally intensive than the basic model shown in this vignette, typically taking over an hour for applications similar to the one shown here. Further information about how they are defined mathematically will be given in a forthcoming paper. See the R help pages for further information on how to invoke the functions.</p>
 <div id="hierarchical-models" class="section level2">
 <h2>Hierarchical models</h2>
 <p><code>disbayes_hier</code> is used to fit a joint model for data from multiple areas.</p>
@@ -396,7 +394,7 @@ div.csl-indent {
 </div>
 <div id="trends-through-time-non-hierarchical-models-only" class="section level2">
 <h2>Trends through time (non-hierarchical models only)</h2>
-<p><code>disbayes</code> can include information about trends through calendar time, which can be age dependent. The ratio of incidence between previous years and the current year (the one represented by the data) can be supplied as a matrix, with one row per year of age and one column per calendar year. See the help page, arguments <code>inc_trend_cf</code> and <code>cf_trend_mat</code>.</p>
+<p><code>disbayes</code> can include information about trends through calendar time, which can be age dependent. The ratio of incidence between previous years and the current year (the one represented by the data) can be supplied as a matrix, with one row per year of age and one column per calendar year. See the help page, arguments <code>inc_trend</code> and <code>cf_trend</code>.</p>
 </div>
 <div id="references" class="section level2 unnumbered">
 <h2 class="unnumbered">References</h2>
