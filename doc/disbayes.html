@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Chris Jackson chris.jackson@mrc-bsu.cam.ac.uk" />
+
+<meta name="date" content="2021-07-07" />
+
+<title>Bayesian estimation of chronic disease epidemiology from incomplete data: the disbayes package</title>
+
+<script src="data:application/javascript;base64,Ly8gUGFuZG9jIDIuOSBhZGRzIGF0dHJpYnV0ZXMgb24gYm90aCBoZWFkZXIgYW5kIGRpdi4gV2UgcmVtb3ZlIHRoZSBmb3JtZXIgKHRvCi8vIGJlIGNvbXBhdGlibGUgd2l0aCB0aGUgYmVoYXZpb3Igb2YgUGFuZG9jIDwgMi44KS4KZG9jdW1lbnQuYWRkRXZlbnRMaXN0ZW5lcignRE9NQ29udGVudExvYWRlZCcsIGZ1bmN0aW9uKGUpIHsKICB2YXIgaHMgPSBkb2N1bWVudC5xdWVyeVNlbGVjdG9yQWxsKCJkaXYuc2VjdGlvbltjbGFzcyo9J2xldmVsJ10gPiA6Zmlyc3QtY2hpbGQiKTsKICB2YXIgaSwgaCwgYTsKICBmb3IgKGkgPSAwOyBpIDwgaHMubGVuZ3RoOyBpKyspIHsKICAgIGggPSBoc1tpXTsKICAgIGlmICghL15oWzEtNl0kL2kudGVzdChoLnRhZ05hbWUpKSBjb250aW51ZTsgIC8vIGl0IHNob3VsZCBiZSBhIGhlYWRlciBoMS1oNgogICAgYSA9IGguYXR0cmlidXRlczsKICAgIHdoaWxlIChhLmxlbmd0aCA+IDApIGgucmVtb3ZlQXR0cmlidXRlKGFbMF0ubmFtZSk7CiAgfQp9KTsK"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">
+/* for pandoc --citeproc since 2.11 */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+<link rel="stylesheet" href="data:text/css,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" type="text/css" />
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Bayesian estimation of chronic disease epidemiology from incomplete data: the disbayes package</h1>
+<h4 class="author">Chris Jackson <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk" class="email">chris.jackson@mrc-bsu.cam.ac.uk</a></h4>
+<h4 class="date">2021-07-07</h4>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span>opts_chunk<span class="sc">$</span><span class="fu">set</span>(<span class="at">fig.width=</span><span class="dv">7</span>)</span></code></pre></div>
+<p>This document illustrates how case fatality can be estimated given incidence and mortality, using Bayesian modelling.</p>
+<p>This also serves to illustrate a general approach for estimating quantities describing disease epidemiology, based on indirect / incomplete data or multiple data sources.</p>
+<p>The method is implemented in the R package <code>disbayes</code>, and could easily be adapted to novel situations.</p>
+<p>A brief overview is given in this vignette, but a fuller explanation will be given in the paper <em>Bayesian multi-state modelling of incomplete chronic disease epidemiology data for health impact simulation models</em> (Jackson et al., in progress).</p>
+<div id="theoretical-disease-model" class="section level1">
+<h1>Theoretical disease model</h1>
+<p>We represent a disease as a continuous-time, multi-state process with three states:</p>
+<ol style="list-style-type: decimal">
+<li>disease-free</li>
+<li>disease</li>
+<li>dead from the disease.</li>
+</ol>
+<p>If we assume that mortality from other causes is independent of disease status, deaths from other causes are uninformative and can be ignored.</p>
+<p>The disease process is then fully defined by the</p>
+<ul>
+<li><p>disease incidence <span class="math inline">\(i(a)\)</span>, and the</p></li>
+<li><p>case fatality rate <span class="math inline">\(f(a)\)</span>,</p></li>
+</ul>
+<p>which are both assumed to depend on age <span class="math inline">\(a\)</span>. Remission is also possible for some diseases, with rate <span class="math inline">\(r(a)\)</span>, though for simplicity of illustration is ignored here. Assume further that the rates are constant within integer years of age <span class="math inline">\(a\)</span>, so they can be written <span class="math inline">\(i_a\)</span>, <span class="math inline">\(f_a\)</span>.</p>
+<p>From these, we can determine the <em>transition probability matrix</em> <span class="math inline">\(P_a\)</span>, whose <span class="math inline">\(r,s\)</span> entry <span class="math inline">\(P_{ars}\)</span> is the probability that a person is in state <span class="math inline">\(s\)</span> at age <span class="math inline">\(a+1\)</span> given they are in state <span class="math inline">\(r\)</span> at age <span class="math inline">\(a\)</span>. The matrix <span class="math inline">\(P_a\)</span> is defined as a function of <span class="math inline">\(i_a\)</span> and <span class="math inline">\(f_a\)</span>, which is the solution to a differential equation, and is written out explicitly in the DisMod II paper (<span class="citation">Barendregt et al. (2003)</span>).</p>
+<p>Further, let <span class="math inline">\(S_a\)</span> be the “state occupancy probabilities,” or the proportion of individuals in a hypothetical birth cohort (of infinite size) who are in each state at age <span class="math inline">\(a\)</span>. This is a row vector with three elements <span class="math inline">\(S_{ar}\)</span>, one for each state <span class="math inline">\(r\)</span>. Assume everyone is disease-free at age 0. The state occupancy probabilities at each subsequent age <span class="math inline">\(a+1\)</span> are then determined by mutiplying by the transition probability matrix:</p>
+<p><span class="math display">\[ S_{a+1} = S_a P_a \]</span></p>
+<p>The prevalence of disease (among people who are alive) at each age <span class="math inline">\(a\)</span> is then obtained as <span class="math inline">\(pr_a = S_{a2} / (S_{a1} + S_{a2})\)</span>.</p>
+<p>The disease-specific mortality rate at age <span class="math inline">\(a\)</span>, or the probability that a person alive at age <span class="math inline">\(a\)</span> dies from the disease before age <span class="math inline">\(a+1\)</span>, can also be expressed in terms of the disease prevalence at age <span class="math inline">\(a\)</span> and the transition probabilities between ages <span class="math inline">\(a\)</span> and <span class="math inline">\(a+1\)</span>, as</p>
+<p><span class="math display">\[ dm_a = P_{a23} pr_a + P_{a13} (1 - pr_a) \]</span></p>
+</div>
+<div id="bayesian-approach-to-estimating-the-model-from-data" class="section level1">
+<h1>Bayesian approach to estimating the model from data</h1>
+<p>Data are observed which give information about some, but not all, of the parameters in the theoretical disease model. The form of the data available may be different in each application. We then wish to estimate any remaining unknown parameters. The Bayesian approach to estimating these unknowns can be described as four steps:</p>
+<ol style="list-style-type: decimal">
+<li><p>write down a theoretical model for underlying disease progression (as done above)</p></li>
+<li><p>write down a statistical model for the observed data given the parameters of the underlying disease model. In this model, observed data need to be expressed as counts of individuals and associated denominators, e.g. </p></li>
+</ol>
+<ul>
+<li><p>(incidence): given a population of size <span class="math inline">\(n_a^{(mort)}\)</span>, <span class="math inline">\(r_a^{(inc)}\)</span> of these are observed to get the disease within the next year</p></li>
+<li><p>(mortality): given a population of size <span class="math inline">\(n_a^{(mort)}\)</span> (with or without the disease), <span class="math inline">\(r_a^{(mort)}\)</span> of these are observed to die from the disease within the next year</p></li>
+<li><p>(prevalence): from a sample of <span class="math inline">\(n_a^{(prev)}\)</span> individuals, <span class="math inline">\(r_a^{(prev)}\)</span> are known to have the disease at age <span class="math inline">\(a\)</span> (and <span class="math inline">\(n_a^{(prev)} - r_a^{(prev)}\)</span> are known to not have the disease.</p></li>
+</ul>
+<p>The next section discusses how these data can be derived, given the typical forms of data available from burden of disease studies. A denominator is required, because it enables uncertainty associated with each estimate to be quantified, as we will discuss later.</p>
+<ol start="3" style="list-style-type: decimal">
+<li><p>write down prior distributions for the unknowns. These may express prior ignorance, as in the example below.</p></li>
+<li><p>compute the (unique) posterior distribution of the unknown parameters in the joint model, given the observed data.</p></li>
+</ol>
+<p>This approach is used in the DisMod-MR package, as explained by <span class="citation">Flaxman, Vos, and Murray (2015)</span>, however the software itself is not fully documented. The older (published) DisMod II (<span class="citation">Barendregt et al. (2003)</span>) used an ad-hoc optimisation approach to estimate parameters.</p>
+<p>Advantages of the Bayesian method, implemented in <code>disbayes</code>, include</p>
+<ul>
+<li><p>uncertainty about any quantity is quantified automatically through the posterior distribution, given the data, model assumptions and prior distributions supplied.</p></li>
+<li><p>the ease of including multiple sources of direct/indirect data. This is enabled by the generic computational methods and available software for Bayesian modelling, specifically the Stan package, illustrated below. This allows the approach to generalise to settings with different forms of data available. Currently implemented models include hierarchical models, models with additive area and gender effects, and models with age-specific time trends. In contrast, DisMod II only allows limited forms of data.</p></li>
+</ul>
+<p>Further discussion of the differences between <code>disbayes</code> and DisMod-MR are given in the paper [Jackson et al, to appear].</p>
+</div>
+<div id="data-required-by-the-bayesian-model" class="section level1">
+<h1>Data required by the Bayesian model</h1>
+<div id="given-estimates-and-denominators" class="section level2">
+<h2>…Given estimates and denominators</h2>
+<p>The following data are given in the R data frame <code>ihdengland</code> supplied in the package.</p>
+<ul>
+<li><p><code>inc_num</code>,<code>inc_denom</code>: incidence of IHD by age</p></li>
+<li><p><code>mort_num</code>,<code>mort_denom</code>: estimates of IHD-specific mortality by age</p></li>
+<li><p><code>prev_num</code>,<code>prev_denom</code>: estimates of prevalence by age</p></li>
+</ul>
+<p>and we wish to estimate case fatality by age, given these inputs. A selection of rows from the full data frame are shown here. We select only the data from one area and gender (Bristol, male) for this illustration.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(disbayes)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code></pre></div>
+<pre><code>## 
+## Attaching package: &#39;dplyr&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     filter, lag</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>ihdbristol <span class="ot">&lt;-</span> ihdengland <span class="sc">%&gt;%</span> <span class="fu">filter</span>(location<span class="sc">==</span><span class="st">&quot;Bristol&quot;</span>, sex<span class="sc">==</span><span class="st">&quot;Male&quot;</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>ihdbristol <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="fu">between</span>(age, <span class="dv">50</span>, <span class="dv">55</span>))</span></code></pre></div>
+<pre><code>## # A tibble: 6 x 11
+##   sex     age location mort_num inc_num prev_num mort_denom inc_denom prev_denom
+##   &lt;chr&gt; &lt;dbl&gt; &lt;fct&gt;       &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;      &lt;dbl&gt;
+## 1 Male     50 Bristol         4      28      142       7817      8326       5810
+## 2 Male     51 Bristol         4      32      140       7771      8294       5041
+## 3 Male     52 Bristol         4      32      140       7664      7934       4433
+## 4 Male     53 Bristol         5      30      144       7498      7245       3985
+## 5 Male     54 Bristol         5      28      150       7274      6223       3699
+## 6 Male     55 Bristol         5      23      158       6990      4874       3574
+## # ... with 2 more variables: rem_num &lt;dbl&gt;, rem_denom &lt;dbl&gt;</code></pre>
+<p>These data were obtained from the Global Burden of Disease, 2017, and transformed in three ways to obtain the data seen here. Firstly, the published point estimates and confidence intervals for each annual risk probability was converted to an implicit numerator and denominator. This is done by assuming that</p>
+<ul>
+<li><p>the incidence has been estimated as <span class="math inline">\(r_a^{(inc)}/n_a^{(inc)}\)</span>, where out of <span class="math inline">\(n_a^{(inc)}\)</span> people who are alive at age <span class="math inline">\(a\)</span>, <span class="math inline">\(r_a^{(inc)}\)</span> of these get IHD before age <span class="math inline">\(a+1\)</span>.</p></li>
+<li><p>the mortality has been estimated as <span class="math inline">\(r_a^{(mort)}/n_a^{(mort)}\)</span>, where out of <span class="math inline">\(n_a^{(mort)}\)</span> people who are alive at age <span class="math inline">\(a\)</span>, <span class="math inline">\(r_a^{(mort)}\)</span> of these die of IHD before age <span class="math inline">\(a+1\)</span>. These ratios are estimates of the true, underlying disease-specific mortalities <span class="math inline">\(dm_a\)</span>.</p></li>
+<li><p>the prevalence has been estimated as <span class="math inline">\(r_a^{(prev)}/n_a^{(prev)}\)</span>, where out of <span class="math inline">\(n_a^{(prev)}\)</span> people who are alive at age <span class="math inline">\(a\)</span>, <span class="math inline">\(r_a^{(prev)}\)</span> of them have IHD.</p></li>
+</ul>
+<p>The published estimates and uncertainty interval are then used to derive the implicit denominator and numerator, using the method described in the next subsection.</p>
+<p>Then secondly, estimates for five-year age groups were converted to one-year groups. Most simply this could be done by assuming the counts are equal for each year of age, but a more sophisticated method was used based on “temporal disaggregation” using one of the methods implemented by Sax and Steiner in the <code>tempdisagg</code> R package (<span class="citation">Sax and Steiner (2013)</span>). This ensures that the disaggregated counts vary smoothly with age, while preserving the aggregate totals. Thirdly, counts from smaller geographical areas were simply added up to obtain the corresponding counts for the larger areas (English city regions) required in this analysis.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>ihdbristol[ihdbristol<span class="sc">$</span>age <span class="sc">%in%</span> <span class="dv">50</span><span class="sc">:</span><span class="dv">55</span>, ]</span></code></pre></div>
+<pre><code>## # A tibble: 6 x 11
+##   sex     age location mort_num inc_num prev_num mort_denom inc_denom prev_denom
+##   &lt;chr&gt; &lt;dbl&gt; &lt;fct&gt;       &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;      &lt;dbl&gt;
+## 1 Male     50 Bristol         4      28      142       7817      8326       5810
+## 2 Male     51 Bristol         4      32      140       7771      8294       5041
+## 3 Male     52 Bristol         4      32      140       7664      7934       4433
+## 4 Male     53 Bristol         5      30      144       7498      7245       3985
+## 5 Male     54 Bristol         5      28      150       7274      6223       3699
+## 6 Male     55 Bristol         5      23      158       6990      4874       3574
+## # ... with 2 more variables: rem_num &lt;dbl&gt;, rem_denom &lt;dbl&gt;</code></pre>
+</div>
+<div id="determining-numerators-and-denominators-from-point-andor-interval-estimates" class="section level2">
+<h2>Determining numerators and denominators from point and/or interval estimates</h2>
+<p>Sometimes a point estimate <span class="math inline">\(\hat{p}\)</span> for a quantity such as incidence is published alongside an (e.g. 95%) interval estimate <span class="math inline">\((\hat{p}^{(lower)},\hat{p}^{(upper)})\)</span>. The interval estimate can be assumed to express the uncertainty associated with the estimate. Such information can be converted to an implicit numerator <span class="math inline">\(r\)</span> and denominator <span class="math inline">\(n\)</span> as follows. We assume the point and interval estimate are summaries of a Beta posterior distribution which has been obtained by combining a vague prior with an observation of <span class="math inline">\(r\)</span> events occurring out of a sample of <span class="math inline">\(n\)</span> individuals. If a Beta(0,0) prior is used, then the posterior is known to be Beta(r, n-r). We can then search for the best-fitting Beta(r,n-r)$ distribution which has median <span class="math inline">\(\hat{p}\)</span> and (2.5,97.5) quantiles <span class="math inline">\((\hat{p}^{(lower)},\hat{p}^{(upper)})\)</span>, and set <span class="math inline">\(r=a, n=a+b\)</span>. A utility to perform this search is provided in the SHELF package for expert elicitation (<span class="citation">O’Hagan et al. (2006)</span>).</p>
+<p>In other applications, the denominators might be directly available, e.g. we might know that the prevalence was estimated from a survey of <span class="math inline">\(r_a^{(prev)}\)</span> people, or we might assume that the incidence and mortality were obtained from a comprehensive registry of the population, in which case the denominator would equal the population size (within the specific stratum, e.g. as defined by age and gender, that the estimate refers to).</p>
+<p>The uncertainty inherent in the information supplied about each of incidence, prevalence and mortality is measured by the denominator. In the example above, this is equated to the size of the population used to produce the estimate. However, if we also suspected that one of the data sources may be biased, but were unsure about the direction of bias, we could downweight that data source by multiplying both the numerator and denominator by the same amount, e.g. 0.5 if we wanted to give a data source half its original weight. Note that if counts are scaled in this way, they should then be rounded to the nearest integer.</p>
+</div>
+<div id="bayesian-modelling-process" class="section level2">
+<h2>Bayesian modelling process</h2>
+<p>The four steps of the Bayesian modelling process are then implemented as follows:</p>
+<ol style="list-style-type: decimal">
+<li><p>write down the theoretical disease model, as given above</p></li>
+<li><p>write down the statistical model for the data. All count data are assumed to arise from a Binomial distribution with the corresponding denominator, and a probability parameter which is a function of the parameters in the theoretical disease model.</p>
+<ul>
+<li><p>(incidence) <span class="math inline">\(r_a^{(inc)} \sim ~ Binomial(n_a, 1 - P_{a11})\)</span>, where <span class="math inline">\(P_{a11}\)</span> is the annual probability of remaining free of the disease.</p></li>
+<li><p>(mortality) <span class="math inline">\(r_a^{(mort)} \sim ~ Binomial(n_a, dm_a)\)</span>, where the disease-specific mortality <span class="math inline">\(dm_a\)</span> is a deterministic function of the incidences and case fatalities <span class="math inline">\(\{i_j,f_j\}\)</span> for ages <span class="math inline">\(j\)</span> up to <span class="math inline">\(a\)</span>, as described in the theoretical disease model.</p></li>
+<li><p>(prevalence) <span class="math inline">\(r_a^{(prev)} \sim ~ Binomial(n_a^{(prev)}, pr_a)\)</span>, where <span class="math inline">\(pr_a\)</span> is the true prevalence, defined as a deterministic function of the incidences and case fatalities.</p></li>
+</ul></li>
+<li><p>define prior distributions for the unknown parameters, as explained in the next section.</p></li>
+<li><p>compute the posterior distribution <span class="math inline">\(p(\theta | \mathbf{y})\)</span> for parameters <span class="math inline">\(\theta = \{i_a,f_a\}\)</span> given data <span class="math inline">\(\mathbf{y} = \{i_a, r_a, n_a\}\)</span></p></li>
+</ol>
+</div>
+<div id="alternative-models-prior-assumptions" class="section level2">
+<h2>Alternative models / prior assumptions</h2>
+<p>In example such as this one, where quantities are estimated from indirect data, it is important to consider what substantive prior information is available about the unknown quantities, and what influence the assumed prior has on the resulting estimates.</p>
+<p>In these examples, the case fatality is only informed indirectly. The <code>disbayes</code> package implements two alternative models for how case fatality depends on age. The same methods can be used for how incidence depends on age.</p>
+<ol style="list-style-type: decimal">
+<li><p>the case fatality rate <span class="math inline">\(f_a\)</span> for each year of age <span class="math inline">\(a\)</span> is assumed to have an independent vague prior distribution, taken to be exponential(1).</p></li>
+<li><p>the case fatality rate is assumed to be a smooth function <span class="math inline">\(g()\)</span> of age, <span class="math inline">\(f_a = g(a)\)</span>. This smooth function is defined by a spline basis <span class="math inline">\(log(f_a) = \sum_k \beta_k g_k(a)\)</span>, where <span class="math inline">\(g_k()\)</span> are basis functions. A “thin plate” spline is used, following the default in the <code>mgcv</code> R package (Wood), and the amount of smoothness is determined automatically through a hierarchical prior on the coefficients.</p></li>
+</ol>
+<p>In addition, for all ages below a given cut-off age <span class="math inline">\(a_{base}\)</span>, case fatalities are assumed to be equal to a constant <span class="math inline">\(f_{base}\)</span>. This cut-off age <span class="math inline">\(a_{base}\)</span> needs to be supplied when calling the <code>disbayes</code> function. <span class="math inline">\(f_{base}\)</span> does not need to be supplied however, and is estimated from the data under the assumption that the dependence on age is a smooth function.</p>
+<p>Model (2) is more realistic. However it may not give sensible estimates if the information provided by the data is too weak. The results of fitting Model (1) can help to diagnose where the indirect information on case fatality provided by the rest of the data is weaker or stronger. If the information on <span class="math inline">\(f_a\)</span> for a particular age is too weak, then the posterior distribution will be identical to the prior. In those cases, substantive prior information about case fatality at that age is necessary for the estimates to be meaningful.</p>
+<p>This information might come from nearby ages that are better-informed, through extrapolation from the smoothing model. However extrapolating in this way is only feasible for a limited time span (perhaps around 10-20 years) before stronger assumptions are necessary, e.g. that case fatality is constant below a certain age.</p>
+</div>
+</div>
+<div id="fitting-bayesian-models-with-the-stan-software-via-disbayes" class="section level1">
+<h1>Fitting Bayesian models with the Stan software via disbayes</h1>
+<p>The Stan software (<a href="http://mc-stan.org">mc-stan.org</a>) allows any Bayesian model to be written down in the Stan language. The software then enables a sample from the posterior distribution to be drawn, using Hamiltonian Monte Carlo sampling.</p>
+<p>The <code>disbayes</code> package uses Stan to fit the Bayesian disease model given here to the data <span class="math inline">\(\mathbf{y} = \{i_a, r_a, n_a\}\)</span> supplied in the <code>ihdbristol</code> data frame. The function <code>disbayes</code> does the work of converting the data to the required format for Stan, and calling the Stan software to run the simulations.</p>
+<p>The <code>disbayes</code> function requires the following arguments</p>
+<ul>
+<li><p><code>dat</code>: a data frame where all the variables are stored</p></li>
+<li><p>additional arguments indicating which columns of the data contain which variables.</p></li>
+</ul>
+<p>The required variables include at least information about incidence and mortality, optionally information about prevalence, and some indication of uncertainty around this information. This information can be supplied in three alternative ways. For example, for incidence,</p>
+<ol style="list-style-type: decimal">
+<li><p>risk probability estimate with denominator: through arguments <code>inc</code> and <code>inc_denom</code>. The numerator is computed automatically, by multiplying the denominator by the risk estimate.</p></li>
+<li><p>numerator and denominator, through arguments <code>inc_num</code> and <code>inc_denom</code>. This is what is done in the example here.</p></li>
+<li><p>estimate with lower and upper 95% credible limits, through arguments <code>inc</code>, <code>inc_lower</code> and <code>inc_upper</code>. The numerator and denominator are comptue computed automatically, as described above.</p></li>
+</ol>
+<p>The value given for the argument is a character string identifying the corresponding variable in the data. For mortality and prevalence, arguments with names beginning <code>mort</code> and <code>prev</code> are supplied in the same manner.</p>
+<p>Before running the <code>disbayes</code> function to fit the models, we set up the computer for parallel processing. This allows multiple processor cores to be used, which enables the models to fit substantially faster.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">mc.cores =</span> parallel<span class="sc">::</span><span class="fu">detectCores</span>())</span></code></pre></div>
+<p>The following call to the <code>disbayes</code> function is then made to fit the model to the <code>ihdbristol</code> data. The argument <code>eqage=40</code> defines an assumption that case fatality is constant for all ages below 40.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>dbres <span class="ot">&lt;-</span> <span class="fu">disbayes</span>(<span class="at">dat =</span> ihdbristol,</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>                  <span class="at">age =</span> <span class="st">&quot;age&quot;</span>,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">inc_num =</span> <span class="st">&quot;inc_num&quot;</span>, </span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">inc_denom =</span> <span class="st">&quot;inc_denom&quot;</span>, </span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">prev_num =</span> <span class="st">&quot;prev_num&quot;</span>, </span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">prev_denom =</span> <span class="st">&quot;prev_denom&quot;</span>,</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>                 <span class="at">mort_num =</span> <span class="st">&quot;mort_num&quot;</span>,</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>                 <span class="at">mort_denom =</span> <span class="st">&quot;mort_denom&quot;</span>,</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>                 <span class="at">eqage =</span> <span class="dv">40</span>,</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>                 <span class="at">chains =</span> <span class="dv">2</span>,</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>                 <span class="at">iter =</span> <span class="dv">1000</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>                 )</span></code></pre></div>
+<p>The computation may take a few minutes, or less depending on the number of cores and their speed. The number of iterations <code>iter</code> should be high enough that the results are not affected by Monte Carlo error.</p>
+<p>The <code>disbayes</code> function returns a list with components <code>fit</code> and <code>fitu</code>, containing the smoothed and unsmoothed model fits respectively. Each of these components is an object in the <code>stanfit</code> format defined by the <code>rstan</code> R interface to Stan.</p>
+</div>
+<div id="ihd-example-results" class="section level1">
+<h1>IHD example: Results</h1>
+<p>The results could be summarised and manipulated using functions provided by rstan, e.g. the <code>summary</code> and <code>extract</code> method for <code>stanfit</code> objects. For example, we can check the MCMC simulations have converged, by examining the “trace plot” of the simulation progress for selected parameters. The simulated chains should mix together and look like white noise. Also if the <code>disbayes</code> call resulted in many reports of “divergent transitions,” then the chains are unlikely to have converged to a valid posterior. If convergence hasn’t occurred, then the model probably needs to be simplified (e.g. by increasing <code>eqage</code>), or the data are insufficient.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>rstan<span class="sc">::</span><span class="fu">traceplot</span>(dbres<span class="sc">$</span>fit, <span class="at">pars=</span><span class="fu">paste0</span>(<span class="st">&quot;cf[&quot;</span>, <span class="dv">60</span><span class="sc">:</span><span class="dv">65</span>, <span class="st">&quot;]&quot;</span>))</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p>The <code>disbayes</code> package provides some shortcuts for extracting summary statistics. The posterior medians, 95% credible intervals and other statistics for all parameters of interest can be extracted from the fitted models using the <code>tidy</code> method for <code>disbayes</code> objects.</p>
+<p>The result is a data frame with the variables indicated in the variable called <code>var</code>. Variables include <code>inc</code> (incidence), <code>cf</code> (case fatality), <code>mort</code> (mortality), <code>prev</code> (prevalence), each indexed by year of age given in the <code>age</code> variable. <code>model</code> indicates the smoothed or unsmoothed model. The first few rows of the summary below contain estimates of incidence for the first few years of age.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>summ <span class="ot">&lt;-</span> <span class="fu">tidy</span>(dbres)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(summ)</span></code></pre></div>
+<pre><code>##       var age state       mean    se_mean        sd      2.5%        25%
+## 1 beta[1]  NA    NA  0.3783239 0.06275665 2.1283664 -4.022859 -0.8384869
+## 2 beta[2]  NA    NA  0.2290877 0.06793546 1.9563789 -3.313931 -1.0608978
+## 3 beta[3]  NA    NA  0.1940468 0.06765728 1.9825665 -3.484651 -1.0754211
+## 4 beta[4]  NA    NA  0.3966285 0.07072907 1.6278135 -2.378560 -0.6823392
+## 5 beta[5]  NA    NA -0.9454994 0.04849136 1.4949214 -4.004552 -1.8649573
+## 6 beta[6]  NA    NA -0.7293399 0.01748361 0.6108846 -1.905425 -1.1339223
+##           50%         75%     97.5%     n_eff      Rhat    model
+## 1  0.29312094  1.50703149 5.2174075 1150.2000 1.0003670 smoothed
+## 2  0.11025040  1.31447756 4.5655453  829.3023 0.9993007 smoothed
+## 3  0.07111139  1.23971654 4.6001995  858.6702 1.0003160 smoothed
+## 4  0.24646786  1.41740088 3.9430939  529.6798 0.9999034 smoothed
+## 5 -0.88224929 -0.01016661 1.8594994  950.4035 0.9980312 smoothed
+## 6 -0.73025636 -0.32833912 0.4762164 1220.8319 0.9990020 smoothed</code></pre>
+<p>To extract results for a specific variable and model, it is convenient to use standard tidyverse functions, e.g. to get the median and interquartile range of case fatality under the smoothed model for people aged between 60 and 65:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>summ <span class="sc">%&gt;%</span> </span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(var<span class="sc">==</span><span class="st">&quot;cf&quot;</span>, <span class="fu">between</span>(age,<span class="dv">60</span>,<span class="dv">65</span>), model<span class="sc">==</span><span class="st">&quot;smoothed&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(age, <span class="st">`</span><span class="at">25%</span><span class="st">`</span>, <span class="st">`</span><span class="at">50%</span><span class="st">`</span>, <span class="st">`</span><span class="at">75%</span><span class="st">`</span>)</span></code></pre></div>
+<pre><code>##   age        25%        50%        75%
+## 1  60 0.01577547 0.01713661 0.01852266
+## 2  61 0.01595451 0.01723055 0.01855599
+## 3  62 0.01618481 0.01732790 0.01863060
+## 4  63 0.01639249 0.01750528 0.01872202
+## 5  64 0.01661619 0.01768763 0.01882231
+## 6  65 0.01688044 0.01789476 0.01900031</code></pre>
+<p>The default <code>plot</code> method for objects returned by <code>disbayes</code> plots the posterior summaries for case fatality. Both the smoothed and unsmoothed estimates from age 40 and above are shown. If other styles of plot are desired, the tidy data frame output of the <code>tidy</code> method above is designed so that it can be passed to <code>ggplot2</code> without too much effort.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(dbres) <span class="sc">+</span>  <span class="fu">ylab</span>(<span class="st">&quot;Case fatality&quot;</span>) <span class="sc">+</span> <span class="fu">xlab</span>(<span class="st">&quot;Age&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">xlim=</span><span class="fu">c</span>(<span class="dv">40</span>,<span class="dv">100</span>), <span class="at">ylim=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="fl">0.5</span>)) </span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p>Under the unsmoothed model, the uncertainty about case fatality is biggest for the youngest and oldest ages, where either prevalence is lowest or the proportion of the cohort who are still alive is lowest.</p>
+<p>The smoothed model givese more precise estimates, aided by the assumption that case fatalities are similar between similar ages, and that case fatality is constant under the age of 40. The smoothed model also removes the artefacts from the 5-year age grouping that are seen in the unsmoothed results. While the point estimates agree with those from DisMod II (not shown here), the Bayesian method has the benefit of characterising uncertainty as a posterior distribution. Uncertainty about case fatality in this example arises from the disease prevalence. If the prevalence is lower, fewer people have the disease, giving less information from which to estimate the case fatality for people with the disease.</p>
+</div>
+<div id="advanced-models" class="section level1">
+<h1>Advanced models</h1>
+<p><code>disbayes</code> provides a selection of more advanced models for more complex data structures. These are substantially more computationally intensive than the basic model shown in this vignette, typically taking over an hour for applications similar to the one shown here. See the paper for further information about how they are defined mathematically, and their R help pages for further information on how to invoke the functions.</p>
+<div id="hierarchical-models" class="section level2">
+<h2>Hierarchical models</h2>
+<p><code>disbayes_hier</code> is used to fit a joint model for data from multiple areas.</p>
+</div>
+<div id="hierarchical-models-with-additive-area-and-gender-effects" class="section level2">
+<h2>Hierarchical models with additive area and gender effects</h2>
+<p><code>disbayes_hier</code> can also be used to fit a joint model for data from multiple areas and different genders. It is assumed that the relative case fatality between women and men is the same for each area. While this is labelled <code>gender</code> it can be used for any single binary predictor, though usually we will want to consider gender.</p>
+</div>
+<div id="trends-through-time-non-hierarchical-models-only" class="section level2">
+<h2>Trends through time (non-hierarchical models only)</h2>
+<p><code>disbayes</code> can include information about trends through calendar time, which can be age dependent. The ratio of incidence between previous years and the current year (the one represented by the data) can be supplied as a matrix, with one row per year of age and one column per calendar year. See the help page, arguments <code>inc_trend_cf</code> and <code>cf_trend_mat</code>.</p>
+</div>
+<div id="references" class="section level2 unnumbered">
+<h2 class="unnumbered">References</h2>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-dismod2" class="csl-entry">
+Barendregt, J. J., G. J. Van Oortmarssen, T. Vos, and C. J. L. Murray. 2003. <span>“<span class="nocase">A generic model for the assessment of disease epidemiology: the computational basis of DisMod II</span>.”</span> <em>Population Health Metrics</em> 1 (1): 4.
+</div>
+<div id="ref-flaxman2015" class="csl-entry">
+Flaxman, A. D., T. Vos, and C. J. L. Murray. 2015. <em>An Integrative Metaregression Framework for Descriptive Epidemiology</em>. University of Washington Press.
+</div>
+<div id="ref-ohagan:elic" class="csl-entry">
+O’Hagan, A., C. E. Buck, A. Daneshkhah, J. R. Eiser, P. H. Garthwaite, D. J. Jenkinson, J. E Oakley, and T. Rakow. 2006. <em><span>Uncertain Judgements: Eliciting Experts’ Probabilities</span></em>. John Wiley &amp; Sons.
+</div>
+<div id="ref-RJ-2013-028" class="csl-entry">
+Sax, C., and P. Steiner. 2013. <span>“<span class="nocase">Temporal disaggregation of time series</span>.”</span> <em><span>The R Journal</span></em> 5 (2): 80–87. <a href="https://doi.org/10.32614/RJ-2013-028">https://doi.org/10.32614/RJ-2013-028</a>.
+</div>
+</div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
