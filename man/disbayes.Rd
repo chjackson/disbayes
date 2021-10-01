@@ -54,11 +54,14 @@ disbayes(
 \arguments{
 \item{data}{Data frame containing some of the variables below.  The
   variables below are provided as character strings naming columns in this
-  data frame.   For incidence and mortality, one of the following three
+  data frame.   For each disease measure available, one of the following three
   combinations of variables must be specified:
 
   (1) numerator and denominator (2) estimate and denominator (3) estimate
   with lower and upper credible limits
+  
+  Mortality must be supplied, and at least one of incidence and prevalence. 
+  If remission is assumed to be possible, then remission data should also be supplied (see below).
 
   For estimates based on registry data assumed to cover the whole
   population, then the denominator will be the population size.}
@@ -111,7 +114,9 @@ register)}
 data should be supplied if remission is permitted in the model, either as
 a numerator and denominator or as an estimate and lower credible interval.
 Conversely, if no remission data are supplied, then remission is assumed
-to be impossible.}
+to be impossible.  These "data" may represent a prior judgement rather than
+observation - lower denominators or wider credible limits represent
+weaker prior information.}
 
 \item{rem_denom}{Denominator for the estimate of the remission rate}
 
@@ -310,6 +315,7 @@ Estimates a three-state disease model given data on incidence, prevalence
 and mortality.
 }
 \details{
-Currently it is designed to estimate case fatality and/or incidence given
-data on at least mortality and incidence.
+It is designed to estimate case fatality and incidence, given
+data on mortality and at least one of incidence and prevalence.
+Remission may also be included.
 }
