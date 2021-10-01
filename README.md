@@ -27,7 +27,7 @@ The development repository for the [disbayes](http://cran.r-project.org/package=
   
   - models with assumed trends in disease incidence or case fatality through calendar time, where trends can be age-specific (non-hierarchical models only)
 
-* It is inspired by the [DisMod II](https://www.epigear.com/index_files/dismod_ii.html), and [DisMod-MR](https://github.com/ihmeuw/dismod_mr) packages used for the Global Burden of Disease studies.   It follows the formal, fully Bayesian framework described in the [book by Flaxman](http://www.combinedacademic.co.uk/integrated-meta-regression-framework-for-descriptive-epidemiology) and modified and extended in the paper _Bayesian multi-state modelling of incomplete chronic disease epidemiology data for health impact simulation models_ (Jackson et al., in progress). 
+* It is inspired by the [DisMod II](https://www.epigear.com/index_files/dismod_ii.html) and [DisMod-MR](https://github.com/ihmeuw/dismod_mr) packages used for the Global Burden of Disease studies.   It follows the formal, fully Bayesian framework described in the [book by Flaxman et al.](https://uwapress.uw.edu/book/9780295991849/an-integrative-metaregression-framework-for-descriptive-epidemiology/) and modified and extended in the paper _Bayesian multi-state modelling of incomplete chronic disease epidemiology data for health impact simulation models_ (Jackson et al., in progress). 
 
 * Source code is at the [GitHub repository](https://github.com/chjackson/disbayes)
 
