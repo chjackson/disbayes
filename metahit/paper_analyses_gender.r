@@ -1,35 +1,60 @@
 
 source("paper_analyses_header.r")
-options(mc.cores = 2)
+nchains <- 2
+options(mc.cores = nchains)
 
 task_id <- as.numeric(Sys.getenv("SLURM_ARRAY_TASK_ID"))
 runs_todo <- 1:nrow(hierrungdf) 
 i <- runs_todo[task_id]
 
+if (0){
+  source("paper_analyses_header.r")
+  i <- 1
+  nchains <- 1
+}
+
 mhi <- gbd %>%
-    filter(cause==hierrungdf$disease[i]) %>%
+    filter(disease==hierrungdf$disease[i]) %>%
     droplevels
 
-db <- disbayes_hier_gender(data=mhi,
-                    group = "location",
-                    gender = "sex",
-                    group_init = "London",
-                    inc_num = "num_inc", inc_denom = "denom_inc",
-                    mort_num = "num_mort", mort_denom = "denom_mort",
-                    prev_num = "num_prev", prev_denom = "denom_prev",
-                    rem_num = "num_rem", rem_denom = "denom_rem",
-                    model = hierrungdf$model[i], 
-                    remission = hierrungdf$remission[i],
-                    age="ageyr", smooth_cf=TRUE,
-                    eqage=hierrundf$eqage[i], 
-                    nfold_int_guess = 5,
-                    nfold_int_upper =  50,
-                    nfold_slope_guess = 2,
-                    nfold_slope_upper =  20,
-                    cf_init = 0.1,
-                    chains=2, iter=1000)
+
+## what is the difference from before?  can compare with github 
+## - improper lognormal prior on inc 
+## - exponential rather than gamma priors on lam
+## perhaps it hadn't worked well enough before given divergences 
+## Anyway this works with optimisation.  Smoothnesses fixed at values for IHD in nonhier
+##resnh %>% 
+##  filter(disease=="Ischemic heart disease", area=="Leeds", gender=="Male", grepl("lambda",var))
+
+db <- disbayes_hier(data=mhi,
+                    group = "area",
+                    gender = "gender",
+                    inc_num = "inc_num", inc_denom = "inc_denom",
+                    mort_num = "mort_num", mort_denom = "mort_denom",
+                    prev_num = "prev_num", prev_denom = "prev_denom",
+                    rem_num = if (hierrungdf$remission[i]) "rem_num" else NULL,
+                    rem_denom = if (hierrungdf$remission[i]) "rem_denom" else NULL,
+                    cf_model = hierrungdf$model[i],
+                    inc_model = "indep",
+                    inc_prior = c(1.1, 1), 
+                    scf_fixed = 2.65, 
+                    scfmale_fixed = 2.65,
+                    eqage = hierrundf$eqage[i], 
+                    nfold_int_guess = 5, nfold_int_upper =  50,
+                    nfold_slope_guess = 2, nfold_slope_upper =  20,
+                    #method="opt", hessian=TRUE, draws=1000, iter=10000, verbose=TRUE
+                    method="mcmc", refresh = 1, chains=nchains, iter=1000,
+                    stan_control=list(max_treedepth=15)
+)
+
 
 if (0){
+    ds <- sqrt(diag(-db$fit$hessian))
+    sort(ds)[1:10]
+    evals <- eigen(-db$fit$hessian)$values
+    names(ds)[evals < 0]
+    sqrt(diag(solve(-db$fit$hessian)))
+
   library(bayesplot) 
   mcmc_trace(db$fit,pars=c("sd_inter"), 
              np = nuts_params(db$fit))
@@ -41,7 +66,7 @@ if (0){
 res <- tidy(db) %>%
   mutate(disease=hierrungdf$disease[i])
 
-loo <- looi_disbayes_hier_gender(db) %>%
+loo <- looi_disbayes_hier(db) %>%
     mutate(disease=hierrungdf$disease[i])
 
 saveRDS(list(res=res,loo=loo), file= paste0("results_hier_gender/res", i, ".rds"))

@@ -196,7 +196,7 @@ trendplot <- trends %>%
 ## Perhaps because Oxfordshire is lower risk than ave
 ## but can't find any contemporary data on variations in incidence
 
-pdf("../write/trend_data.pdf", height=4, width=6)
+pdf("~/work/chronic/write/trend_data.pdf", height=4, width=6)
 
 trendplot %>% 
   mutate(age_gender = sprintf("%s,%s", agegroup, gender)) %>%
@@ -243,6 +243,7 @@ tryr <- rbind(trbackm, trbackf, tryr)
 ## learning opportunity for purrr 
 
 tryr_sm <- tryr %>% 
+  arrange(age, gender, year) %>% 
   group_by(gender, year) %>%
   nest() %>%
   mutate(mod = map(data, ~loess(p2017 ~ age, 
@@ -351,8 +352,6 @@ ggplot(oxmicfint, aes(x=year, y=cf, group=age, col=age)) +
 ## No data for after 2010. Could assume same as last year in Smolina
 # Could also extrapolate
 
-## eh don't bother mimicing BHF format, just use end format 
-
 smyjoin <- smcfy %>% 
   filter(year %in% 1999:2010) %>%
   mutate("ox_agefrom" = case_when(agefrom==30 ~ 45, 
@@ -405,7 +404,7 @@ cftrends <- rbind(smyjoin %>% filter(year %in% 2002:2010),
   arrange(agefrom, gender, year)
 
 ## Plot of absolute CF, excluding interpolated bit 
-pdf("../write/trendcf_data.pdf", height=4, width=6)
+pdf("~/work/chronic/write/trendcf_data.pdf", height=4, width=6)
 
 cftrendplot <- cftrends %>%
   filter(!(year %in% 1999:2001)) %>%
@@ -566,12 +565,13 @@ saveRDS(cftrends_female, file="cftrends_female_noextrap.rds")
 
 ## Data used in package and in analysis 
 cftrends <- cftryr_sm_sens %>% 
-    select(gender, age, year, p2017=p2017_sm) %>%
+    arrange(age, gender, year) %>% 
+    select(age, gender, year, p2017=p2017_sm) %>%
     mutate(outcome = "Case fatality") 
 
 ihdtrends <- rbind(inctrends, cftrends) 
 
-use_data(ihdtrends) 
+usethis::use_data(ihdtrends) 
 
 
 

@@ -1,34 +1,33 @@
 library(dplyr)
 library(tidyr)
 
-ihdbristol <- ihdengland %>% filter(location=="Bristol", sex=="Male")
+ihdbristol <- ihdengland %>% 
+  dplyr::filter(area=="Bristol", gender=="Male") %>%
+  mutate(mort_prob = mort_num/mort_denom,
+       mort_lower = plogis(qlogis(mort_prob)-1),
+       mort_upper = plogis(qlogis(mort_prob)+1))
 
-test_that("standard disbayes model",{
+test_that("standard disbayes model, MCMC",{
   dbres <- disbayes(dat = ihdbristol,
                     inc_num = "inc_num", inc_denom = "inc_denom",
                     prev_num = "prev_num", prev_denom = "prev_denom",
                     mort_num = "mort_num", mort_denom = "mort_denom",
-                    eqage = 40, loo=FALSE, algorithm="Fixed_param", chains=1, iter=100, iter_train = 100)
+                    eqage = 40, loo=FALSE, method="mcmc", algorithm="Fixed_param", 
+                    chains=1, iter=100)
   expect_s3_class(dbres, "disbayes")
 })
 
 test_that("data supplied as estimate and denominator",{
-  ihdbristol <- ihdbristol %>%
-    mutate(mort_prob = mort_num/mort_denom)
   dbres <- disbayes(dat = ihdbristol,
                     inc_num = "inc_num", inc_denom = "inc_denom",
                     prev_num = "prev_num", prev_denom = "prev_denom",
                     mort = "mort_prob", mort_denom = "mort_denom",
-                    eqage = 40, loo=FALSE, algorithm="Fixed_param", chains=1, iter=100, iter_train = 100)
+                    eqage = 40, loo=FALSE, method="mcmc", algorithm="Fixed_param", 
+                    chains=1, iter=100)
   expect_s3_class(dbres, "disbayes")
 })
 
 test_that("data supplied as estimate and credible limits",{
-  ihdbristol <- ihdbristol %>%
-    mutate(mort_prob = mort_num/mort_denom,
-           mort_lower = plogis(qlogis(mort_prob)-1),
-           mort_upper = plogis(qlogis(mort_prob)+1))
-  
   x <- with(ihdbristol, ci2num(mort_prob, mort_lower, mort_upper, denom0=1400))
   expect_equal(x$num[1], 0)
   expect_equal(x$denom[1], 1400)
@@ -37,7 +36,7 @@ test_that("data supplied as estimate and credible limits",{
                     inc_num = "inc_num", inc_denom = "inc_denom",
                     prev_num = "prev_num", prev_denom = "prev_denom",
                     mort = "mort_prob", mort_lower = "mort_lower", mort_upper="mort_upper",
-                    eqage = 40, loo=FALSE, algorithm="Fixed_param", chains=1, iter=100, iter_train = 100)
+                    eqage = 40, loo=FALSE, method="mcmc", algorithm="Fixed_param", chains=1, iter=100)
   expect_s3_class(dbres, "disbayes")
 })
 
@@ -57,9 +56,10 @@ test_that("increasing case fatality",{
                     inc_num = "inc_num", inc_denom = "inc_denom",
                     prev_num = "prev_num", prev_denom = "prev_denom",
                     mort_num = "mort_num", mort_denom = "mort_denom",
-                    increasing_cf = TRUE, 
+                    cf_model = "increasing", 
                     eqage = 40,
-                    chains = 1, iter_train = 100, iter=100, loo=FALSE, algorithm="Fixed_param")
+                    chains = 1, iter=100, loo=FALSE, 
+                    method="mcmc", algorithm="Fixed_param")
   expect_s3_class(dbres, "disbayes")
 })
 
@@ -68,26 +68,28 @@ test_that("constant case fatality",{
                     inc_num = "inc_num", inc_denom = "inc_denom",
                     prev_num = "prev_num", prev_denom = "prev_denom",
                     mort_num = "mort_num", mort_denom = "mort_denom",
-                    const_cf = TRUE, 
+                    cf_model = "const", 
                     eqage = 40,
-                    chains = 1, iter_train = 100, iter=100, loo=FALSE, algorithm="Fixed_param")
+                    chains = 1, iter=100, loo=FALSE, 
+                    method="mcmc", algorithm="Fixed_param")
   expect_s3_class(dbres, "disbayes")
 })
 
-test_that("smooth incidence", { 
-  dbres <- disbayes(dat = ihdbristol, inc = "inc", 
+test_that("unsmooth incidence", { 
+  dbres <- disbayes(dat = ihdbristol, 
                     inc_num = "inc_num", inc_denom = "inc_denom",
                     prev_num = "prev_num", prev_denom = "prev_denom",
                     mort_num = "mort_num", mort_denom = "mort_denom",
-                    smooth_inc = TRUE, 
-                    chains = 1, iter_train = 100, iter=100, loo=FALSE, algorithm="Fixed_param")
+                    inc_model = "indep", 
+                    chains = 1, iter=100, loo=FALSE, 
+                    method="mcmc", algorithm="Fixed_param")
   expect_s3_class(dbres, "disbayes")
 })
 
-test_that("remission", {
+#test_that("remission", {
   ## data not supplied 
-  ## data supplied 
-})
+  ### data supplied 
+#})
 
 test_that("errors in age structure", {
   ihdbristol$badage <- ihdbristol$age
@@ -136,11 +138,11 @@ test_that("disbayes model with trends",{
                     inc_num = "inc_num", inc_denom = "inc_denom",
                     prev_num = "prev_num", prev_denom = "prev_denom",
                     mort_num = "mort_num", mort_denom = "mort_denom",
-                    eqage = 40, loo=FALSE, algorithm="Fixed_param", 
-                    inc_trend_mult = trends_inc, 
-                    cf_trend_mult = trends_cf, 
-                    chains=1, iter=10, iter_train = 10)
-  expect_s3_class(dbres, "disbayes_trend")
+                    eqage = 40, loo=FALSE, method="mcmc", algorithm="Fixed_param", 
+                    inc_trend = trends_inc, 
+                    cf_trend = trends_cf, 
+                    chains=1, iter=10)
+  expect_s3_class(dbres, "disbayes")
 })
 
 
@@ -151,7 +153,7 @@ test_that("errors in trend data", {
              inc_num = "inc_num", inc_denom = "inc_denom",
              prev_num = "prev_num", prev_denom = "prev_denom",
              mort_num = "mort_num", mort_denom = "mort_denom",
-             inc_trend_mult = trendsbad),
+             inc_trend = trendsbad),
     "trend matrix of dimension")
   
   expect_error(
@@ -159,7 +161,7 @@ test_that("errors in trend data", {
              inc_num = "inc_num", inc_denom = "inc_denom",
              prev_num = "prev_num", prev_denom = "prev_denom",
              mort_num = "mort_num", mort_denom = "mort_denom",
-             inc_trend_mult = "wibble"),
+             inc_trend = "wibble"),
     "trends data should be")
   
 })

@@ -8,3 +8,7 @@ vignettes/render.r
 src/*
 dbh.rds
 vignettes/dbh.rds
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^\.github$

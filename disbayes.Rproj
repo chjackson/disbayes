@@ -18,3 +18,4 @@ PackageInstallArgs: --no-multiarch --with-keep.source
 PackageBuildArgs: --no-build-vignettes
 PackageBuildBinaryArgs: --no-build-vignettes
 PackageCheckArgs: --no-install --ignore-vignettes
+PackageRoxygenize: rd,collate,namespace

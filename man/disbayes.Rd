@@ -27,20 +27,27 @@ disbayes(
   rem_lower = NULL,
   rem_upper = NULL,
   age = "age",
-  smooth_cf = TRUE,
-  increasing_cf = FALSE,
-  const_cf = FALSE,
-  smooth_inc = FALSE,
+  cf_model = "smooth",
+  inc_model = "smooth",
+  rem_model = "const",
+  prev_zero = FALSE,
   inc_trend = NULL,
   cf_trend = NULL,
-  remission = FALSE,
   cf_init = 0.01,
   eqage = 30,
+  eqagehi = NULL,
   loo = TRUE,
-  sprior = 1,
+  sprior = c(1, 1),
+  scf_fixed = NULL,
+  sinc_fixed = NULL,
+  rem_prior = c(1.1, 1),
+  inc_prior = c(2, 0.1),
+  cf_prior = c(2, 0.1),
+  method = "opt",
+  draws = 1000,
   iter = 10000,
-  iter_train = 1000,
-  s_opts = NULL,
+  stan_control = NULL,
+  bias_model = NULL,
   ...
 )
 }
@@ -53,8 +60,8 @@ disbayes(
   (1) numerator and denominator (2) estimate and denominator (3) estimate
   with lower and upper credible limits
 
-  For estimates based on registry data assumed to cover the whole population, then
-  the denominator will be the population size.}
+  For estimates based on registry data assumed to cover the whole
+  population, then the denominator will be the population size.}
 
 \item{inc_num}{Numerator for the incidence data, assumed to represent the
 observed number of new cases within a year among a population of size
@@ -100,7 +107,11 @@ register)}
 
 \item{mort_upper}{Upper credible limit for the mortality estimate}
 
-\item{rem_num}{Numerator for the estimate of the remission rate}
+\item{rem_num}{Numerator for the estimate of the remission rate.  Remission
+data should be supplied if remission is permitted in the model, either as
+a numerator and denominator or as an estimate and lower credible interval.
+Conversely, if no remission data are supplied, then remission is assumed
+to be impossible.}
 
 \item{rem_denom}{Denominator for the estimate of the remission rate}
 
@@ -112,104 +123,187 @@ register)}
 
 \item{age}{Variable in the data indicating the year of age}
 
-\item{smooth_cf}{Case fatality is modelled as a smooth function of age,
-  using a spline.  If \code{smooth_cf=FALSE} then a priori the case
-  fatalities are assumed to be independent for each year of age.
+\item{cf_model}{Model for how case fatality varies with age.
 
-  The unsmoothed model is useful for determining how much information is in
+\code{"smooth"} (the default). Case fatality is modelled as a smooth function of age,
+  using a spline.
+
+\code{"indep"} Case fatalities are estimated independently for each year of age.  This may be
+useful for determining how much information is in
   the data. That is, if the posterior from this model is identical to the
   prior for a certain age, then there is no information in the data alone
   about case fatality at that age, indicating that some other structural
   assumption (such as a smooth function of age) or external data are equired
-  to give more precise estimates.}
+  to give more precise estimates.
 
-\item{increasing_cf}{Case fatality is modelled as a smooth and increasing
-function of age.}
+\code{"increasing"} Case fatality is modelled as a smooth and increasing
+  function of age.
 
-\item{const_cf}{Case fatality is modelled as constant with age.}
+\code{"const"} Case fatality is modelled as constant with age.}
 
-\item{smooth_inc}{Incidence is modelled as a smooth function of age.}
+\item{inc_model}{Model for how incidence varies with age.
+
+\code{"smooth"} (the default). Incidence is modelled as a smooth spline function of age.
+
+\code{"indep"} Incidence rates for each year of age are estimated independently.}
+
+\item{rem_model}{Model for how remission rates vary with age, which are typically
+less well-informed by data, compared to incidence and case fatality. 
+
+\code{"const"} (the default). Constant remission rate over all ages.
+
+\code{"indep"} Remission rates estimated independently over all ages.}
+
+\item{prev_zero}{If \code{TRUE}, attempt to estimate prevalence at age zero
+from the data, as part of the Bayesian model, even if the observed prevalence is zero.
+Otherwise (the default) this is assumed to be zero if the count is zero, and estimated
+otherwise.}
 
 \item{inc_trend}{Matrix of constants representing trends in incidence
-through calendar time by year of age.  There are \code{nage} rows and
-\code{nage} columns, where \code{nage} is the number of years of age
-represented in the data. The entry in the ith row and jth column
-represents the ratio between the incidence \code{nage+j} years prior to
-the year of the data, year, and the incidence in the year of the data, for
-a person i years of age. For example, if \code{nage=100} and the data
-refer to the year 2017, then the first column refers to the year 1918 and
-the last (100th) column refers to 2017.  The last column should be all 1,
-unless the current data are supposed to be biased.
+  through calendar time by year of age.  There are \code{nage} rows and
+  \code{nage} columns, where \code{nage} is the number of years of age
+  represented in the data. The entry in the ith row and jth column
+  represents the ratio between the incidence \code{nage+j} years prior to
+  the year of the data, year, and the incidence in the year of the data, for
+  a person i years of age. For example, if \code{nage=100} and the data
+  refer to the year 2017, then the first column refers to the year 1918 and
+  the last (100th) column refers to 2017.  The last column should be all 1,
+  unless the current data are supposed to be biased.
 
-To produce this format from a long data frame,  
-filter to the appropriate outcome and subgroup, and use \code{\link[tidyr]{pivot_wider}},
-e.g. 
+  To produce this format from a long data frame, filter to the appropriate
+  outcome and subgroup, and use \code{\link[tidyr]{pivot_wider}}, e.g.
 
-```
-trends <- ihdtrends %>% 
- filter(outcome=="Incidence", gender=="Female") %>%
- pivot_wider(names_from="year", values_from="p2017") %>%
- select(-age, -gender, -outcome) %>% 
- as.matrix()
-```}
+  \code{trends <- ihdtrends %>% 
+           filter(outcome=="Incidence", gender=="Female") %>%
+            pivot_wider(names_from="year", values_from="p2017") %>% 
+            select(-age, -gender, -outcome) %>% 
+            as.matrix()}}
 
-\item{cf_trend}{Matrix of constants representing trends in case
-fatality through calendar time by year of age, in the same format as
+\item{cf_trend}{Matrix of constants representing trends in case fatality
+through calendar time by year of age, in the same format as
 \code{inc_trend}.}
-
-\item{remission}{Is remission from the disease permitted in the model
-\code{TRUE} or \code{FALSE}.  If \code{TRUE}, then data must be provided, as
-for incidence, mortality and prevalence.}
 
 \item{cf_init}{Initial guess at a typical case fatality value, for an
 average age.}
 
-\item{eqage}{Case fatality and incidence are assumed to be equal for all ages
-below this age when using the smoothed model}
+\item{eqage}{Case fatalities (and incidences) are assumed to be equal for
+all ages below this age, inclusive, when using the smoothed model.}
 
-\item{loo}{Compute leave-one-out cross validation statistics.}
+\item{eqagehi}{Case fatalities (and incidences) are assumed to be equal for
+all ages above this age, inclusive, when using the smoothed model.}
 
-\item{sprior}{Rate of the exponential prior distribution used to penalise
-the coefficients of the spline model.  The default of 1 should adapt
-appropriately to the data, but higher values give stronger smoothing,
-or lower values give weaker smoothing,  if required.}
+\item{loo}{Compute leave-one-out cross validation statistics (for \code{method="mcmc"} only).}
 
-\item{iter}{Number of MCMC iterations to use for the smoothed model fit.}
+\item{sprior}{Vector of two elements, giving the rates of the exponential prior distributions used to penalise
+the coefficients of the spline model.  The first refers to the spline model for incidence, the second for case fatality.  The default of 1 should adapt
+appropriately to the data, but higher values give stronger smoothing, or
+lower values give weaker smoothing,  if required.}
 
-\item{iter_train}{Number of MCMC iterations to use for the unsmoothed (training)
-model fit.}
+\item{scf_fixed}{If this is set to a number, then the parameter determining the smoothness of case fatality with age (i.e. the standard deviation of the spline basis coefficients) is fixed at this number.  If \code{scf_fixed=TRUE}, then an "empirical Bayes" method is used, where the posterior mode of this parameter is determined (using the prior defined by \code{sprior}), and the model is fitted again with the parameter fixed at this mode.  If \code{scf_fixed=NULL} (the default) then a "full Bayes" method is used where the full posterior of this parameter is estimated.   NOT IMPLEMENTED YET FOR HIERARCHICAL MODELS}
 
-\item{s_opts}{List of arguments to supply to the function \code{\link[mgcv]{s}}
-for constructing a spline basis, e.g. \code{list(bs="cr")} to switch from the
-default "thin plate" spline to a cubic spline.  Currently not implemented!}
+\item{sinc_fixed}{As \code{scf_fixed}, but for incidence instead of case fatality.}
 
-\item{...}{Further arguments passed to \pkg{rstan}{sampling} to control
-running of Stan, that are applied to both the "training" (unsmoothed) model
-fit and the smoothed model fit.}
+\item{rem_prior}{Vector of two elements giving the Gamma shape and rate parameters of the
+prior for the remission rate, used in both \code{rem_model="const"} and \code{rem_model="fixed"}.}
+
+\item{inc_prior}{Vector of two elements giving the Gamma shape and rate parameters of the
+prior for the incidence rate.  Only used if \code{inc_model="indep"}, for each age-specific rate.}
+
+\item{cf_prior}{Vector of two elements giving the Gamma shape and rate parameters of the
+prior for the case fatality rate.  Only used if \code{cf_model="indep"}, for each age-specific rate,
+and for the rate at \code{eqage} in \code{cf_model="increasing"}.}
+
+\item{method}{String indicating the inference method, defaulting to
+  \code{"opt"}.
+
+  If \code{method="mcmc"} then a sample from the posterior is drawn using Markov Chain Monte Carlo
+  sampling, via \pkg{rstan}'s \code{\link[rstan:stanmodel-method-sampling]{rstan::sampling()}} function.   This is the most
+  accurate but the slowest method.
+
+  If \code{method="opt"}, then instead of an MCMC sample from the posterior,
+  `disbayes` returns the posterior mode calculated using optimisation, via
+  \pkg{rstan}'s \code{\link[rstan:stanmodel-method-optimizing]{rstan::optimizing()}} function.
+  A sample from a normal approximation to the (real-line-transformed)
+  posterior distribution is drawn in order to obtain credible intervals.
+
+  If the optimisation fails to converge (non-zero return code), try increasing the
+  number of iterations from the default 1000, e.g. `disbayes(...,
+  iter=10000, ...)`, or changing the algorithm to `disbayes(...,
+  algorithm="Newton", ...)`.
+
+  If there is an error message that mentions `chol`, then
+  the computed Hessian matrix is not positive definite at the reported optimum, hence credible intervals
+  cannot be computed.
+  This can occur either because of numerical error in computation of the Hessian, or because the
+  reported optimum is wrong.  If you are willing to believe
+  the optimum and live without credible intervals, then set \code{draws=0} to skip
+  computation of the Hessian.   To examine the problematic Hessian, set
+  \code{hessian=TRUE,draws=0}, then look at the \code{$fit$hessian} component of the
+  `disbayes` return object.   If it can be inverted, do \code{sqrt(diag(solve()))} on the Hessian, and
+check for \code{NaN}s, indicating the problematic parameters. 
+Otherwise, diagonal entries of the Hessian matrix that are very small
+  may indicate parameters that are poorly identified from the data, leading to computational
+  problems. 
+
+  If \code{method="vb"}, then variational Bayes methods are used, via \pkg{rstan}'s
+  \code{\link[rstan:stanmodel-method-vb]{rstan::vb()}} function.  This is labelled as "experimental" by
+  \pkg{rstan}.  It might give a better approximation to the posterior
+  than \code{method="opt"}, but has not been investigated much for `disbayes` models.}
+
+\item{draws}{Number of draws from the normal approximation to the posterior
+when using \code{method="opt"}.}
+
+\item{iter}{Number of iterations for MCMC sampling, or maximum number of iterations for optimization.}
+
+\item{stan_control}{(\code{method="mcmc"} only). List of options supplied as the \code{control} argument
+to \code{\link[rstan:stanmodel-method-sampling]{rstan::sampling()}} in \pkg{rstan} for the main model fit.}
+
+\item{bias_model}{Experimental model for bias in the incidence estimates due
+  to conflicting information between the different data sources.  If
+  \code{bias_model=NULL} (the default) no bias is assumed, and all data are
+  assumed to be generated from the same age-specific incidences.
+
+  Otherwise there are assumed to be two alternative curves of incidence by
+  age (denoted 2 and 1) where curve 2 is related to curve 1 via a constant
+  hazard ratio that is estimated from the data, given a standard normal
+  prior on the log scale.  Three distinct curves would not be identifiable
+  from the data. 
+
+  If \code{bias_model="inc"} then the incidence data is assumed to be
+  generated from curve 2, and the prevalence and mortality data from curve
+  1.
+
+  \code{bias_model="prev"} then the prevalence data is generated from curve
+  2, and the incidence and mortality data from curve 1.
+
+  If \code{bias_model="incprev"} then both incidence and prevalence data are
+  generated from curve 2, and the mortality data from curve 1.}
+
+\item{...}{Further arguments passed to \code{\link[rstan:stanmodel-method-sampling]{rstan::sampling()}} to
+control MCMC sampling, or \code{\link[rstan:stanmodel-method-optimizing]{rstan::optimizing()}} to control
+optimisation, in Stan.}
 }
 \value{
 A list with the following components
 
-\code{fits}: An object containing posterior samples from the fitted model,
-in the \code{stanfit} format returned by the \code{\link[rstan]{stan}}
-function in the \pkg{rstan} package.
+  \code{fit}: An object containing posterior samples from the fitted model,
+  in the \code{stanfit} format returned by the \code{\link[rstan]{stan}}
+  function in the \pkg{rstan} package.
 
-\code{fitu}: Another \code{stanfit} object containing the equivalent "unsmoothed" model results
-where case fatality and incidence are given independent priors per year of age.
+  \code{loo}: A list of objects containing leave-one-out cross-validation
+  statistics.  There is one list component for each of the observed outcomes
+  informing the model: incidence, prevalence, mortality and remission.   The
+  component for each outcome is an object in the form returned by the
+  \code{\link[loo]{loo}} function in the \pkg{loo} package. This can be used
+  to assess how well the model predicts the data for that outcome, compared
+  to other models.  The \code{\link{looi_disbayes}} function can be used to extract from this
+  list a single tidy data frame with one row per observation.
 
-\code{loos}: A list of objects containing leave-one-out cross-validation statistics.  There is
-one list component for each of the observed outcomes informing the model: incidence, prevalence,
-mortality and remission.   The component for each outcome is an object
-in the form returned by the \code{\link[loo]{loo}} function in the \pkg{loo} package. This can
-be used to assess how well the model predicts the data for that outcome, compared to other models. 
+  \code{dat}: A list containing the input data in the form of numerators
+  and denominators. 
 
-The \code{\link{looi_disbayes}} function can be used to extract from this list
-a single tidy data frame with one row per observation. 
-
-\code{loou}: Equivalent cross-validation statistics for the unsmoothed model. 
-
-Use the \code{\link{tidy.disbayes}} method to return summary statistics from the
-fitted models.
+  Use the \code{\link{tidy.disbayes}} method to return summary statistics
+  from the fitted models, simply by calling \code{tidy()} on the fitted model.
 }
 \description{
 Estimates a three-state disease model given data on incidence, prevalence

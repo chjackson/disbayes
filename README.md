@@ -7,23 +7,27 @@ The development repository for the [disbayes](http://cran.r-project.org/package=
 
   - published information on age-specific mortality and at least one of incidence or prevalence
 
-  - some indication of the uncertainty associated with the published estimates - that could be a credible interval, or estimates given as a numerator and a denominator.
+  - some indication of the uncertainty associated with the published estimates, either as a credible interval, or by expressing the estimate as a number of cases with associated denominator. 
+  
+* The underlying model is a three-state multi-state model with states given by no disease, disease and death.  Remission from the disease is optional.
 
-* The underlying model is a three-state multi-state model with states given by no disease, disease and death, and assuming no remission from the disease.
+* Case fatality and incidence can be modelled as smooth functions of age, through a spline model.   Remission is either zero, or estimated, assuming either constant remission rate or independent remission for each age. 
 
-* Case fatality is assumed to be a smooth function of age, through a spline model. 
+* Two alternative estimation methods can be used, both based on the [Stan](http://mc-stan.org) software.
 
-* The following more advanced models are provided, which are all computationally intensive:
+	- exact point estimation using optimisation to obtain the posterior mode, with credible intervals based on an approximation to the Bayesian posterior.  This is generally instant to compute, but the uncertainty quantification is approximate. 
 
-  - hierarchical models for data by age and area, where rates are related by area
+	- full Bayesian estimation using Markov Chain Monte Carlo.  This gives more accurate uncertainty quantification but is computationally intensive. 
+
+* The following more advanced models are provided, which are all more computationally intensive:
+
+  - hierarchical models for data by age and area, which share information between areas to strengthen estimates from areas with less data
   
   - hierarchical models for data by age, area and gender, where the effect of gender is assumed to be the same for every area
   
-  - models for data by age, with assumed trends in disease incidence or case fatality through calendar time
+  - models with assumed trends in disease incidence or case fatality through calendar time, where trends can be age-specific (non-hierarchical models only)
 
-* Fully Bayesian estimation is used, based on the [Stan](http://mc-stan.org) software.
-
-* It is inspired by [DisMod II](https://www.epigear.com/index_files/dismod_ii.html) and related packages used for the Global Burden of Disease studies, except that it follows the formal, fully Bayesian framework described in the [book by Flaxman](http://www.combinedacademic.co.uk/integrated-meta-regression-framework-for-descriptive-epidemiology) and modified and extended in the paper _Bayesian multi-state modelling of incomplete chronic disease epidemiology data for health impact simulation models_ (Jackson et al., in progress). 
+* It is inspired by the [DisMod II](https://www.epigear.com/index_files/dismod_ii.html), and [DisMod-MR](https://github.com/ihmeuw/dismod_mr) packages used for the Global Burden of Disease studies.   It follows the formal, fully Bayesian framework described in the [book by Flaxman](http://www.combinedacademic.co.uk/integrated-meta-regression-framework-for-descriptive-epidemiology) and modified and extended in the paper _Bayesian multi-state modelling of incomplete chronic disease epidemiology data for health impact simulation models_ (Jackson et al., in progress). 
 
 * Source code is at the [GitHub repository](https://github.com/chjackson/disbayes)
 

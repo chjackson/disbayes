@@ -9,9 +9,13 @@ Keep this nice and tidy.
 
 setwd("~/work/chronic/disbayes/metahit")
 source("paper_analyses_header.r")
-library(directlabels) # this is nice but do i even use it ? 
+source("read_model_results.r")
 
 ```
+
+
+
+
 
 
 # Data summary 
@@ -20,35 +24,15 @@ Raw point estimates of mort, inc and prev.   Just women for now.  Curves compare
 
 ```{r,eval=FALSE}
 
-gbdplot <- gbd %>% 
-  filter(cause %in% diseases, 
-         location %in% cityregions) %>%
-  mutate(mort_prob = num_mort/denom_mort,
-         mort_lower = qbeta(0.025, num_mort+0.5, denom_mort+0.5), 
-         mort_upper = qbeta(0.975, num_mort+0.5, denom_mort+0.5), 
-         prev_prob = num_prev/denom_prev,
-         prev_lower = qbeta(0.025, num_prev+0.5, denom_prev+0.5), 
-         prev_upper = qbeta(0.975, num_prev+0.5, denom_prev+0.5), 
-         inc_prob = num_inc/denom_inc,
-         inc_lower = qbeta(0.025, num_inc+0.5, denom_inc+0.5), 
-         inc_upper = qbeta(0.975, num_inc+0.5, denom_inc+0.5), 
-         location = fct_recode(location, 
-                               "North East"="North East (city region)",
-                               "West Midlands"="West Midlands (city region)"),
-         cause = fct_recode(cause, "Dementia" = "Alzheimer's disease and other dementias",
-                            "Lung cancer" = "Tracheal, bronchus, and lung cancer",
-                            "COPD" = "Chronic obstructive pulmonary disease"),
-         cause = factor(cause, levels = c("Ischemic heart disease", "Stroke", "Dementia",
-                                          "COPD", "Breast cancer", "Lung cancer", 
-                                          "Colon and rectum cancer","Stomach cancer",
-                                          "Uterine cancer")))
-gbdplotf <- gbdplot %>% filter(sex=="Female")
-gbdplotm <- gbdplot %>% filter(sex=="Male", cause != "Breast cancer")
+foo <- function(x){
+  cat(deparse(substitute(x)))
+}
 
 ht <- 3
-pdf("../write/mort_data.pdf", height=ht)
-ggplot(gbdplotf, aes(x=ageyr, y=mort_prob, col=location, group=location)) + 
-  facet_wrap(~cause, ncol=3, scales="free_y") + 
+pdf("../../write/mort_data.pdf", height=ht)
+gbdplot$areagender <- interaction(gbdplot$area, gbdplot$gender)
+ggplot(gbdplot, aes(x=age, y=mort_prob, col=area, lty=gender, group=areagender)) + 
+  facet_wrap(~disease, ncol=3, scales="free_y") + 
   coord_cartesian(xlim = c(50,100)) +
   ylab("Annual mortality probability") + 
   xlab("Year of age") +
@@ -60,9 +44,9 @@ ggplot(gbdplotf, aes(x=ageyr, y=mort_prob, col=location, group=location)) +
         legend.position = "none")
 dev.off()
 
-pdf("../write/inc_data.pdf", height=ht)
-ggplot(gbdplotf, aes(x=ageyr, y=inc_prob, col=location, group=location)) + 
-  facet_wrap(~cause, ncol=3, scales="free_y") + 
+pdf("../../write/inc_data.pdf", height=ht)
+ggplot(gbdplot, aes(x=age, y=inc_prob, col=area, lty=gender, group=areagender)) + 
+  facet_wrap(~disease, ncol=3, scales="free_y") + 
   coord_cartesian(xlim = c(50,100)) +
   ylab("Annual incidence probability") + 
   xlab("Year of age") +
@@ -74,216 +58,82 @@ ggplot(gbdplotf, aes(x=ageyr, y=inc_prob, col=location, group=location)) +
         legend.position = "none")
 dev.off()
 
-pdf("../write/prev_data.pdf", height=ht)
-ggplot(gbdplotf, aes(x=ageyr, y=prev_prob, col=location, group=location)) + 
-  facet_wrap(~cause, ncol=3, scales="free_y") + 
+pdf("../../write/prev_data.pdf", height=ht)
+ggplot(gbdplot, aes(x=age, y=prev_prob, col=area, lty=gender, group=areagender)) + 
+  facet_wrap(~disease, ncol=3, scales="free_y") + 
   coord_cartesian(xlim = c(50,100)) +
   ylab("Prevalence probability") + 
   xlab("Year of age") +
   geom_ribbon(aes(ymin=prev_lower, ymax=prev_upper), fill="gray80", col="gray80") +
   geom_line() + 
-  labs(col = "City region") +
-  theme_bw() + 
-  theme(strip.text.x = element_text(size = 7.5))
-dev.off()
-
-
-pdf("../write/mort_datam.pdf", height=ht)
-ggplot(gbdplotm, aes(x=ageyr, y=mort_prob, col=location, group=location)) + 
-  facet_wrap(~cause, ncol=3, scales="free_y") + 
-  coord_cartesian(xlim = c(50,100)) +
-  ylab("Annual mortality probability") + 
-  xlab("Year of age") +
-  geom_ribbon(aes(ymin=mort_lower, ymax=mort_upper), fill="gray80", col="gray80") +
-  geom_line() + 
-  labs(col = "City region") +
+  labs(col = "City region", lty="") +
   theme_bw() + 
   theme(strip.text.x = element_text(size = 7.5),
-        legend.position = "none")
+        legend.spacing.y = unit(0.1, "cm"))
 dev.off()
-
-pdf("../write/inc_datam.pdf", height=ht)
-ggplot(gbdplotm, aes(x=ageyr, y=inc_prob, col=location, group=location)) + 
-  facet_wrap(~cause, ncol=3, scales="free_y") + 
-  coord_cartesian(xlim = c(50,100)) +
-  ylab("Annual incidence probability") + 
-  xlab("Year of age") +
-  geom_ribbon(aes(ymin=inc_lower, ymax=inc_upper), fill="gray80", col="gray80") +
-  geom_line() + 
-  labs(col = "City region") +
-  theme_bw() + 
-  theme(strip.text.x = element_text(size = 7.5),
-        legend.position = "none")
-dev.off()
-
-pdf("../write/prev_datam.pdf", height=ht)
-ggplot(gbdplotm, aes(x=ageyr, y=prev_prob, col=location, group=location)) + 
-  facet_wrap(~cause, ncol=3, scales="free_y") + 
-  coord_cartesian(xlim = c(50,100)) +
-  ylab("Prevalence probability") + 
-  xlab("Year of age") +
-  geom_ribbon(aes(ymin=prev_lower, ymax=prev_upper), fill="gray80", col="gray80") +
-  geom_line() + 
-  labs(col = "City region") +
-  theme_bw() + 
-  theme(strip.text.x = element_text(size = 7.5))
-dev.off()
-
-
-
-
-
-
 
 
 ```
 
 
-# Run the Bayesian modelling analyses 
 
-```{r,eval=FALSE}
-# These are done on a cluster using SLURM so we don't source these files 
-# source("paper_analyses_nonhier.r")
-# source("paper_analyses_hier.r")
-# source("paper_analyses_hier_gender.r")
-```
-
-
-
-
-
-# Read and join all model results 
-
-
-```{r}
-reslist <- loolist <- vector(nrow(rundf), mode="list")
-for (i in 1:nrow(rundf)){
-  fname <- sprintf("results_nonhier/res%s.rds",i)
-  if (file.exists(fname)) {
-    resi <- readRDS(fname)
-    reslist[[i]] <- resi$res
-    loolist[[i]] <- resi$loo
-  }
-}
-
-dput(as.numeric(which(sapply(reslist, is.null)))) # which ones didn't work due to tmpfile conflicts
-
-resnh <- do.call("rbind", reslist) 
-resns <- resnh %>% 
-  filter(model=="unsmoothed")
-resnh <- resnh %>%
-  filter(model=="smoothed") %>% 
-  mutate(model="Independent areas")
-loonh <- do.call("rbind", loolist) %>%
-  mutate(model="Independent areas")
-
-resi <- readRDS("results_nonhier/res_eng_utrc_female.rds")
-res_utrc <- resi$res; loo_utrc <- resi$loo
-resi <- readRDS("results_nonhier/res_eng_stmc_male.rds")
-res_stmc_m <- resi$res; loo_stmc_m <- resi$loo
-resi <- readRDS("results_nonhier/res_eng_stmc_female.rds")
-res_stmc_f <- resi$res; loo_stmc_f <- resi$loo
-resnat <- rbind(res_utrc, res_stmc_m, res_stmc_f) %>%
-  filter(model=="smoothed") %>% 
-  mutate(model="National")
-resnh <- resnh %>% 
-  dplyr::filter(!(disease %in% c("Stomach cancer", "Uterine cancer"))) %>%
-  full_join(resnat)
-
-loonat <- rbind(loo_utrc, loo_stmc_m, loo_stmc_f) %>%
-  mutate(model="National")
-loonh <- loonh %>% 
-  dplyr::filter(!(disease %in% c("Stomach cancer", "Uterine cancer"))) %>%
-  full_join(loonat)
-
-res %>% filter(disease=="Uterine cancer", var=="cf", between(age, 58, 70))
-res_utrc %>% filter(disease=="Uterine cancer", var=="cf", between(age, 90, 100))
-## Smoothed hasn't worked 
-
-reslist <- loolist <- vector(nrow(hierrundf), mode="list")
-for (i in setdiff(1:nrow(hierrundf), c())){
-  resi <- readRDS(sprintf("results_hier/res%s.rds",i))
-  reslist[[i]] <- resi[[1]]
-  loolist[[i]] <- resi[[2]]
-}
-resh <- do.call("rbind", reslist)
-resh$model <- "Hierarchical"
-resh$area <- factor(as.character(unique(gbd$location))[as.numeric(resh$area)])  # TODO will not be needed if disbayes_hier returns original factor levels for areas instead of mucking with codes
-looh <- do.call("rbind", loolist) %>%
-  mutate(area = factor(area, labels=areas),
-         model = "Hierarchical")
-
-reslist <- loolist <- vector(nrow(hierrungdf), mode="list")
-for (i in setdiff(1:nrow(hierrungdf), 7)){ # exclude stomach cancer
-  resi <- readRDS(sprintf("results_hier_gender/res%s.rds",i))
-  reslist[[i]] <- resi[[1]]
-  loolist[[i]] <- resi[[2]]
-}
-resg <- do.call("rbind", reslist) %>%
-  mutate(gender = fct_recode(gender, "Female"="1", "Male"="2"),
-         model = "Hierarchical joint gender",
-         area = factor(as.character(unique(gbd$location))[as.numeric(area)])
-  )
-loog <- do.call("rbind", loolist) %>%
-  mutate(area = factor(area, labels=areas),
-         model = "Hierarchical joint gender",
-         gender = factor(gender, labels=genders))
-
-
-reslist <- vector(nrow(trendrundf), mode="list")
-for (i in setdiff(1:nrow(trendrundf), c(2))){
-  load(sprintf("results_trend/res%s.rda",i))  
-  reslist[[i]] <- res
-}
-
-restr <- do.call("rbind", reslist)
-restr$model <- "Time trends"
-
-disease_shorten <- c("Dementia" = "Alzheimer's disease and other dementias",
-                     "Lung cancer" = "Tracheal, bronchus, and lung cancer",
-                     "COPD" = "Chronic obstructive pulmonary disease")
-disease_order <- c("Ischemic heart disease", "Stroke", "Dementia", "COPD", "Breast cancer", "Lung cancer", 
-                   "Colon and rectum cancer","Stomach cancer","Uterine cancer")
-
-resall <- full_join(resnh, resh) %>% 
-  full_join(resg) %>%  # remove after new run
-  full_join(restr) %>%
-  mutate(disease = fct_recode(disease, !!!disease_shorten),
-         disease = factor(disease, levels = disease_order),
-         year = if_else(model == "Time trends", year + 1917, 2017))
-
-looall <- full_join(loonh, looh) %>%
-  full_join(loog) %>%
-  mutate(disease = fct_recode(disease, !!!disease_shorten),
-         disease = factor(disease, levels = disease_order))
-         
-
-```
-
-
-# Independent areas
+# Independent areas 
 
 * Results from fitting disbayes model by disease, gender and area separately
 
+* Stomach cancer and uterine cancer are done using national data. 
 
-```{r}
+```{r,eval=FALSE}
 
-resnh %>% filter(disease == "Stomach cancer", var=="cf", area=="Bristol", gender=="Female") 
+## Convergence checks.   All OK with 5000 samples and the occasional model simplification
+resnc <- resnh %>% filter(Rhat > 1.05)
+table(resnc$disease, resnc$area, resnc$gender)
 
-## Convergence checks.  
-## Hasn't converged for stomach and uterine cancer, in areas where there were no deaths or small numbers of deaths.
-## We use national data for these instead. 
-## What's happened now for stroke? 
 
-resnc <- resnh %>% filter(Rhat > 2) 
-resnc <- resnh %>% filter(Rhat > 1.2) 
-resnc <- resnh %>% filter(Rhat > 1.1) 
-resnc <- resnh %>% filter(Rhat > 1.05) 
-table(resnc$disease, resnc$gender)
-table(resnc$disease, resnc$gender, resnc$area)["Stomach cancer",,]
-gbd %>% filter(location=="Bristol", cause=="Uterine cancer") %>% select(ageyr, num_mort, num_inc, num_rem)  # No deaths. 
-gbd %>% filter(cause=="Uterine cancer", location %in% cityregions) %>% pull(num_mort) %>% sum
-gbd %>% filter(cause=="Uterine cancer", location %in% cityregions) %>% pull(num_inc) %>% sum
+## Compare modal approx with posterior 
+## Page of plots for a single area and gender.  Disease variation more important than area/gender variation  
+## stmc, utrc use national point estimates 
+## What are the current settings used for these? 
+
+resall %>% 
+  filter(var=="cf", disease=="Dementia", gender=="Female", 
+         area=="Bristol", between(age, 70, 90), model=="Independent areas")
+
+resoptunc <- readRDS("resoptunc_nonhier.rds") %>% 
+  filter(!disease %in% c("Stomach cancer","Uterine cancer"))
+resoptnat <- readRDS("resopt_nat.rds")
+resoptunccf <- resoptunc %>%
+  full_join(resoptnat) %>% 
+  filter(var=="cf") %>%
+  mutate(p50 = 1 - exp(-`par`),
+         plow = 1 - exp(-`2.5%`),
+         pupp = 1 - exp(-`97.5%`)) %>%
+  filter(area=="Bristol" | area=="England", gender=="Female") %>%
+  mutate(disease = fct_recode(disease, !!!disease_shorten),
+           disease = factor(disease, levels = disease_order)) %>%
+  filter(age %in% c(70, 75, 80, 85, 90)) %>%
+  mutate(Algorithm = "Mode approximation")
+
+pdf("../../write/opt_compare.pdf")
+
+resp <- resall %>% 
+  dplyr::filter(model %in% c("Independent areas","National"), var=="cf") %>%
+  dplyr::filter(area=="Bristol" | (area=="England" & model=="National"), gender=="Female") %>%
+  mutate(Algorithm="MCMC") %>%
+  full_join(resoptunccf)
+resp %>%
+  filter(age %in% c(70, 75, 80, 85, 90)) %>%
+  mutate(par = 1 - exp(-`50%`),
+         plow = 1 - exp(-`2.5%`),
+         pupp = 1 - exp(-`97.5%`)) %>%
+  ggplot(aes(x=age, y=par, col=algorithm, lty=algorithm)) + 
+  geom_errorbar(aes(ymin=plow, ymax=pupp), width=1.5,
+              position=position_dodge(width=2), lwd=1.3) +
+  geom_point(position=position_dodge(width=2), size=1.3) + 
+  facet_wrap(vars(disease), ncol=2, scales="free_y") + 
+  xlab("Age (years)") + ylab("Case fatality probability")
+
+dev.off()
 
 
 
@@ -315,26 +165,7 @@ grid::grid.draw(grob)
 
 dev.off()
 
-
-#  TODO  more investigation of results for tbalc, carc 
-## where theres between area var and unc 
-## Lung cancer - lots of BAV. CARC less so. 
-## What to we get from hier model in each case? 
-
-example_age <- 90
-resall %>% 
-  dplyr::filter(model %in% c("Independent areas"), var=="cf",
-                disease == "Lung cancer", gender=="Male",age==example_age) %>%
-ggplot(aes(x=`50%`, y=area, col=model)) +
-    coord_cartesian() +
-    geom_point(position=ggstance::position_dodgev(height=0.4)) +
-    geom_errorbarh(aes(xmin=`2.5%`, xmax=`97.5%`),
-                   position=ggstance::position_dodgev(height=0.4)) +
-    xlab(sprintf("Case fatality for age %s", example_age) )
-
-
 ```
-
 
 
 
@@ -343,27 +174,28 @@ ggplot(aes(x=`50%`, y=area, col=model)) +
 
 ```{r,cache=TRUE}
 
-## convergence checks. look at Rhat
-## i=16 only one with divergent- utrc - we're not using this model anyway
-## stomach cancer is only one that hasn't converged 
+## UTRC doesn't converge, so we use the empirical Bayes results 
 
-summary(resh$Rhat) 
-resh %>% filter(gender=="Male", disease=="Stomach cancer", var=="cf", age>60, age<70) 
+resh %>%
+  filter(disease=="Stomach cancer", gender=="Male", var=="cf") %>%
+  ggplot(aes(x=age, y=`50%`, col=area, group=area)) + 
+  geom_line()
+
+resh %>% filter(gender=="Female", disease=="Stomach cancer", 
+                var=="cf", age>40, age<60) %>% select(age,`50%`,Rhat) 
 resnc <- resh %>% filter(Rhat > 2) 
-resnc <- resh %>% filter(Rhat > 1.1) 
+resnc <- resh %>% filter(Rhat > 1.05) 
 table(resnc$disease, resnc$gender)
-table(resnc$disease, resnc$gender, resnc$area)
+
+## Look at precision of CRC estimates as exemplar. 
+## Effective sample size of 1000 after a few hours
 resh %>% filter(gender=="Male", disease=="Ischemic heart disease", age==60, var=="cf") %>% head
-resh %>% filter(gender=="Male", disease=="Stroke", age==60, var=="cf") %>% head
-resh %>% filter(gender=="Male", disease=="Stomach cancer", age==60, var=="cf") %>% head
-resh %>% filter(disease=="Uterine cancer", age==60, var=="cf") %>% head
-resh %>% filter(gender=="Male", area=="Bristol", age==60, var=="cf") %>% head
+resh %>% filter(gender=="Male", disease=="Colon and rectum cancer", age==60, var=="cf") %>% head
 
 
 ## Between area variability in point and interval ests, hier and nonhier models  
 ## Specific age and gender, compare between areas 
-## Can use this to assess benefit from hier models. 
-## Shrinkage is moderate.  
+## Not used in paper 
 
 example_age <- 90
 dat <- resall %>% filter(age==example_age, var=="cf", 
@@ -380,6 +212,7 @@ ggplot(dat, aes(x=`50%`, y=area, col=model)) +
 
 
 ## Between area variability in age curves, point ests.  CARC.  Shrinkage for oldest
+## Use this in paper 
 
 pdf("../write/hier_crc.pdf", width=6, height=4)
 
@@ -415,6 +248,15 @@ dev.off()
 
 # Hierarchical model with gender effect independent of area
 
+Fuck me the Rhats are fucked 
+Theyve basically all broken . 
+Must be some unused parameter or wev that has been left in to break it 
+Use the optim models to debug it 
+looks like the incidence related parameters
+beta_inc not in tidy but can't tell 
+
+
+
 
 ```{r}
 
@@ -424,6 +266,10 @@ summary(resg$Rhat)  #
 resnc <- resg %>% filter(Rhat > 2) 
 resnc <- resg %>% filter(Rhat > 1.1) 
 resnc <- resg %>% filter(Rhat > 1.01) 
+
+resnc <- resg %>% filter(Rhat > 1.1, disease=="Ischemic heart disease") 
+resg %>% filter(grepl("beta_inc",var))
+
 table(resnc$disease)
 table(resnc$disease, resnc$area)
 
@@ -455,10 +301,10 @@ example_age <- 70
 
 #DEBUGME SHOW RAW MORT DATA FOR LC FOR AREAS, SEE IF GENDER DIFFERENCE
 gbd %>% filter(ageyr==70, 
-               cause=="Tracheal, bronchus, and lung cancer", 
-               location %in% c("Bristol","Liverpool","West Midlands (city region)")) %>%
-  mutate(p_mort = num_mort/denom_mort, p_prev=num_prev/denom_prev, mpratio=p_mort/p_prev) %>%
-  select(sex, location, num_mort, denom_mort, p_mort, p_prev, mpratio)
+               disease=="Tracheal, bronchus, and lung cancer", 
+               area %in% c("Bristol","Liverpool","West Midlands (city region)")) %>%
+  mutate(p_mort = mort_num/mort_denom, p_prev=prev_num/prev_denom, mpratio=p_mort/p_prev) %>%
+  select(sex, area, mort_num, mort_denom, p_mort, p_prev, mpratio)
 ## YES: MORT/PREV AGREES WITH CF 
 
 i <- 3
@@ -472,13 +318,13 @@ resi[[1]] %>%
   filter(var=="cf", between(age, 68, 72), area==1)
 
 gbd %>% filter(ageyr==70, 
-               cause=="Tracheal, bronchus, and lung cancer", 
-               location %in% c("Bristol","Liverpool","West Midlands (city region)")) %>%
-  group_by(location) %>%
-  mutate(num_mort=sum(num_mort), denom_mort=sum(denom_mort), 
-         num_prev=sum(num_prev), denom_prev=sum(denom_prev)) %>%
-  mutate(p_mort = num_mort/denom_mort, p_prev=num_prev/denom_prev, mpratio=p_mort/p_prev) %>%
-  select(sex, location, num_mort, denom_mort, p_mort, p_prev, mpratio)
+               disease=="Tracheal, bronchus, and lung cancer", 
+               area %in% c("Bristol","Liverpool","West Midlands (city region)")) %>%
+  group_by(area) %>%
+  mutate(mort_num=sum(mort_num), mort_denom=sum(mort_denom), 
+         prev_num=sum(prev_num), prev_denom=sum(prev_denom)) %>%
+  mutate(p_mort = mort_num/mort_denom, p_prev=prev_num/prev_denom, mpratio=p_mort/p_prev) %>%
+  select(sex, area, mort_num, mort_denom, p_mort, p_prev, mpratio)
 
 pdf("../write/gender.pdf", width=6, height=4) # NOTE one for IHD, one for lung cancer 
 
@@ -505,50 +351,66 @@ dev.off()
 
 
 ## Lookup table for all results
+
 100 * 9 * 18 * 2 * 3 results for each of inc and CF 
 
-How to distribute this on github?  A data file in the disbayes package?  
-A separate package with code and results?  yea should be standard format for these.  what does hadley do 
-Just data and vignettes, no code.  yeah. 
-where to put the analysis scripts and slurm script? inst/scripts or suchlike. 
-yeah
+TODO just save this data frame in the metahit directory. there's no standard format
+
+TODO append the results from optimisation.  OK to have multiple results for one case 
+or just save in different format, since one has mode 
 
 ```{r}
 app_tab <- resall %>%
   filter(var %in% c("cf","inc","rem")) %>%
   select(disease, var, gender, age, area, model, `25%`, `50%`, `97.5%`) %>%
   arrange(disease, var, gender, age, area, model)
-app_tab
+app_tab %>% head
 ```
 
 
 
 # Cross validatory comparison 
 
-First compare nonhier with hier.  
+Compare nonhierarchical with hierarchical model, for all diseases and outcomes.  
 
+Colon and rectum cancer is highlighted in the paper as a case where the hierarchical model makes a difference to the results, for ages 80+.   The hierarchical model gives better predictions here. 
 
 ```{r}
 looall <- loonh %>% mutate(model="Independent areas") %>%
   full_join(looh %>% mutate(model="Hierarchical")) %>%
-  filter(!(model=="National"))
+  filter(!(model=="National")) %>%
+  select(age, gender, elpd_loo, model, area, disease, var) %>%
+  group_by(model, gender, disease, var)
 
+looall %>% 
+  summarise(eisum = sum(elpd_loo)) %>%
+  pivot_wider(names_from=model, values_from=eisum) %>%
+  mutate(elpd_diff = `Hierarchical` - `Independent areas`)
+
+looall %>% 
+  filter(age > 80) %>%
+  summarise(eisum = sum(elpd_loo)) %>%
+  pivot_wider(names_from=model, values_from=eisum) %>%
+  mutate(elpd_diff = `Hierarchical` - `Independent areas`)%>%
+  filter(disease=="Colon and rectum cancer")
+```
+
+Graph of how predictive ability depends on age and area, for selected disease and outcome.  Hierarchical model is better for older ages.  Age 50 data seem to be strong enough that shrinkage is not needed.  Note that age 50 parameters are also assumed to apply to younger ages. 
+
+```{r}
 loosub <- looall %>% 
-#  filter(disease=="Colon and rectum cancer", var=="mort", gender=="Male",
-  filter(disease=="Ischemic heart disease", var=="inc", gender=="Male",
-         area %in% cityregions) %>%
-  select(age, elpd_loo, model, area) %>%
+  filter(disease=="Colon and rectum cancer", gender=="Male", var=="mort") %>%
+  ## sum ELPD by five year age group
   pivot_wider(names_from=model, values_from=elpd_loo) %>%
   mutate(elpd_diff = `Hierarchical` - `Independent areas`) %>%
-  ## sum ELPD by five year age group
   mutate(agegroup = cut(age, seq(0,100,5), right=FALSE, include.lowest = TRUE)) %>%
-  group_by(area, agegroup) %>%
+  group_by(area, agegroup, gender, var) %>%
   summarise(elpd_diff = sum(elpd_diff), .groups=c("drop")) %>%
   mutate(agemid = as.numeric(as.character(factor(agegroup, labels = seq(2.5, 97.5, by=5)))))
 
 ggplot(loosub, aes(x=agemid, y=elpd_diff, colour=area)) +
   geom_hline(yintercept=0, col="gray", lwd=2) +
-    geom_line() + 
+  geom_line() + 
   geom_point() + 
   scale_x_continuous(limits=c(30,100), breaks = seq(0,100,10)) + 
   geom_text(data=data.frame(x=c(50,50), y=c(-Inf,Inf)), 
@@ -556,27 +418,8 @@ ggplot(loosub, aes(x=agemid, y=elpd_diff, colour=area)) +
             inherit.aes=FALSE,
             label=c("Independent areas preferred","Hierarchical preferred"), 
             vjust=c(0,1), hjust=c(0,0)) +
-  geom_dl(aes(label=area), method= list(dl.combine("first.points", "last.points")))
-
-## so why is hier better for mid ages?  worse for below 
-## surely age 95 value is iffy due to weak data. 
-
-## why two groups of areas?  It's not the area numerator or denominator size.
-## Labels are right way round. higher ELPD good
-
-gbd %>% filter(cause=="Colon and rectum cancer") %>% 
-  group_by(location) %>% filter(areatype=="cityregion") %>% 
-  summarise(n=sum(num_mort)) %>% arrange(n)
-
-looall %>% filter(age>90, age <92, gender=="Male", disease=="Colon and rectum cancer", var=="mort") %>%
-  select(area, p_loo, model) %>%
-  pivot_wider(names_from=model, values_from=p_loo) %>% as.data.frame()
-
-## These results are hard to explain
-## Suspect there is no point using cross validation to compare hier and nonhier
-## The results are the same where there is data
-## Hier only helps for extrapolation to oldest ages where there is no data
-## That is a matter of judgement that can use exchangeability. 
+  directlabels::geom_dl(aes(label=area), 
+                        method=list(directlabels::dl.combine("first.points", "last.points")))
 
 ```
 
@@ -627,8 +470,6 @@ loohg %>%
 
 
 
-
-
 # Time trends 
 
 Damn, Absolute incidence estimates are way off both the model results, 
@@ -648,36 +489,154 @@ But then they will carry on changing through time in the future if we use them i
 pdf("../write/trend_res.pdf")
 
 datt <- gbd %>% 
-  filter(location=="Leeds", cause=="Ischemic heart disease") %>%
-  mutate(inc_prob = num_inc / denom_inc, 
+  filter(area=="Leeds", disease=="Ischemic heart disease") %>%
+  mutate(inc_prob = inc_num / inc_denom, 
          inc_rate = -log(1-inc_prob), 
          var = "Incidence", 
          gender = sex)
 
-resoy <- resall %>% filter((model=="Time trends" & year > 2000 ),
-                          area=="Leeds", 
-                          disease=="Ischemic heart disease",
-                          var %in% c("inc")) %>% mutate(var="Incidence")
-
+resoy <- resall %>% filter(model=="Time trends", 
+                            year == 2017,
+                            area=="Leeds", 
+                            disease=="Ischemic heart disease",
+                            var %in% c("inc")) %>% mutate(var="Incidence")
+                           
 rest <- resall %>% filter((model == "Independent areas") | (model=="Time trends" & year==2017),
                           area=="Leeds", 
                           disease=="Ischemic heart disease",
                           var %in% c("inc","cf")
 #                          gender=="Male"
-)
+) %>% full_join(resoy)
+
+resopt <- readRDS(file="resopt_trend.rds") %>% 
+  filter(disease=="Ischemic heart disease",area=="Leeds",
+         var %in% c("inc","cf"), year==99) %>%
+  mutate(var = fct_recode(var, "Incidence"="inc", "Case fatality"="cf"))
+
 rest %>% 
   filter(between(age, 50, 90)) %>% 
   mutate(var = fct_recode(var, "Incidence"="inc", "Case fatality"="cf"),
          model = fct_recode(model, "No time trends" = "Independent areas")) %>%
 ggplot(aes(x=age, y=`50%`, col=model, fill=model, 
            group=interaction(gender, model))) +
+  coord_cartesian(ylim=c(0.0,0.04)) +
   geom_ribbon(aes(ymin=`2.5%`, ymax=`97.5%`), alpha=0.2) +
   facet_wrap(vars(gender, var), nrow=2, scales="free_y") +
   geom_line() + 
   xlab("Age") + ylab("") + 
   labs(col="", fill="") + 
-  geom_line(data=datt, aes(x=ageyr, y=inc_rate), inherit.aes = FALSE) + 
-  geom_line(data=resoy, aes(x=age, y=`50%`, col=factor(year), group=year), lty=2, inherit.aes = FALSE)
+  geom_line(data=datt, aes(x=ageyr, y=inc_rate), inherit.aes = FALSE) +
+  geom_line(data=resopt, aes(x=age, y=par), inherit.aes=FALSE, col="blue")
+
+## Point estimates are accurate, so we can use them to diagnose the bias 
+
+#  geom_line(data=resoy, aes(x=age, y=`50%`, col=factor(year), group=year), lty=2, inherit.aes = FALSE)
 dev.off()
 
+## Experimental sensitivity analyses to different trends
+## what was it? 2003-2010 continues. saved in restrs 
+## where's the conclusion from this?  estimates vary a lot
+
+rest_saved <- rest %>% 
+  filter(between(age, 50, 90), model=="Time trends", 
+         gender=="Male", var %in% c("inc","cf")) 
+res_saved <- resnh %>% filter(between(age, 50, 90), model=="Independent areas", disease=="Ischemic heart disease", area=="Leeds", gender=="Male", var %in% c("inc","cf"))
+  
+restrs <- restrs %>% 
+  mutate(trendin = ifelse(inctrend & cftrend, "both", 
+  ifelse(inctrend, "inc", ifelse(cftrend, "cf", "neither")))) %>%
+  mutate(trendin = ifelse(trsens=="zero", "neither", trendin))
+
+dat <- restrs %>% 
+  filter(var %in% c("inc","cf"), model=="smoothed", trsens %in% c("hi", "zero"))
+dat$age <- rep(1:100, length.out=nrow(dat))
+dat %>%
+  filter(age < 80) %>%
+ggplot(aes(x=age, y=`50%`, col=trendin)) + 
+  geom_line(lwd=2) + 
+  facet_grid(cols=vars(var)) + 
+  geom_line(data=datt %>% filter(gender=="Male") %>% mutate(var=fct_recode(var,"inc"="Incidence")), 
+            aes(x=ageyr, y=inc_rate), inherit.aes = FALSE) 
+
++ 
+  geom_line(data=rest_saved, col="black") + 
+  geom_line(data=res_saved, col="blue")
+
+restrs %>% 
+  filter(var %in% c("inc","cf")) %>%
+  mutate(age = rep(1:100, length.out=n())) %>%
+  filter(model=="smoothed", age==60, var=="cf", cftrend==TRUE, inctrend==TRUE) 
+
+
 ```
+
+Right this is saying that it doesn't make much difference to CF, but big diff to inc as in Scar
+were the original plots wrong.   OK fine just axis limit distortion. 
+
+So the only problem left is disagreement with current empirical incidence 
+dismod2 types would say the model is "forcing consistency" 
+evidence of conflict between current inc and current CF  
+Hm is this evidence that the gbd data are consistent with themselves under a model that ignores trends.  
+
+Hey wot it does match.   Wot about original independent-areas results 
+
+cf - higher with inc or both, lower with cf or neither 
+inc - higher with cf only, then neither, then both, then lowest with inc. 
+
+So dose response is OK 
+but they interact in unpredictable ways 
+and need to fix the 5 year tihng 
+and reconcile the modest changes here with the big changes from the real data
+
+Compare real with artificial trend data.  Where does the difference come from? 
+Looks reasonably representative of CF to me.  Age 70 value is generous 
+Incidence: trend data is more noisy.  Pick an even higher value that's on the high end of the data. 
+
+```{r}
+ism <- inctrends_hi %>% as.data.frame() %>% 
+  mutate(age = 1:100) %>%
+  pivot_longer(names_to = "year", values_to = "p2017", cols = 1:100) %>%
+  mutate(year = as.numeric(year)) %>% 
+  filter(age %in% c(40,60,80,100), year > 1970) %>% 
+  mutate(age = factor(age), model = "sens")
+
+ihdtrends %>% 
+  filter(age %in% c(40,60,80,100), year > 1970, gender=="Male", outcome=="Incidence") %>% 
+  mutate(age = factor(age), model = "data") %>%
+  full_join(ism) %>%
+  ggplot(aes(x=year, y=p2017, col=age, lty=model)) + geom_line()
+
+```
+
+
+
+Well that's odd. 
+
+With inc trends on. 
+There's much less of an effect than there was with the real data. 
+Consistent dose response effect 
+CF trend makes no difference to current CF ests , but affects current inc ests. Wot? 
+
+With cf trends on
+Only an effect on cf if there is inc trends.
+Consistent dose response when there's an effect
+Inc est: both inc and cf trends make a difference.  moderate differences
+
+Is this a bug in the sens analysis setup??   cf trends are not affecting cf
+And why are there still those stupid 5 year artefacts for incidence?  didn't i transfer the new data? 
+
+OK think og it a new way 
+TREND IN: 
+inc but not cf : 
+cf but not inc : reduced inc 
+both inc and cf:     reduced inc 
+
+inc highest: 
+inctrend false, cftrend true
+inctrend true, cftrend true 
+cftrend false.   
+inc lowest 
+
+cf highest with 
+inctrend true, cftrend false or true 
+inctrend false 

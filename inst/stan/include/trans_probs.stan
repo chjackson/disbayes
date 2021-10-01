@@ -61,15 +61,30 @@ functions {
     P[3,3] = 1;
     return P;
   }
+
+    matrix defuzz_P(matrix P){
+      matrix[3,3] Pr;
+      for (r in 1:3) {
+	for (s in 1:3) {
+	  Pr[r,s] = P[r,s];
+	  if (P[r,s] < 0) Pr[r,s] = 0;
+	  if (P[r,s] > 1) Pr[r,s] = 1;
+	}
+      }
+      return Pr;
+    }
   
   matrix trans_probs(real i, real f, real r) {
+    matrix[3,3] P;
     if (r != 0)
-    return trans_probs_rem(i, f, r);
+      P = trans_probs_rem(i, f, r);
     else { 
       if (i == f)
-      return trans_probs_norem_i(i);
+	P = trans_probs_norem_i(i);
       else
-      return trans_probs_norem_if(i, f);
+	P = trans_probs_norem_if(i, f);
     }
+    return defuzz_P(P);
   }
+  
 }

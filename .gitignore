@@ -42,3 +42,8 @@ src/Makevars.win
 metahit/TODO.md
 dbh.rds
 vignettes/dbh.rds
+/Meta/
+metahit/slurm*out
+/doc/
+metahit/results_nonhier
+docs

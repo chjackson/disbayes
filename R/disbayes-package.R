@@ -7,10 +7,11 @@
 #' @useDynLib disbayes, .registration = TRUE
 #' @import methods
 #' @import Rcpp
+#' @importFrom stats coef lm qbeta qexp qnorm quantile rlnorm rnorm
 #' @importFrom generics tidy
 #' @importFrom rstan sampling
-#' @importFrom stats lm sd rlnorm rnorm
 #' @importFrom mgcv smoothCon jagam s
+#' @importFrom matrixStats colQuantiles
 #' @import dplyr
 #' @importFrom tidyr extract pivot_wider pivot_longer
 #' @importFrom magrittr "%>%"

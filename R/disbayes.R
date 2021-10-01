@@ -17,8 +17,8 @@
 ##'   (1) numerator and denominator (2) estimate and denominator (3) estimate
 ##'   with lower and upper credible limits
 ##'
-##'   For estimates based on registry data assumed to cover the whole population, then
-##'   the denominator will be the population size.
+##'   For estimates based on registry data assumed to cover the whole
+##'   population, then the denominator will be the population size.
 ##'
 ##' @param inc_num Numerator for the incidence data, assumed to represent the
 ##'   observed number of new cases within a year among a population of size
@@ -54,7 +54,11 @@
 ##' @param mort_lower Lower credible limit for the mortality estimate
 ##' @param mort_upper Upper credible limit for the mortality estimate
 ##'
-##' @param rem_num Numerator for the estimate of the remission rate
+##' @param rem_num Numerator for the estimate of the remission rate.  Remission
+##'   data should be supplied if remission is permitted in the model, either as
+##'   a numerator and denominator or as an estimate and lower credible interval.
+##'   Conversely, if no remission data are supplied, then remission is assumed
+##'   to be impossible.
 ##' @param rem_denom Denominator for the estimate of the remission rate
 ##' @param rem  Estimate of the remission rate
 ##' @param rem_lower Lower credible limit for the remission estimate
@@ -62,27 +66,41 @@
 ##'
 ##' @param age Variable in the data indicating the year of age
 ##'
-##' @param smooth_cf Case fatality is modelled as a smooth function of age,
-##'   using a spline.  If \code{smooth_cf=FALSE} then a priori the case
-##'   fatalities are assumed to be independent for each year of age.
+##' @param cf_model Model for how case fatality varies with age.
 ##'
-##'   The unsmoothed model is useful for determining how much information is in
+##' \code{"smooth"} (the default). Case fatality is modelled as a smooth function of age,
+##'   using a spline.
+##'
+##' \code{"indep"} Case fatalities are estimated independently for each year of age.  This may be
+##' useful for determining how much information is in
 ##'   the data. That is, if the posterior from this model is identical to the
 ##'   prior for a certain age, then there is no information in the data alone
 ##'   about case fatality at that age, indicating that some other structural
 ##'   assumption (such as a smooth function of age) or external data are equired
 ##'   to give more precise estimates.
 ##'
-##' @param increasing_cf Case fatality is modelled as a smooth and increasing
+##' \code{"increasing"} Case fatality is modelled as a smooth and increasing
 ##'   function of age.
 ##'
-##' @param const_cf Case fatality is modelled as constant with age. 
-##' 
-##' @param smooth_inc Incidence is modelled as a smooth function of age. 
+##' \code{"const"} Case fatality is modelled as constant with age.
 ##'
-##' @param remission Is remission from the disease permitted in the model
-##' \code{TRUE} or \code{FALSE}.  If \code{TRUE}, then data must be provided, as
-##' for incidence, mortality and prevalence.
+##' @param inc_model Model for how incidence varies with age.
+##'
+##' \code{"smooth"} (the default). Incidence is modelled as a smooth spline function of age.
+##'
+##' \code{"indep"} Incidence rates for each year of age are estimated independently.
+##'
+##' @param rem_model Model for how remission rates vary with age, which are typically
+##' less well-informed by data, compared to incidence and case fatality. 
+##'
+##' \code{"const"} (the default). Constant remission rate over all ages.
+##'
+##' \code{"indep"} Remission rates estimated independently over all ages. 
+##'
+##' @param prev_zero If \code{TRUE}, attempt to estimate prevalence at age zero
+##'   from the data, as part of the Bayesian model, even if the observed prevalence is zero.
+##'   Otherwise (the default) this is assumed to be zero if the count is zero, and estimated
+##'   otherwise. 
 ##'
 ##' @param inc_trend Matrix of constants representing trends in incidence
 ##'   through calendar time by year of age.  There are \code{nage} rows and
@@ -94,72 +112,142 @@
 ##'   refer to the year 2017, then the first column refers to the year 1918 and
 ##'   the last (100th) column refers to 2017.  The last column should be all 1,
 ##'   unless the current data are supposed to be biased.
-##'   
-##'   To produce this format from a long data frame,  
-##'   filter to the appropriate outcome and subgroup, and use \code{\link[tidyr]{pivot_wider}},
-##'   e.g. 
-##'   
-##'   ```
-##'   trends <- ihdtrends %>% 
-##'    filter(outcome=="Incidence", gender=="Female") %>%
-##'    pivot_wider(names_from="year", values_from="p2017") %>%
-##'    select(-age, -gender, -outcome) %>% 
-##'    as.matrix()
-##'   ```
 ##'
-##' @param cf_trend Matrix of constants representing trends in case
-##'   fatality through calendar time by year of age, in the same format as
+##'   To produce this format from a long data frame, filter to the appropriate
+##'   outcome and subgroup, and use \code{\link[tidyr]{pivot_wider}}, e.g.
+##'
+##'   \code{trends <- ihdtrends %>% 
+##'            filter(outcome=="Incidence", gender=="Female") %>%
+##'             pivot_wider(names_from="year", values_from="p2017") %>% 
+##'             select(-age, -gender, -outcome) %>% 
+##'             as.matrix()}
+##'
+##' @param cf_trend Matrix of constants representing trends in case fatality
+##'   through calendar time by year of age, in the same format as
 ##'   \code{inc_trend}.
-##'   
+##'
 ##' @param cf_init Initial guess at a typical case fatality value, for an
 ##'   average age.
 ##'
-##' @param eqage Case fatality and incidence are assumed to be equal for all ages
-##' below this age when using the smoothed model
+##' @param eqage Case fatalities (and incidences) are assumed to be equal for
+##'   all ages below this age, inclusive, when using the smoothed model.
 ##'
-##' @param loo Compute leave-one-out cross validation statistics. 
+##' @param eqagehi Case fatalities (and incidences) are assumed to be equal for
+##'   all ages above this age, inclusive, when using the smoothed model.
 ##'
-##' @param sprior Rate of the exponential prior distribution used to penalise
-##'   the coefficients of the spline model.  The default of 1 should adapt
-##'   appropriately to the data, but higher values give stronger smoothing,
-##'   or lower values give weaker smoothing,  if required.
+##' @param loo Compute leave-one-out cross validation statistics (for \code{method="mcmc"} only). 
 ##'
-##' @param iter Number of MCMC iterations to use for the smoothed model fit.
+##' @param sprior Vector of two elements, giving the rates of the exponential prior distributions used to penalise
+##'   the coefficients of the spline model.  The first refers to the spline model for incidence, the second for case fatality.  The default of 1 should adapt
+##'   appropriately to the data, but higher values give stronger smoothing, or
+##'   lower values give weaker smoothing,  if required.
+##'
+##' @param scf_fixed  If this is set to a number, then the parameter determining the smoothness of case fatality with age (i.e. the standard deviation of the spline basis coefficients) is fixed at this number.  If \code{scf_fixed=TRUE}, then an "empirical Bayes" method is used, where the posterior mode of this parameter is determined (using the prior defined by \code{sprior}), and the model is fitted again with the parameter fixed at this mode.  If \code{scf_fixed=NULL} (the default) then a "full Bayes" method is used where the full posterior of this parameter is estimated.   NOT IMPLEMENTED YET FOR HIERARCHICAL MODELS 
+##'
+##' @param sinc_fixed  As \code{scf_fixed}, but for incidence instead of case fatality.
+##'
+##' @param inc_prior Vector of two elements giving the Gamma shape and rate parameters of the
+##' prior for the incidence rate.  Only used if \code{inc_model="indep"}, for each age-specific rate. 
 ##' 
-##' @param iter_train Number of MCMC iterations to use for the unsmoothed (training)
-##' model fit.
+##' @param cf_prior Vector of two elements giving the Gamma shape and rate parameters of the
+##' prior for the case fatality rate.  Only used if \code{cf_model="indep"}, for each age-specific rate,
+##' and for the rate at \code{eqage} in \code{cf_model="increasing"}.
 ##'
-##' @param s_opts List of arguments to supply to the function \code{\link[mgcv]{s}}
-##' for constructing a spline basis, e.g. \code{list(bs="cr")} to switch from the
-##' default "thin plate" spline to a cubic spline.  Currently not implemented! 
+##' @param rem_prior Vector of two elements giving the Gamma shape and rate parameters of the
+##' prior for the remission rate, used in both \code{rem_model="const"} and \code{rem_model="fixed"}. 
 ##'
-##' @param ... Further arguments passed to \pkg{rstan}{sampling} to control
-##'   running of Stan, that are applied to both the "training" (unsmoothed) model
-##'   fit and the smoothed model fit.
+##' @param method String indicating the inference method, defaulting to
+##'   \code{"opt"}.
+##'
+##'   If \code{method="mcmc"} then a sample from the posterior is drawn using Markov Chain Monte Carlo
+##'   sampling, via \pkg{rstan}'s \code{\link[rstan:stanmodel-method-sampling]{rstan::sampling()}} function.   This is the most
+##'   accurate but the slowest method.
+##'
+##'   If \code{method="opt"}, then instead of an MCMC sample from the posterior,
+##'   `disbayes` returns the posterior mode calculated using optimisation, via
+##'   \pkg{rstan}'s \code{\link[rstan:stanmodel-method-optimizing]{rstan::optimizing()}} function.
+##'   A sample from a normal approximation to the (real-line-transformed)
+##'   posterior distribution is drawn in order to obtain credible intervals.
+##' 
+##'   If the optimisation fails to converge (non-zero return code), try increasing the
+##'   number of iterations from the default 1000, e.g. `disbayes(...,
+##'   iter=10000, ...)`, or changing the algorithm to `disbayes(...,
+##'   algorithm="Newton", ...)`.
+##'
+##'   If there is an error message that mentions `chol`, then
+##'   the computed Hessian matrix is not positive definite at the reported optimum, hence credible intervals
+##'   cannot be computed.
+##'   This can occur either because of numerical error in computation of the Hessian, or because the
+##'   reported optimum is wrong.  If you are willing to believe
+##'   the optimum and live without credible intervals, then set \code{draws=0} to skip
+##'   computation of the Hessian.   To examine the problematic Hessian, set
+##'   \code{hessian=TRUE,draws=0}, then look at the \code{$fit$hessian} component of the
+##'   `disbayes` return object.   If it can be inverted, do \code{sqrt(diag(solve()))} on the Hessian, and
+##' check for \code{NaN}s, indicating the problematic parameters. 
+##' Otherwise, diagonal entries of the Hessian matrix that are very small
+##'   may indicate parameters that are poorly identified from the data, leading to computational
+##'   problems. 
+##' 
+##'   If \code{method="vb"}, then variational Bayes methods are used, via \pkg{rstan}'s
+##'   \code{\link[rstan:stanmodel-method-vb]{rstan::vb()}} function.  This is labelled as "experimental" by
+##'   \pkg{rstan}.  It might give a better approximation to the posterior
+##'   than \code{method="opt"}, but has not been investigated much for `disbayes` models.
+##'
+##' @param draws Number of draws from the normal approximation to the posterior
+##' when using \code{method="opt"}.  
+##'
+##' @param iter Number of iterations for MCMC sampling, or maximum number of iterations for optimization.
+##'
+##' @param stan_control (\code{method="mcmc"} only). List of options supplied as the \code{control} argument
+##'   to \code{\link[rstan:stanmodel-method-sampling]{rstan::sampling()}} in \pkg{rstan} for the main model fit.
+##'   
+##'
+##' @param bias_model Experimental model for bias in the incidence estimates due
+##'   to conflicting information between the different data sources.  If
+##'   \code{bias_model=NULL} (the default) no bias is assumed, and all data are
+##'   assumed to be generated from the same age-specific incidences.
+##'
+##'   Otherwise there are assumed to be two alternative curves of incidence by
+##'   age (denoted 2 and 1) where curve 2 is related to curve 1 via a constant
+##'   hazard ratio that is estimated from the data, given a standard normal
+##'   prior on the log scale.  Three distinct curves would not be identifiable
+##'   from the data. 
+##'
+##'   If \code{bias_model="inc"} then the incidence data is assumed to be
+##'   generated from curve 2, and the prevalence and mortality data from curve
+##'   1.
+##'
+##'   \code{bias_model="prev"} then the prevalence data is generated from curve
+##'   2, and the incidence and mortality data from curve 1.
+##'
+##'   If \code{bias_model="incprev"} then both incidence and prevalence data are
+##'   generated from curve 2, and the mortality data from curve 1.
+##'
+##' @param ... Further arguments passed to \code{\link[rstan:stanmodel-method-sampling]{rstan::sampling()}} to
+##'   control MCMC sampling, or \code{\link[rstan:stanmodel-method-optimizing]{rstan::optimizing()}} to control
+##'   optimisation, in Stan.
 ##'
 ##' @return A list with the following components
 ##'
-##' \code{fits}: An object containing posterior samples from the fitted model,
-##' in the \code{stanfit} format returned by the \code{\link[rstan]{stan}}
-##' function in the \pkg{rstan} package.
+##'   \code{fit}: An object containing posterior samples from the fitted model,
+##'   in the \code{stanfit} format returned by the \code{\link[rstan]{stan}}
+##'   function in the \pkg{rstan} package.
 ##'
-##' \code{fitu}: Another \code{stanfit} object containing the equivalent "unsmoothed" model results
-##' where case fatality and incidence are given independent priors per year of age.
+##'   \code{loo}: A list of objects containing leave-one-out cross-validation
+##'   statistics.  There is one list component for each of the observed outcomes
+##'   informing the model: incidence, prevalence, mortality and remission.   The
+##'   component for each outcome is an object in the form returned by the
+##'   \code{\link[loo]{loo}} function in the \pkg{loo} package. This can be used
+##'   to assess how well the model predicts the data for that outcome, compared
+##'   to other models.  The \code{\link{looi_disbayes}} function can be used to extract from this
+##'   list a single tidy data frame with one row per observation.
 ##'
-##' \code{loos}: A list of objects containing leave-one-out cross-validation statistics.  There is
-##' one list component for each of the observed outcomes informing the model: incidence, prevalence,
-##' mortality and remission.   The component for each outcome is an object
-##' in the form returned by the \code{\link[loo]{loo}} function in the \pkg{loo} package. This can
-##' be used to assess how well the model predicts the data for that outcome, compared to other models. 
+##'   \code{dat}: A list containing the input data in the form of numerators
+##'   and denominators. 
 ##'
-##' The \code{\link{looi_disbayes}} function can be used to extract from this list
-##' a single tidy data frame with one row per observation. 
+##'   Use the \code{\link{tidy.disbayes}} method to return summary statistics
+##'   from the fitted models, simply by calling \code{tidy()} on the fitted model. 
 ##'
-##' \code{loou}: Equivalent cross-validation statistics for the unsmoothed model. 
-##'
-##' Use the \code{\link{tidy.disbayes}} method to return summary statistics from the
-##' fitted models. 
-##'   
 ##' @export
 disbayes <- function(data,
                      inc_num=NULL, inc_denom=NULL, inc=NULL, inc_lower=NULL, inc_upper=NULL,
@@ -167,127 +255,187 @@ disbayes <- function(data,
                      mort_num=NULL, mort_denom=NULL, mort=NULL, mort_lower=NULL, mort_upper=NULL,
                      rem_num=NULL, rem_denom=NULL, rem=NULL, rem_lower=NULL, rem_upper=NULL,
                      age="age",
-                     smooth_cf=TRUE,
-                     increasing_cf=FALSE,
-                     const_cf=FALSE,
-                     smooth_inc=FALSE,
+                     cf_model="smooth",
+                     inc_model="smooth",
+                     rem_model="const",
+                     prev_zero=FALSE, 
                      inc_trend = NULL, 
                      cf_trend = NULL, 
-                     remission=FALSE,
                      cf_init = 0.01,
                      eqage = 30,
+                     eqagehi = NULL,
                      loo = TRUE, 
-                     sprior = 1,
+                     sprior = c(1,1),
+                     scf_fixed = NULL, 
+                     sinc_fixed = NULL, 
+                     rem_prior = c(1.1, 1), 
+                     inc_prior = c(2, 0.1), 
+                     cf_prior = c(2, 0.1), 
+                     method = "opt",
+                     draws = 1000,
                      iter = 10000,
-                     iter_train = 1000,
-                     s_opts = NULL, 
+                     stan_control = NULL, 
+                     bias_model = NULL,
                      ...
-                     ){
-    check_age(data, age)
-    nage <- nrow(data)
-
-    ## Convert all data to numerators and denominators 
-    inc_data <- process_data(data, "inc", inc_num, inc_denom, inc, inc_lower, inc_upper, nage)
-    prev_data <- process_data(data, "prev", prev_num, prev_denom, prev, prev_lower, prev_upper, nage)
-    if (!inc_data$supplied && !prev_data$supplied)
-        stop("At least one of incidence or prevalence should be supplied")
-    mort_data <- process_data(data, "mort", mort_num, mort_denom, mort, mort_lower, mort_upper, nage)
-    rem_data <- process_data(data, "rem", rem_num, rem_denom, rem, rem_lower, rem_upper, nage)
-    dat <- c(inc_data, prev_data, mort_data, rem_data, nage=nage, remission=as.numeric(remission))
-    dat$supplied <- NULL
-    
-    if (!is.null(inc_trend) || !is.null(cf_trend)) {
-      trend <- TRUE
-      smooth_cf <- TRUE
-      smooth_inc <- FALSE 
-    } else trend <- FALSE
-    
-    if (trend) {
-      if (is.null(inc_trend)) inc_trend <- matrix(1, nage, nage)
-      if (is.null(cf_trend)) cf_trend <- matrix(1, nage, nage)
-      check_trenddata(inc_trend, nage)
-      check_trenddata(cf_trend, nage)
+){
+  dbcall <- match.call()
+  check_age(data, age)
+  nage <- nrow(data)
+  
+  ## Convert all data to numerators and denominators 
+  inc_data <- process_data(data, "inc", inc_num, inc_denom, inc, inc_lower, inc_upper, nage)
+  prev_data <- process_data(data, "prev", prev_num, prev_denom, prev, prev_lower, prev_upper, nage)
+  if (!inc_data$supplied && !prev_data$supplied)
+    stop("At least one of incidence or prevalence should be supplied")
+  mort_data <- process_data(data, "mort", mort_num, mort_denom, mort, mort_lower, mort_upper, nage)
+  rem_data <- process_data(data, "rem", rem_num, rem_denom, rem, rem_lower, rem_upper, nage)
+  remission <- rem_data$supplied
+  dat <- c(inc_data, prev_data, mort_data, rem_data, nage=nage, remission=as.numeric(remission))
+  dat$supplied <- NULL
+  
+  cf_model <- match.arg(cf_model, c("smooth", "indep", "increasing", "const"))
+  inc_model <- match.arg(inc_model, c("smooth", "indep"))
+  rem_model <- match.arg(rem_model, c("const", "indep"))
+  smooth_cf <- (cf_model=="smooth")
+  increasing_cf <- (cf_model=="increasing")
+  const_cf <- (cf_model=="const")
+  const_rem <- (rem_model=="const")
+  smooth_inc <- (inc_model=="smooth")
+  
+  if (!is.null(inc_trend) || !is.null(cf_trend)) {
+    trend <- TRUE
+    smooth_cf <- TRUE
+  } else trend <- FALSE
+  
+  if (trend) {
+    if (is.null(inc_trend)) inc_trend <- matrix(1, nage, nage)
+    if (is.null(cf_trend)) cf_trend <- matrix(1, nage, nage)
+    check_trenddata(inc_trend, nage)
+    check_trenddata(cf_trend, nage)
+  }
+  prev_zero <- prev_zero || (!is.null(dat$prev_num) && dat$prev_num[1] > 0) 
+  
+  mdata <- list(remission=remission, eqage=eqage, const_rem=const_rem, prev_zero=prev_zero,
+                inc_prior=inc_prior, cf_prior=cf_prior, rem_prior=rem_prior)
+  idata <- list(cf_init=cf_init) 
+  
+  initrates <- init_rates(dat, mdata, idata, ...)
+  
+  if (increasing_cf) smooth_cf <- TRUE
+  if (const_cf) increasing_cf <- TRUE
+  if (isFALSE(scf_fixed)) scf_fixed <- NULL
+  if (isFALSE(sinc_fixed)) sinc_fixed <- NULL
+  scf_isfixed <- !is.null(scf_fixed)
+  sinc_isfixed <- !is.null(sinc_fixed)
+  
+  if (smooth_cf | smooth_inc) {
+    cf_smooth <- init_smooth(log(initrates$cf), eqage, eqagehi, s_opts=NULL)
+    inc_smooth <- init_smooth(log(initrates$inc), eqage, eqagehi, s_opts=NULL)
+    if (!is.null(bias_model))
+      bias_model <- match.arg(bias_model, c("inc","prev","incprev"))
+    nbias <- if (is.null(bias_model)) 1 else 2
+    if (nbias==1){
+      incdata_ind <- prevdata_ind <- 1 
+    } else if (nbias==2){
+      incdata_ind <-  if (bias_model %in% c("inc", "incprev")) 2 else 1
+      prevdata_ind  <-  if (bias_model %in% c("prev", "incprev")) 2 else 1
     }
     
-    inc_init <- init_rate("inc", dat)
-    rem_init <- init_rate("rem", dat)
-    fitu <- train_rate(dat, inc_init=inc_init, cf_init=cf_init,
-                       rem_init=rem_init, remission=remission,
-                       iter_train = iter_train,
-                       ...)
-    loou <- if (loo) get_loo(fitu, remission=remission) else NULL 
-
-    if (increasing_cf) smooth_cf <- TRUE
-    if (const_cf) increasing_cf <- TRUE
+    normalapprox_wanted <- ((method=="opt") &&
+                              ((is.null(list(...)$draws) || list(...)$draws> 1)))
+    unc_wanted <- (method %in% c("mcmc","vb") || normalapprox_wanted)
+    if (unc_wanted && (isTRUE(scf_fixed) || isTRUE(sinc_fixed))) {
+      modes <- eb_find_modes(as.list(dbcall),
+                             dbfn=disbayes,
+                             args=c("scf_fixed", "sinc_fixed"))
+      if (isTRUE(scf_fixed)) scf_fixed <- modes["lambda_cf[1]"] 
+      if (isTRUE(sinc_fixed)) sinc_fixed <- modes["lambda_inc[1]"] 
+      scf_fixed <- max(scf_fixed, 0.01)
+    } else {
+      modes <- NULL
+    } 
+    if (is.null(scf_fixed)) scf_fixed <- 1
+    if (is.null(sinc_fixed)) sinc_fixed <- 1 # dummy values
     
-    if (smooth_cf | smooth_inc) {
-        cfcrude <- summary_disbayes_fit(fitu, vars="cf")[, "med"]
-        si <- init_smooth(log(cfcrude), eqage, s_opts)
-        X <- si$X
-        beta_init <- si$beta 
-        lam_init <- laminc_init <- 0.5 
-
-        inccrude <- summary_disbayes_fit(fitu, vars="inc")[, "med"]
-        si <- init_smooth(log(inccrude), eqage, s_opts)
-        betainc_init <- si$beta
-        
-        datstans <- c(dat, list(smooth_cf=as.numeric(smooth_cf),
-                                increasing_cf=as.numeric(increasing_cf),
-                                const_cf=as.numeric(const_cf),
-                                smooth_inc=as.numeric(smooth_inc),
-                                trend=as.numeric(trend), 
-                                X=X, K=ncol(X), sprior=sprior, eqage=eqage))
-        
-        inits <- function(){
-            list(
-                inc_par = rlnorm(nage*(1-smooth_inc), mean=log(inc_init), sd=inc_init/10),
-                rem_par = rlnorm(nage*remission, mean=log(rem_init), sd=rem_init/10),
-                beta = rnorm(length(beta_init)*smooth_cf*(1 - const_cf),
-                             mean=beta_init, sd=abs(beta_init)/10),
-                lambda = as.array(rlnorm(length(lam_init)*smooth_cf, meanlog=log(lam_init), sdlog=lam_init/10)),
-                beta_inc = rnorm(length(betainc_init)*smooth_inc, mean=betainc_init, sd=abs(betainc_init)/10),
-                lambda_inc = as.array(rlnorm(length(laminc_init)*smooth_inc, meanlog=log(laminc_init), sdlog=laminc_init/10)),
-                lcfbase = if (const_cf) as.array(log(cfcrude[eqage])) else if (increasing_cf) as.array(beta_init[datstans$K-1]) else numeric()
-            )
-        }
-        
-        if (trend) {
-          datstans$inc_trend <- inc_trend
-          datstans$cf_trend <- cf_trend
-          datstans$nyr <- nage
-#          stanmod <- stanmodels$disbayes_trend
-        } else {
-            datstans$inc_trend <- array(1, dim=c(nage,1))
-            datstans$cf_trend <-  array(1, dim=c(nage,1)) 
-            datstans$nyr <- 1
-        }
-        stanmod <- stanmodels$disbayes
-
-        fits <- rstan::sampling(stanmod, data=datstans, init=inits, iter=iter, ...)
-
-        loos <- if (loo) get_loo(fits, remission=remission) else NULL 
-        
-      res <- list(fit=fits, fitu=fitu, loo=loos, loou=loou)
-    } else res <- list(fit=fitu, loo=loou)
-
-    
-    res$nage <- nage
-    class(res) <- "disbayes"
-    if (trend) class(res) <- c("disbayes_trend", class(res))
-    res
+    datstans <- c(dat, list(smooth_cf=as.numeric(smooth_cf),
+                            increasing_cf=as.numeric(increasing_cf),
+                            const_cf=as.numeric(const_cf),
+                            const_rem=as.numeric(const_rem),
+                            smooth_inc=as.numeric(smooth_inc),
+                            prev_zero=as.numeric(prev_zero),
+                            trend=as.numeric(trend), 
+                            nbias = nbias,
+                            mortdata_ind = 1, remdata_ind = 1,
+                            incdata_ind = incdata_ind, 
+                            prevdata_ind = prevdata_ind,
+                            inc_prior = inc_prior, cf_prior = cf_prior, rem_prior = rem_prior,
+                            scf_isfixed = scf_isfixed,  sinc_isfixed = sinc_isfixed, 
+                            lambda_cf_fixed = as.numeric(scf_fixed), 
+                            lambda_inc_fixed = as.numeric(sinc_fixed), 
+                            X=cf_smooth$X, K=ncol(cf_smooth$X), sprior=sprior, eqage=eqage))
+    if (trend) {
+      datstans$inc_trend <- inc_trend
+      datstans$cf_trend <- cf_trend
+      datstans$nyr <- nage
+      
+    } else {
+      datstans$inc_trend <- array(1, dim=c(nage,1))
+      datstans$cf_trend <-  array(1, dim=c(nage,1)) 
+      datstans$nyr <- 1
+    }
+    initsc <- initlist_const(initrates, cf_smooth, inc_smooth, remission, 
+                             eqage, smooth_inc, smooth_cf, const_cf, increasing_cf,
+                             const_rem, nbias, scf_isfixed, sinc_isfixed)
+    initsr <- initlist_random(nage, initrates, cf_smooth, inc_smooth, remission, 
+                              eqage, smooth_inc, smooth_cf, const_cf, increasing_cf,
+                              const_rem, nbias, scf_isfixed, sinc_isfixed)
+    if (method=="opt") { 
+      opts <- rstan::optimizing(stanmodels$disbayes, data=datstans, init=initsc, draws=draws,
+                                iter=iter,  ...)
+      res <- list(fit=opts, fitu=initrates, method="opt")
+    } else if (method=="vb"){ 
+      fits <- rstan::vb(stanmodels$disbayes, data=datstans, init=initsr, ...)
+      loos <- if (loo) get_loo(fits, remission=remission) else NULL 
+      res <- list(fit=fits, fitu=initrates, loo=loos, method="vb")
+    }
+    else if (method=="mcmc") {
+      fits <- rstan::sampling(stanmodels$disbayes, data=datstans, init=initsr, 
+                              iter=iter, control=stan_control, ...)
+      loos <- if (loo) get_loo(fits, remission=remission) else NULL 
+      res <- list(fit=fits, fitu=initrates, loo=loos, method="mcmc")
+    } else stop(sprintf("Unknown method: `%s`", method))
+  } else {
+    if (method=="opt") { 
+      res <- list(fit = initrates$optu, method="opt")
+    } else {
+      fitu <- fit_unsmoothed(dat, inc_init=initrates$inc, cf_init=initrates$cf,
+                             rem_init=initrates$rem, remission=remission,
+                             method = method,
+                             iter = iter, stan_control = stan_control, 
+                             ...)
+      loou <- if (loo) get_loo(fitu, remission=remission) else NULL 
+      res <- list(fit=fitu, loo=loou, method="mcmc")
+    }
+  }
+  res <- c(list(call=dbcall),
+           res,
+           list(nage=nage, dat=dat, stan_data=datstans, stan_inits=initsc,
+                modes=modes, trend=trend))
+  class(res) <- "disbayes"
+  res
 }
 
 get_loo <- function(fits, remission=FALSE) { 
-    outcomes <- c("mort","inc","prev")
-    if (remission) outcomes <- c(outcomes, "rem")
-    loores <- vector(length(outcomes), mode="list")
-    names(loores) <- outcomes 
-    for (outcome in outcomes) {
-        ll <- loo::extract_log_lik(fits, sprintf("ll_%s",outcome), merge_chains=FALSE)
-        r_eff <- loo::relative_eff(exp(ll))
-        loores[[outcome]] <- loo::loo(ll, r_eff = r_eff)
-    }
-    loores
+  outcomes <- c("mort","inc","prev")
+  if (remission) outcomes <- c(outcomes, "rem")
+  loores <- vector(length(outcomes), mode="list")
+  names(loores) <- outcomes 
+  for (outcome in outcomes) {
+    ll <- loo::extract_log_lik(fits, sprintf("ll_%s",outcome), merge_chains=FALSE)
+    r_eff <- loo::relative_eff(exp(ll))
+    loores[[outcome]] <- loo::loo(ll, r_eff = r_eff)
+  }
+  loores
 }
 
 ##' Observation-level leave-one-out cross-validatory statistics from a disbayes fit
@@ -304,57 +452,58 @@ get_loo <- function(fits, remission=FALSE) {
 ##' 
 ##' @export
 looi_disbayes <- function(x, looname="loo") {
-    outcomes <- names(x[[looname]])
-    looi <- vector(length(outcomes), mode="list")
-    names(looi) <- outcomes 
-    for (out in outcomes) {
-        looimat <- x[[looname]][[out]]$pointwise
-        looi[[out]] <- as.data.frame(looimat) %>%
-            mutate(age = rep(1:x$nage, length.out=nrow(looimat)),
-                   var = out) %>%
-            relocate(var, age) 
-    }
-    do.call("rbind", looi) %>%
-        remove_rownames()
+  age <- var <- NULL 
+  outcomes <- names(x[[looname]])
+  looi <- vector(length(outcomes), mode="list")
+  names(looi) <- outcomes 
+  for (out in outcomes) {
+    looimat <- x[[looname]][[out]]$pointwise
+    looi[[out]] <- as.data.frame(looimat) %>%
+      mutate(age = rep(1:x$nage, length.out=nrow(looimat)),
+             var = out) %>%
+      relocate(var, age) 
+  }
+  do.call("rbind", looi) %>%
+    remove_rownames()
 }
 
 get_column <- function(data, str){
-    col <- if (!is.null(str)) data[[str]] else NULL
-    ## TODO also check for integer, binomial consistency 
-    if (!is.null(str) & is.null(col))
-        stop(sprintf("No column \"%s\" in data", str))
-    col
+  col <- if (!is.null(str)) data[[str]] else NULL
+  ## TODO also check for integer, binomial consistency 
+  if (!is.null(str) & is.null(col))
+    stop(sprintf("No column \"%s\" in data", str))
+  col
 }
 
 check_age <- function(data, age="age", model="nonhier", area=NULL, gender=NULL) {
-    if (is.null(data[[age]]))
-        stop(sprintf("age variable `%s` not found in data", age))
-    nage <- length(unique(data[[age]]))
-
-    if (model=="hier") {
-        narea <- length(unique(area))
-        if (nrow(data) != nage * narea) {
-            stop(sprintf("%s rows in data, expected n_ages x n_areas = %s x %s, where n_ages is number of unique ages in the data", nrow(data), nage, narea))
-        }
-        ## note data get ordered by area before calling this 
-        if (!isTRUE(all.equal(data[[age]], rep(seq(from=0,to=nage-1), narea))))
-            stop("data should be ordered by age in each area, with one value per year of age starting at age 0")
+  if (is.null(data[[age]]))
+    stop(sprintf("age variable `%s` not found in data", age))
+  nage <- length(unique(data[[age]]))
+  
+  if (model=="hier") {
+    narea <- length(unique(area))
+    if (nrow(data) != nage * narea) {
+      stop(sprintf("%s rows in data, expected n_ages x n_areas = %s x %s, where n_ages is number of unique ages in the data", nrow(data), nage, narea))
     }
-    else if (model=="gender") {
-        narea <- length(unique(area))
-        ngender <- length(unique(gender))
-        if (nrow(data) != nage * narea * ngender) {
-            stop(sprintf("%s rows in data, expected n_ages x n_areas x n_genders = %s x %s x %s, where n_ages is number of unique ages, and n_genders is number of unique genders in data", nrow(data), nage, narea, ngender))
-        }
-        if (!isTRUE(all.equal(data[[age]], rep(seq(from=0,to=nage-1), narea*ngender))))
-            stop("age variable should be ordered by age in each area and gender, with one value per year of age starting at age 0")
+    ## note data get ordered by area before calling this 
+    if (!isTRUE(all.equal(data[[age]], rep(seq(from=0,to=nage-1), narea))))
+      stop("data should be ordered by age in each area, with one value per year of age starting at age 0")
+  }
+  else if (model=="gender") {
+    narea <- length(unique(area))
+    ngender <- length(unique(gender))
+    if (nrow(data) != nage * narea * ngender) {
+      stop(sprintf("%s rows in data, expected n_ages x n_areas x n_genders = %s x %s x %s, where n_ages is number of unique ages, and n_genders is number of unique genders in data", nrow(data), nage, narea, ngender))
     }
-    else if (model=="nonhier"){ 
-        if (nrow(data) != nage)
-            stop(sprintf("%s rows in data, but %s unique values in data[,age]. Should be one row per distinct year of age", nrow(data), nage))
-        if (!isTRUE(all.equal(data[[age]], seq(from=0,to=nage-1))))
-            stop("age variable should be ordered with one value per year of age starting at age 0")
-    }
+    if (!isTRUE(all.equal(data[[age]], rep(seq(from=0,to=nage-1), narea*ngender))))
+      stop("age variable should be ordered by age in each area and gender, with one value per year of age starting at age 0")
+  }
+  else if (model=="nonhier"){ 
+    if (nrow(data) != nage)
+      stop(sprintf("%s rows in data, but %s unique values in data[,age]. Should be one row per distinct year of age", nrow(data), nage))
+    if (!isTRUE(all.equal(data[[age]], seq(from=0,to=nage-1))))
+      stop("age variable should be ordered with one value per year of age starting at age 0")
+  }
 }
 
 ## Return either constant, num+denom, or error
@@ -366,245 +515,88 @@ check_age <- function(data, age="age", model="nonhier", area=NULL, gender=NULL) 
 
 process_data <- function(data, prefix, num_str, denom_str, est_str, lower_str, upper_str, 
                          nage, ngroup=1, ngender=1, hier=FALSE){
-    num <- get_column(data, num_str)
-    denom <- get_column(data, denom_str)
-    est <- get_column(data, est_str)
-    lower <- get_column(data, lower_str)
-    upper <- get_column(data, upper_str)
-    supplied <- FALSE
-    if (!is.null(num) && !is.null(denom)){
-        res <- list(num=num, denom=denom)
-        supplied <- TRUE
-    }
-    else if (!is.null(est) && !is.null(denom)) {
-        num <- round(est*denom)
-        res <- list(num=num, denom=denom)
-        supplied <- TRUE
-    }
-    else if (!is.null(est) && !is.null(lower) && !is.null(upper)) {
-        res <- ci2num(est, lower, upper)
-        supplied <- TRUE
-    }
-    else {
-        pnames <- list(inc="incidence", prev="prevalence", mort="mortality", rem="remission")
-        if (prefix %in% c("prev","rem","inc"))
-            res <- list(num=rep(0,nage), denom=rep(0,nage), supplied=FALSE)
-        else stop(sprintf("Not enough information supplied to obtain numerator and denominator for %s.\nNeed either numerator and denominator, estimate and denominator, or estimate with lower and upper credible limit", pnames[[prefix]]))
-    }
-    if (prefix=="prev") res$num[1] <- 0  # prevalence at age zero assumed exactly 0
-    if (hier)  # for hierarchical models
-        for (i in c("num","denom"))
-            res[[i]] <- array(res[[i]], dim=c(nage, ngroup, ngender))
-    names(res) <- paste(prefix, names(res), sep="_")
-    res$supplied <- supplied
-    res
+  num <- get_column(data, num_str)
+  denom <- get_column(data, denom_str)
+  est <- get_column(data, est_str)
+  lower <- get_column(data, lower_str)
+  upper <- get_column(data, upper_str)
+  supplied <- FALSE
+  if (!is.null(num) && !is.null(denom)){
+    res <- list(num=num, denom=denom)
+    supplied <- TRUE
+  }
+  else if (!is.null(est) && !is.null(denom)) {
+    num <- round(est*denom)
+    res <- list(num=num, denom=denom)
+    supplied <- TRUE
+  }
+  else if (!is.null(est) && !is.null(lower) && !is.null(upper)) {
+    res <- ci2num(est, lower, upper)
+    supplied <- TRUE
+  }
+  else {
+    pnames <- list(inc="incidence", prev="prevalence", mort="mortality", rem="remission")
+    if (prefix %in% c("prev","rem","inc"))
+      res <- list(num=rep(0,nage), denom=rep(0,nage), supplied=FALSE)
+    else stop(sprintf("Not enough information supplied to obtain numerator and denominator for %s.\nNeed either numerator and denominator, estimate and denominator, or estimate with lower and upper credible limit", pnames[[prefix]]))
+  }
+  if (prefix=="prev") res$num[1] <- 0  # prevalence at age zero assumed exactly 0
+  if (hier)  # for hierarchical models
+    for (i in c("num","denom"))
+      res[[i]] <- array(res[[i]], dim=c(nage, ngroup, ngender))
+  names(res) <- paste(prefix, names(res), sep="_")
+  res$supplied <- supplied
+  res
 }
 
 check_trenddata <- function(trend, nage){
-    baddf <- FALSE 
-    if (is.data.frame(trend)){
-        trend <- as.matrix(trend)
-        if (!is.numeric(trend)) baddf <- TRUE 
-    }
-    if (!is.matrix(trend) || baddf)
-        stop("trends data should be a matrix or data frame of numerics")
-    if (nrow(trend) != nage || ncol(trend) != nage) {
-        stop(sprintf("trend matrix of dimension (%s,%s), should be (%s,%s) to match the number of ages",nrow(trend),ncol(trend),nage,nage))
-    }
+  baddf <- FALSE 
+  if (is.data.frame(trend)){
+    trend <- as.matrix(trend)
+    if (!is.numeric(trend)) baddf <- TRUE 
+  }
+  if (!is.matrix(trend) || baddf)
+    stop("trends data should be a matrix or data frame of numerics")
+  if (nrow(trend) != nage || ncol(trend) != nage) {
+    stop(sprintf("trend matrix of dimension (%s,%s), should be (%s,%s) to match the number of ages",nrow(trend),ncol(trend),nage,nage))
+  }
 }
 
-##' Summarise estimates from a disbayes model.  Deprecated in favour of the "tidy" method". 
+##' Quick and dirty plot of estimates from disbayes models against age
 ##'
-##' @param object Object returned by \code{\link{disbayes}}
+##' Posterior medians and 95% credible intervals for a quantity of interest are plotted against year of age.
 ##'
-##' @param vars Names of the variables of interest to return.  If not supplied, all estimated quantities are returned. 
+##' @param x Object returned by \code{\link{disbayes}}
+##'
+##' @param variable Name of the variable of interest to plot against age, by default case fatality rates.
 ##'
 ##' @param ... Other arguments. Currently unused
 ##'
-##' Deprecated in favour of \code{\link{tidy.disbayes}}.
+##' @return A \code{ggplot2} object that can be printed to show the plot, or customised by adding \code{geom}s.
+##'
+##' Better plots can be drawn by \code{tidy}ing the object returned by \code{disbayes}, and using \code{ggplot2} directly on the tidy data frame that this produces. See the vignette for examples. 
 ##' 
 ##' @export
-summary.disbayes <- function(object, vars=NULL, ...){
-    fit <- object$fit
-    summ <- summary_disbayes_fit(fit, vars=vars) 
-    class(summ) <- c("summary.disbayes", class(summ))
-    summ
+plot.disbayes <- function(x, variable="cf", ...){
+  var <- NULL 
+  summcf <- tidy(x) %>%
+    filter(var==variable)
+  p <- ggplot2::ggplot(summcf, ggplot2::aes_string(x="age")) + 
+    ggplot2::geom_pointrange(ggplot2::aes_(y=as.name("50%"),
+                                           ymin=as.name("2.5%"),
+                                           ymax=as.name("97.5%")))
+  p
 }
 
-##' Summarise estimates from the model.  Deprecated in favour of the "tidy" method. 
-##'
-##' @param fit A Stan fitted model object
-##'
-##' @param vars Names of variables indexed by age, e.g. \code{vars="cf"} if you want the case fatality estimates for all ages.
-##'
-##' Deprecated in favour of \code{\link{tidy.disbayes}}.
-##'
+
 ##' @export
-summary_disbayes_fit <- function(fit, vars=NULL){
-    summ <- rstan::summary(fit)$summary
-    summ <- as.data.frame(summ[, c("2.5%","50%","97.5%")])
-    names(summ) <- c("lower95","med","upper95")
-    if (!is.null(vars)) {
-        vrex <- paste(vars, collapse="|")
-        rex <- sprintf("^%s\\[.+\\]$", vrex)
-        rows <- grep(rex, rownames(summ))
-        summ <- summ[rows,,drop=FALSE]
-    }
-    summ
+print.disbayes <- function(x, ...){
+  cat("Call:\n")
+  dput(x$call)
+  cat(sprintf("\nTo summarise parameter estimates, call tidy() on the fitted model object\n"))
 }
 
-##' Plot estimates from the model against age
-##'
-##' Posterior medians and 95% credible intervals for a quantity of interest are plotted against year of age.  
-##'
-##' @param x Object returned by \code{\link{disbayes}}
-##'
-##' @param variable Name of the variable of interest to plot against age
-##'
-##' @param unsmoothed If \code{TRUE}, results from the unsmoothed model are overlaid
-##'
-##' @param ... Other arguments. Currently unused
-##' 
 ##' @export
-plot.disbayes <- function(x, variable="cf", unsmoothed=TRUE, ...){
-    summcf <- summary.disbayes(x, vars=variable)
-    summcf$age <- seq_len(x$nage)
-    p <- ggplot2::ggplot(summcf, ggplot2::aes_string(x="age"))
-    if (!is.null(x$fitu) && unsmoothed){
-        summu <- summary_disbayes_fit(x$fitu, vars=variable)
-        summu$age <- seq_len(x$nage)
-        p <- p + 
-          ggplot2::geom_pointrange(ggplot2::aes_string(y="med", ymin="lower95", ymax="upper95"), data=summu, col="gray")
-    }
-    p <- p +
-      ggplot2::geom_pointrange(ggplot2::aes_string(y="med", ymin="lower95", ymax="upper95"))
-    p
+summary.disbayes <- function(object, ...){
+  print(object)
 }
-
-plot.summary.disbayes <- function(summ, variable="cf"){
-    rex <- sprintf("%s\\[.+\\]", variable)
-    rows <- grep(rex, rownames(summ))
-    summcf <- summ[rows,,drop=FALSE]
-    summcf$age <- seq_len(nrow(summcf))
-    p <- ggplot2::ggplot(summcf, ggplot2::aes_string(x="age")) + 
-      ggplot2::geom_pointrange(ggplot2::aes_string(y="med", ymin="lower95", ymax="upper95"))
-    p
-}
-
-##' Form a tidy data frame from the estimates from a disbayes fit
-##'
-##' Simply call this after fitting disbayes, as, e.g.
-##' ```
-##' res <- disbayes(...)
-##' tidy(res)
-##' ```
-##' 
-##' @importFrom generics tidy
-##'
-##' @param x Object returned by \code{\link{disbayes}}
-##'
-##' @param ... Other arguments (currently unused)
-##'
-##' @return A data frame with one row per model parameter, giving summary statistics
-##' for the posterior distribution for that parameter.   For array parameters, e.g. those
-##' that depend on age or area, then the age and area are returned in separate columns,
-##' to make it easier to summarise and plot the results, e.g. using \pkg{ggplot2}. 
-##' 
-##' @export
-tidy.disbayes <- function(x,...) {
-    summ <- tidy_disbayes_nonhier(x$fit) %>% mutate(model="smoothed")
-    summu <- tidy_disbayes_nonhier(x$fitu) %>% mutate(model="unsmoothed")
-    rbind(summ, summu)
-}
-
-tidy_disbayes_nonhier <- function(fit, ...) {
-    vars_age <- c("cf","inc","prev", "inc_par","cf_par","rem_par",
-                  "dcf","rem","inc_prob","rem_prob","prev","mort")
-    vars_agestate <- "state_probs"
-    vars_const <- c("beta","beta_inc","lambda","lambda_inc","prevzero","lcfbase")
-    summ <- rstan::summary(fit)$summary %>% 
-                              as.data.frame() %>%
-                              rownames_to_column("varorig") %>%
-                              tidyr::extract(varorig, "var", "(.+)\\[.+\\]", remove=FALSE)
-    summ_age <- summ %>% 
-        filter(var %in% vars_age) %>% 
-        tidyr::extract(varorig, "age", ".+\\[(.+)\\]")
-    summ_agestate <- summ %>% 
-        filter(var %in% vars_agestate) %>% 
-        tidyr::extract(varorig, c("age", "state"), ".+\\[(.+),(.+)\\]")
-    stats <- c("mean", "se_mean", "sd", "2.5%", "25%", "50%", "75%", "97.5%", "n_eff", "Rhat")
-    summ <- summ %>%
-        filter(var %in% vars_const) %>% 
-        mutate(var = varorig) %>% 
-        select(-varorig) %>% 
-        full_join(summ_age, by=c("var",stats)) %>%
-        full_join(summ_agestate, by=c("var","age",stats)) %>%
-        mutate(age = as.numeric(age),
-               state = as.numeric(state)) %>%
-        relocate(var, age, state)
-    summ
-}
-
-tidy.disbayes_trend_onemodel <- function(fit, startyear = 0, ...) {
-    vars_age <- c("inc_par", "rem_par", "cf_base", "rem", "inc_prob", "rem_prob", "prev", "mort")
-    vars_ageyear <- c("cf", "inc")
-    vars_ageyearstate <- c("state_probs")
-    vars_const <- c("beta","lambda")
-
-    summ <- rstan::summary(fit)$summary %>% 
-                              as.data.frame() %>%
-                              rownames_to_column("varorig") %>%
-                              tidyr::extract(varorig, "var", "(.+)\\[.+\\]", remove=FALSE)
-
-    summ_age <- summ %>% 
-        filter(var %in% vars_age) %>% 
-        tidyr::extract(varorig, "age", ".+\\[([[:digit:]]+)\\]") %>%
-        mutate(age = as.numeric(age))
-
-    summ_ageyear <- summ %>%
-        filter(var %in% vars_ageyear) %>% 
-        tidyr::extract(varorig, into=c("age", "year"),
-                       ".+\\[([[:digit:]]+),([[:digit:]]+)\\]") %>%
-        mutate(age = as.numeric(age),
-               year = as.numeric(year) + startyear - 1)
-
-    summ_ageyearstate <- summ %>%
-        filter(var %in% vars_ageyearstate) %>%
-        tidyr::extract(varorig, into=c("age", "year", "state"),
-                       ".+\\[(.+),(.+).(.+)\\]") %>% 
-        mutate(age = as.numeric(age),
-               year = as.numeric(year) + startyear - 1,
-               state = as.numeric(state))
-
-    stats <- c("mean", "se_mean", "sd", "2.5%", "25%", "50%", "75%", "97.5%", "n_eff", "Rhat")
-    summ <- summ %>% 
-        filter(var %in% vars_const) %>%
-        mutate(var = varorig) %>% 
-        full_join(summ_age, by=c("var",stats)) %>% 
-        full_join(summ_ageyear, by=c("var","age",stats)) %>% 
-        full_join(summ_ageyearstate, by=c("var","age","year",stats)) %>%
-        relocate(var, age, year, state)
-
-  summ
-}
-
-##' Tidy output for a disbayes model with a time trend
-##' 
-##' @importFrom generics tidy
-##'
-##' @param x Object returned by \code{\link{disbayes}}
-##'
-##' @param startyear Constant to add to the year variable in the result (e.g. to convert years 1-100 to years 1918-2018).
-##' 
-##' @inheritParams tidy.disbayes
-##' 
-##' @export
-tidy.disbayes_trend <- function(x,startyear=0,...) {
-    summ <- tidy.disbayes_trend_onemodel(x$fit,startyear=startyear) %>% mutate(model="smoothed")
-    summu <- tidy.disbayes_trend_onemodel(x$fitu,startyear=startyear) %>% mutate(model="unsmoothed") 
-    rbind(summ, summu)
-}
-
-## Functions that provide useful post-estimation functionality should be given the same names as the corresponding functions in rstanarm (if applicable). For example, posterior_predict() to draw from the posterior predictive distribution, posterior_interval()
-## https://cran.r-project.org/web/packages/rstantools/vignettes/developer-guidelines.html
-

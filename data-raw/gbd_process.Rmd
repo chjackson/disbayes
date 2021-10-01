@@ -434,6 +434,8 @@ gbdpyrcr %>%
 
 Put numerators and denominators for incidence, prevalence and mortality in different columns
 
+Rename variables for consistency with disbayes 
+
 ```{r}
 
 gbdmod <- readRDS(file=file.path(relative_path_gbd, "gbdmod.rds"))
@@ -444,16 +446,23 @@ gbddb <- gbdmod %>%
   pivot_wider(names_from=measure,
               values_from=c("num","denom"),
               values_fill = list(num=0, denom=5000)) %>% 
-  mutate(location = fct_recode(str_to_title(location),
-                                 `Greater Manchester`="Greatermanchester",
-                                 `North East (city region)`="Northeast",
-                                 `North East (region)`="North East",
-                                 `West Midlands (city region)`="Westmidlands",
-                                 `West Midlands (region)`="West Midlands",
-                                 `East of England`="East Of England")) %>%
-  mutate(cause = str_to_sentence(cause)) %>%
-  arrange(location, cause, sex, ageyr) %>%
-  filter(! cause %in% c("Hypertensive heart disease"))
+  mutate(area = fct_recode(str_to_title(location),
+                           `Greater Manchester`="Greatermanchester",
+                           `North East (city region)`="Northeast",
+                           `North East (region)`="North East",
+                           `West Midlands (city region)`="Westmidlands",
+                           `West Midlands (region)`="West Midlands",
+                           `East of England`="East Of England")) %>%
+  mutate(disease = str_to_sentence(cause)) %>%
+  rename(age = ageyr,
+         gender = sex,
+         inc_num = num_inc, inc_denom = denom_inc,
+         prev_num = num_prev, prev_denom = denom_prev,
+         mort_num = num_mort, mort_denom = denom_mort
+  ) %>% 
+  select(age, gender, disease, area, areatype, inc_num, inc_denom, prev_num, prev_denom, mort_num, mort_denom) %>%
+  arrange(area, disease, gender, age) %>%
+  filter(! disease %in% c("Hypertensive heart disease"))
 
 saveRDS(gbddb, file=file.path(relative_path_gbd, "gbddb.rds"))
 
@@ -485,7 +494,7 @@ Convert remission "rates" to numerators and denominators by assuming a denominat
 
 ```{r}
 library(readxl)
-rem <- read_excel("~/work/chronic/Figure_10__Predicted_10-year_net-survival_using_the_hybrid_approach_for_men_and_women_(aged_15_to_99_years).xls", range="A7:C26", na=":") %>%
+rem <- read_excel("~/work/chronic/cancerdata/Figure_10__Predicted_10-year_net-survival_using_the_hybrid_approach_for_men_and_women_(aged_15_to_99_years).xls", range="A7:C26", na=":") %>%
   pivot_longer(cols=c("Men","Women"), names_to = "sex", values_to = "surv10") %>% 
   mutate(prem1 = 1 - (1 - surv10/100)^(1/10)) %>% 
   filter(Cancer %in% c("Breast","Uterus","Colorectal","Liver","Stomach","Lung"),
@@ -499,29 +508,29 @@ rem <- read_excel("~/work/chronic/Figure_10__Predicted_10-year_net-survival_usin
                              #,
                              #"Liver cancer"="Liver"
                              ),
-         sex = fct_recode(sex, "Male"="Men", "Female"="Women")) %>% 
-  rename(cause = Cancer)
+         gender = fct_recode(sex, "Male"="Men", "Female"="Women")) %>% 
+  rename(disease = Cancer)
 
 cancers <- c("Tracheal, bronchus, and lung cancer", "Colon and rectum cancer", "Stomach cancer", "Liver cancer", "Breast cancer", "Uterine cancer")
 
 num_cancer <- gbddb %>% 
-  filter(cause %in% cancers, 
-         ageyr %in% 15:99) %>% 
-  group_by(sex, cause) %>% 
-  summarise(ncases = sum(num_prev)) %>% 
-  left_join(rem, by=c("cause","sex")) %>%
-  mutate(num_rem = round(ncases*prem1 / 100),
-         denom_rem = round(ncases / 100)) %>% 
-  select(sex, cause, num_rem, denom_rem)
+  filter(disease %in% cancers, 
+         age %in% 15:99) %>% 
+  group_by(gender, disease) %>% 
+  summarise(ncases = sum(prev_num)) %>% 
+  left_join(rem, by=c("disease","gender")) %>%
+  mutate(rem_num = round(ncases*prem1 / 100),
+         rem_denom = round(ncases / 100)) %>% 
+  select(gender, disease, rem_num, rem_denom)
 num_cancer
 
 gbddb <- gbddb %>% 
   left_join(num_cancer) %>% 
-  mutate(num_rem = replace_na(num_rem, 0),
-         denom_rem = replace_na(denom_rem, 0))
+  mutate(rem_num = replace_na(rem_num, 0),
+         rem_denom = replace_na(rem_denom, 0))
 
 saveRDS(gbddb, file=file.path(relative_path_gbd, "gbddb.rds"))
-saveRDS(gbddb, file=file.path("~/work/chronic", "gbddb.rds"))
+saveRDS(gbddb, file=file.path("~/work/chronic/disbayes/metahit", "gbddb.rds"))
 
 qbeta(c(0.025, 0.975), 128, 940-128) # 0.11 to 0.16.more plausible
 

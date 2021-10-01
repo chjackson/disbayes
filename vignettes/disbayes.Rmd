@@ -98,10 +98,10 @@ The following data are given in the R data frame `ihdengland` supplied in the pa
 
 and we wish to estimate case fatality by age, given these inputs.  A selection of rows from the full data frame are shown here.  We select only the data from one area and gender (Bristol, male) for this illustration. 
 
-```{r,show=FALSE}
+```{r,show=FALSE,message=FALSE}
 library(disbayes)
-library(dplyr)
-ihdbristol <- ihdengland %>% filter(location=="Bristol", sex=="Male")
+library(dplyr,quietly = TRUE)
+ihdbristol <- ihdengland %>% filter(area=="Bristol", gender=="Male")
 ihdbristol %>% filter(between(age, 50, 55))
 ```
 
@@ -120,6 +120,32 @@ Then secondly, estimates for five-year age groups were converted to one-year gro
 ```{r,eval=TRUE}
 ihdbristol[ihdbristol$age %in% 50:55, ]
 ```
+
+## Smoothly disaggregating data from age groups to years of age 
+
+As an aside, here we show how the temporal disaggregation procedure is done in R. We have a disease count outcome that is measured for 5-year age groups, as in the following data frame.  
+
+```{r}
+dat <- data.frame(agefrom=seq(0,20,5), ageto=seq(4,24,5),
+                  measure=c(15,20,24,35,29))
+dat
+```
+The following code shows how to produce a smoothly disaggregated version of this count, and compares the smooth disaggregation to a crude disaggregation where the 5-year counts are simply divided by 5 to estimate one-year counts.
+We can check that the smoothly-disaggregated measures add up to the original data that were provided for the 5-year age groups. 
+
+```{r}
+if (requireNamespace("tempdisagg")) { 
+   disagg_crude <- rep(dat$measure/5, each=5)
+   disagg_smooth <- predict(tempdisagg::td(dat$measure ~ 1, to=5, method="fast"))
+   ageyr <- 0:24
+   plot(ageyr, disagg_crude, type="l", xlab="Age", ylab="Measure", ylim=c(0,8))
+   lines(ageyr, disagg_smooth, col="blue")
+   agegroup <- cut(ageyr, seq(0,25,5), right = FALSE)
+   tapply(disagg_smooth, agegroup, sum)
+}
+```
+See the documentation for the [tempdisagg](https://cran.r-project.org/web/packages/tempdisagg/index.html) package, including the vignettes and the help page for the `td` function in this package, for more information about smooth temporal disaggregation.  Uneven intervals are also supported, and disaggreggation problems where the mean (rather than the sum) of the high-frequency data is consistent with the low-frequency data. 
+
 
 ## Determining numerators and denominators from point and/or interval estimates
 
@@ -170,7 +196,11 @@ This information might come from nearby ages that are better-informed, through e
 
 # Fitting Bayesian models with the Stan software via disbayes
 
-The Stan software ([mc-stan.org](http://mc-stan.org)) allows any Bayesian model to be written down in the Stan language.  The software then enables a sample from the posterior distribution to be drawn, using Hamiltonian Monte Carlo sampling.
+The Stan software ([mc-stan.org](http://mc-stan.org)) allows any Bayesian model to be written down in the Stan language.  The software then enables the unknown parameters to be estimated through two alternative methods: 
+
+1. `method="opt"` (the default). Optimisation is used to find the mode of the posterior distribution, which gives a point estimate for the parameters.  An approximate sample from the posterior is then drawn using a normal approximation around the posterior mode.   This sample is summarised to give credible intervals. 
+
+2. `method="mcmc"`.  A sample from the posterior is drawn using Markov Chain Monte Carlo sampling, which is summarised to give a point estimate (median) and credible intervals. This is slower (typically taking a few minutes) but gives a more accurate characterisation of uncertainty. 
 
 The `disbayes` package uses Stan to fit the Bayesian disease model given here to the data $\mathbf{y} = \{i_a, r_a, n_a\}$ supplied in the `ihdbristol` data frame.   The function `disbayes` does the work of converting the data to the required format for Stan, and calling the Stan software to run the simulations.
 
@@ -190,71 +220,105 @@ The required variables include at least information about incidence and mortalit
 
 The value given for the argument is a character string identifying the corresponding variable in the data.  For mortality and prevalence, arguments with names beginning `mort` and `prev` are supplied in the same manner. 
 
-Before running the `disbayes` function to fit the models, we set up the computer for parallel processing.  This allows multiple processor cores to be used, which enables the models to fit substantially faster. 
-```{r}
-options(mc.cores = parallel::detectCores())
-```
+## Running `disbayes`: optimisation method 
 
 The following call to the `disbayes` function is then made to fit the model to the `ihdbristol` data.   The argument `eqage=40` defines an assumption that case fatality is constant for all ages below 40. 
 
 ```{r, eval=TRUE, cache=TRUE, warning=FALSE, message=FALSE}
-dbres <- disbayes(dat = ihdbristol,
-                  age = "age",
-                 inc_num = "inc_num", 
-                 inc_denom = "inc_denom", 
-                 prev_num = "prev_num", 
-                 prev_denom = "prev_denom",
-                 mort_num = "mort_num",
-                 mort_denom = "mort_denom",
-                 eqage = 40,
-                 chains = 2,
-                 iter = 1000
-                 )
+dbres <- disbayes(dat = ihdbristol, age = "age",
+                 inc_num = "inc_num", inc_denom = "inc_denom", 
+                 prev_num = "prev_num", prev_denom = "prev_denom",
+                 mort_num = "mort_num", mort_denom = "mort_denom",
+                 inc_model="indep",
+                 eqage = 40)
 ```
 
-The computation may take a few minutes, or less depending on the number of cores and their speed.   The number of iterations `iter` should be high enough that the results are not affected by Monte Carlo error. 
+For comparison, we also fit an "unsmoothed" version of this model where the age-specific
+case fatality rates have independent priors, rather than being related through a spline function.  
 
-The `disbayes` function returns a list with components `fit` and `fitu`, containing the smoothed and unsmoothed model fits respectively.  Each of these components is an object in the `stanfit` format defined by the `rstan` R interface to Stan. 
+```{r, eval=TRUE, cache=TRUE, warning=FALSE, message=FALSE}
+dbresu <- disbayes(dat = ihdbristol, age = "age",
+                 inc_num = "inc_num", inc_denom = "inc_denom", 
+                 prev_num = "prev_num", prev_denom = "prev_denom",
+                 mort_num = "mort_num", mort_denom = "mort_denom",
+                 cf_model = "indep", 
+                 eqage = 40) # chains = 2, iter = 1000)
+```
+
+These produce accurate point estimates (defined by the posterior mode), and approximate credible intervals.  
+
+## Running `disbayes`: MCMC method 
+
+If more accurate credible intervals are desired, then MCMC sampling can be used instead by setting `method="mcmc"`, as follows.  This is more computationally intensive, typically taking a few minutes per fit.   
+
+```{r,eval=FALSE}
+options(mc.cores = parallel::detectCores())
+dbresm <- disbayes(dat = ihdbristol, age = "age",
+                 inc_num = "inc_num", inc_denom = "inc_denom", 
+                 prev_num = "prev_num", prev_denom = "prev_denom",
+                 mort_num = "mort_num", mort_denom = "mort_denom",
+                 method="mcmc", chains=2, iter=1000,
+                 eqage = 40)
+```
+
+The sampling by `rstan` can be controlled, e.g. by setting the number of chains to run (perhaps on parallel cores) and the number of iterations - see `help(disbayes)` and the Stan documentation for full details. The number of iterations `iter` should be high enough that the results are not affected by Monte Carlo error.   
+
+After using MCMC, we should check that the sampler has converged, by examining the "trace plot" of the simulation progress for selected parameters. The simulated chains should mix together and look like white noise.   Also if the `disbayes` call resulted in many reports of "divergent transitions", then the chains are unlikely to have converged to a valid posterior.  If convergence hasn't occurred, then the model probably needs to be simplified (e.g. by increasing `eqage`), or the data are insufficient. 
+
+```{r,eval=FALSE}
+rstan::traceplot(dbres$fit, pars=paste0("cf[", 60:65, "]"))
+```
 
 
 # IHD example: Results 
 
-The results could be summarised and manipulated using functions provided by rstan, e.g. the `summary` and `extract` method for `stanfit` objects.    For example, we can check the MCMC simulations have converged, by examining the "trace plot" of the simulation progress for selected parameters. The simulated chains should mix together and look like white noise.   Also if the `disbayes` call resulted in many reports of "divergent transitions", then the chains are unlikely to have converged to a valid posterior.  If convergence hasn't occurred, then the model probably needs to be simplified (e.g. by increasing `eqage`), or the data are insufficient. 
+The `disbayes` function returns a list, with components that depend on what estimation method was used.   For `method="opt"` this list has a component `fit` containing the estimates and draws from the posterior approximation, as returned by the function `optimizing` in the `rstan` package.
+For `method="mcmc"`, this list has a component `fit` which is an object in the `stanfit` format defined by the `rstan` R interface to Stan.  See `help(disbayes)` for further details of the returned object. 
 
-```{r,eval=TRUE}
-rstan::traceplot(dbres$fit, pars=paste0("cf[", 60:65, "]"))
-```
-
-The `disbayes` package provides some shortcuts for extracting summary statistics.   The posterior medians, 95% credible intervals and other statistics for all parameters of interest can be extracted from the fitted models using the `tidy` method for `disbayes` objects.
-
-The result is a data frame with the variables indicated in the variable called `var`.  Variables include `inc` (incidence), `cf` (case fatality), `mort` (mortality), `prev` (prevalence), each indexed by year of age given in the `age` variable.   `model` indicates the smoothed or unsmoothed model.  The first few rows of the summary below contain estimates of incidence for the first few years of age. 
+Whatever estimation method was used, the parameter estimates can be extracted from a disbayes object using the `tidy` method.   The point estimates (modes or posterior medians) 95% credible intervals and other quantiles for all parameters of interest are arranged in a data frame, with the variables indicated in the variable called `var`.  Variables include `inc` (incidence), `cf` (case fatality), `mort` (mortality), `prev` (prevalence), each indexed by year of age given in the `age` variable.
 
 ```{r, eval=TRUE}
-summ <- tidy(dbres)
-head(summ)
+summ <- tidy(dbres) 
 ```
 
-To extract results for a specific variable and model, it is convenient to use standard tidyverse functions, e.g. to get the median and interquartile range of case fatality under the smoothed model for people aged between 60 and 65: 
+To extract results for a specific variable and model, it is convenient to use standard tidyverse functions, e.g. to get the median and interquartile range of case fatality for people aged between 60 and 65: 
 
 ```{r,eval=TRUE}
-library(dplyr)
+library(dplyr,quietly=TRUE)
 summ %>% 
-  filter(var=="cf", between(age,60,65), model=="smoothed") %>%
+  filter(var=="cf", between(age,60,65)) %>%
   select(age, `25%`, `50%`, `75%`)
 ```
 
-The default `plot` method for objects returned by `disbayes` plots the posterior summaries for case fatality.  Both the smoothed and unsmoothed estimates from age 40 and above are shown.    If other styles of plot are desired, the tidy data frame output of the `tidy` method above is designed so that it can be passed to `ggplot2` without too much effort. 
+The default `plot` method for objects returned by `disbayes` plots the posterior summaries for case fatality, allowing a quick check of the model results.  Or do `plot(..., variable="inc")` for incidence.  The function returns a `ggplot2` object that can be modified with `ggplot2` functions, e.g. to add axis labels.
 
 ```{r, eval=TRUE, warning=FALSE}
 library(ggplot2)
-plot(dbres) +  ylab("Case fatality") + xlab("Age") + 
-  coord_cartesian(xlim=c(40,100), ylim=c(0,0.5)) 
+plot(dbres) +  ylab("Case fatality") + xlab("Age") 
 ```
 
-Under the unsmoothed model, the uncertainty about case fatality is biggest for the youngest and oldest ages, where either prevalence is lowest or the proportion of the cohort who are still alive is lowest. 
+More flexible plots can be built by using `ggplot` directly on the tidied estimates.  The following shows the estimates of case fatality from the unsmoothed model in blue, with the estimates from the smoothed model superimposed in black. 
+```{r,warning=FALSE}
+summs <- summ %>% filter(var=="cf")
+summu <- tidy(dbresu) %>% filter(var=="cf")
+ggplot(summu, aes(x=age)) + 
+  geom_pointrange(aes(y=`50%`, ymin=`2.5%`, ymax=`97.5%`),
+                  data=summu, col="blue", alpha=0.5) +
+  geom_pointrange(aes(y=`50%`, ymin=`2.5%`, ymax=`97.5%`),
+                  data=summ, col="black", alpha=0.5)
+```
 
-The smoothed model givese more precise estimates, aided by the assumption that case fatalities are similar between similar ages, and that case fatality is constant under the age of 40.  The smoothed model also removes the artefacts from the 5-year age grouping that are seen in the unsmoothed results.   While the point estimates agree with those from DisMod II (not shown here), the Bayesian method has the benefit of characterising uncertainty as a posterior distribution.  Uncertainty about case fatality in this example arises from the disease prevalence.   If the prevalence is lower, fewer people have the disease, giving less information from which to estimate the case fatality for people with the disease. 
+Under the unsmoothed model, there is no information about case fatality in the youngest ages, hence the estimates are being drawn from the vague prior distribution that take values between about 0 and 60.    The smoothed model gives more useful estimates, aided by the assumption that case fatalities are similar between similar ages, and that case fatality is constant under the age of 40.  
 
+
+## Other options to `disbayes`
+
+Full documentation is given in `help(disbayes)`.  Some more useful options include 
+
+* `cf_model`.  Model for how case fatality varies with age.  As well as the default spline smooth model and unsmoothed models illustrated above, `cf_model="increasing"` fits a model where case fatality is restricted to increase with age, and `cf_model="const"` specifies a constant case fatality with age. 
+
+* `inc_model`. By default, incidence rates are smoothed as a function of age using a spline, as with case fatality rates.   `inc_model="indep"` estimates independent incidence rates for each age. 
+* `rem_model`.  If no remission data are supplied, then the disease is assumed to have zero remission rate.   If remission data are supplied, then remission rates are estimate.   By default, these are assumed to be a constant function of age (`rem_model="const"`).  To estimate independent remission rates for each age, supply `rem_model="indep"`.  Currently no spline smoothing option or other constraint is implemented. 
 
 
 # Advanced models 

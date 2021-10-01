@@ -10,6 +10,6 @@ looi_disbayes_hier(x)
 \item{x}{Object returned by \code{\link{disbayes_hier}}}
 }
 \description{
-Return observation-level leave-one-out cross-validatory statistics from a disbayes_hier_gender fit
+Return observation-level leave-one-out cross-validatory statistics from a disbayes_hier fit
 as a tidy data frame.
 }

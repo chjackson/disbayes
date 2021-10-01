@@ -2,18 +2,21 @@
 % Please edit documentation in R/disbayes.R
 \name{plot.disbayes}
 \alias{plot.disbayes}
-\title{Plot estimates from the model against age}
+\title{Quick and dirty plot of estimates from disbayes models against age}
 \usage{
-\method{plot}{disbayes}(x, variable = "cf", unsmoothed = TRUE, ...)
+\method{plot}{disbayes}(x, variable = "cf", ...)
 }
 \arguments{
 \item{x}{Object returned by \code{\link{disbayes}}}
 
-\item{variable}{Name of the variable of interest to plot against age}
-
-\item{unsmoothed}{If \code{TRUE}, results from the unsmoothed model are overlaid}
+\item{variable}{Name of the variable of interest to plot against age, by default case fatality rates.}
 
 \item{...}{Other arguments. Currently unused}
+}
+\value{
+A \code{ggplot2} object that can be printed to show the plot, or customised by adding \code{geom}s.
+
+Better plots can be drawn by \code{tidy}ing the object returned by \code{disbayes}, and using \code{ggplot2} directly on the tidy data frame that this produces. See the vignette for examples.
 }
 \description{
 Posterior medians and 95% credible intervals for a quantity of interest are plotted against year of age.
