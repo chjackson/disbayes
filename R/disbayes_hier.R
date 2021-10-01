@@ -160,7 +160,7 @@ disbayes_hier <- function(data,
 
     ## TODO get numeric input working for these before trying EB 
     scf_isfixed <- !is.null(scf_fixed)
-    scfmale_isfixed <- !is.null(scfmale_fixed)
+    scfmale_isfixed <- !is.null(scfmale_fixed) || (ng==1)
     sinc_isfixed <- !is.null(sinc_fixed)
 
     ## Empirical Bayes. Fix random effects variances at their posterior modes.
