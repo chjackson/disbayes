@@ -1,5 +1,3 @@
-library(dplyr)
-library(disbayes)
 
 db <- disbayes_hier(ihdengland, age="age", group="area", gender="gender",
                     inc_num = "inc_num", inc_denom = "inc_denom",

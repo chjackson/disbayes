@@ -1,8 +1,4 @@
-library(dplyr)
-library(disbayes)
-
-ihdmale <- ihdengland %>% 
-  dplyr::filter(gender=="Male")
+source("data.r")
 
 db <- disbayes_hier(ihdmale, age="age", group="area", 
                              inc_num = "inc_num", inc_denom = "inc_denom",
