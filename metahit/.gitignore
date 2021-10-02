@@ -2,7 +2,8 @@ results_hier/
 results_nonhier/
 results_hier_gender/
 results_trend/
-gbddb.rds
+gbddb*.rds
 resall.rda
 metahit-hpc-log.txt
+res*.rds
 

@@ -12,3 +12,6 @@ vignettes/dbh.rds
 ^docs$
 ^pkgdown$
 ^\.github$
+vignettes/disbayes_cache
+vignettes/disbayes_files
+vignettes/disbayes.html
