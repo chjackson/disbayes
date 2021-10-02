@@ -2,8 +2,8 @@
 % Please edit documentation in R/disbayes_hier.R
 \name{disbayes_hier}
 \alias{disbayes_hier}
-\title{Bayesian estimation of chronic disease epidemiology from incomplete data - hierarchical model for case fatalities 
-This is computationally intensive.}
+\title{Bayesian estimation of chronic disease epidemiology from incomplete data -
+hierarchical model for case fatalities.}
 \usage{
 disbayes_hier(
   data,
@@ -39,9 +39,7 @@ disbayes_hier(
   prev_zero = FALSE,
   loo = TRUE,
   sprior = c(1, 1),
-  scf_fixed = NULL,
-  scfmale_fixed = NULL,
-  sinc_fixed = NULL,
+  hp_fixed = NULL,
   nfold_int_guess = 5,
   nfold_int_upper = 100,
   nfold_slope_guess = 5,
@@ -50,8 +48,6 @@ disbayes_hier(
   mean_slope_prior = c(5, 5),
   gender_int_priorsd = 0.82,
   gender_slope_priorsd = 0.82,
-  sd_int_fixed = NULL,
-  sd_slope_fixed = NULL,
   inc_prior = c(2, 0.1),
   rem_prior = c(2, 1),
   method = "mcmc",
@@ -63,22 +59,29 @@ disbayes_hier(
 }
 \arguments{
 \item{data}{Data frame containing some of the variables below.  The
-  variables below are provided as character strings naming columns in this
-  data frame.   For each disease measure available, one of the following three
-  combinations of variables must be specified:
+variables below are provided as character strings naming columns in this
+data frame.   For each disease measure available, one of the following three
+combinations of variables must be specified:
 
-  (1) numerator and denominator (2) estimate and denominator (3) estimate
-  with lower and upper credible limits
-  
-  Mortality must be supplied, and at least one of incidence and prevalence. 
-  If remission is assumed to be possible, then remission data should also be supplied (see below).
+(1) numerator and denominator (2) estimate and denominator (3) estimate
+with lower and upper credible limits
 
-  For estimates based on registry data assumed to cover the whole
-  population, then the denominator will be the population size.}
+Mortality must be supplied, and at least one of incidence and prevalence.
+If remission is assumed to be possible, then remission data should also be supplied (see below).
 
-\item{group}{Variable in the data representing the area (or other grouping factor).}
+For estimates based on registry data assumed to cover the whole
+population, then the denominator will be the population size.}
 
-\item{gender}{If \code{NULL} (the default) then the data are one homogenous gender, and there should be one row per year of age.  Otherwise, set \code{gender} to a character string naming the variable in the data representing gender (or other binary grouping factor).  Gender will then treated as a fixed additive effect, so the linear effect of gender on log case fatality is the same in each area.  The data should have one row per year of age and gender.}
+\item{group}{Variable in the data representing the area (or other grouping
+factor).}
+
+\item{gender}{If \code{NULL} (the default) then the data are one homogenous
+gender, and there should be one row per year of age.  Otherwise, set
+\code{gender} to a character string naming the variable in the data
+representing gender (or other binary grouping factor).  Gender will then
+treated as a fixed additive effect, so the linear effect of gender on log
+case fatality is the same in each area.  The data should have one row per
+year of age and gender.}
 
 \item{inc_num}{Numerator for the incidence data, assumed to represent the
 observed number of new cases within a year among a population of size
@@ -86,14 +89,14 @@ observed number of new cases within a year among a population of size
 
 \item{inc_denom}{Denominator for the incidence data.
 
-  The function \code{\link{ci2num}} can be used to convert a published
-  estimate and interval for a proportion to an implicit numerator and
-  denominator.
+The function \code{\link{ci2num}} can be used to convert a published
+estimate and interval for a proportion to an implicit numerator and
+denominator.
 
-  Note that to include extra uncertainty beyond that implied by a published
-  interval, the numerator and denominator could be multiplied by a constant,
-  for example, multiplying both the numerator and denominator by 0.5 would
-  give the data source half its original weight.}
+Note that to include extra uncertainty beyond that implied by a published
+interval, the numerator and denominator could be multiplied by a constant,
+for example, multiplying both the numerator and denominator by 0.5 would
+give the data source half its original weight.}
 
 \item{inc}{Estimate of incidence.}
 
@@ -151,25 +154,36 @@ all ages below this age, inclusive, when using the smoothed model.}
 \item{eqagehi}{Case fatalities (and incidences) are assumed to be equal for
 all ages above this age, inclusive, when using the smoothed model.}
 
-\item{cf_model}{The following alternative models for case fatality are supported:
+\item{cf_model}{The following alternative models for case fatality are
+supported:
 
-\code{"default"} (the default). Random intercepts and slopes, and no further restriction. 
+\code{"default"} (the default). Random intercepts and slopes, and no
+further restriction.
 
 \code{"interceptonly"}.  Random intercepts, but common slopes.
 
-\code{"increasing"}. Case fatality is assumed to be an increasing function of age (note it is constant below \code{"eqage"} in all models) with a common slope for all groups. 
+\code{"increasing"}. Case fatality is assumed to be an increasing function
+of age (note it is constant below \code{"eqage"} in all models) with a
+common slope for all groups.
 
-\code{"const"} Case fatality is assumed to be constant with age, for all ages.
+\code{"const"} Case fatality is assumed to be constant with age, for all
+ages.
 
-In all models, case fatality is a smooth function of age, and incidence rates are is estimated independently for each age.}
+In all models, case fatality is a smooth function of age, and incidence
+rates are is estimated independently for each age.}
 
 \item{inc_model}{Model for how incidence varies with age.
 
-\code{"smooth"} (the default). Incidence is modelled as a smooth spline function of age, independently for eahc area (and gender). 
+\code{"smooth"} (the default). Incidence is modelled as a smooth spline
+function of age, independently for eahc area (and gender).
 
-\code{"indep"} Incidence rates for each year of age, area (and gender) are estimated independently.}
+\code{"indep"} Incidence rates for each year of age, area (and gender) are
+estimated independently.}
 
-\item{rem_model}{Model for how remission varies with age.  Currently supported models are \code{"const"} for a constant remission rate over all ages, or \code{"indep"} for a different remission rates estimated independently for each age with no smoothing.}
+\item{rem_model}{Model for how remission varies with age.  Currently
+supported models are \code{"const"} for a constant remission rate over all
+ages, or \code{"indep"} for a different remission rates estimated
+independently for each age with no smoothing.}
 
 \item{prev_zero}{If \code{TRUE}, attempt to estimate prevalence at age zero
 from the data, as part of the Bayesian model, even if the observed prevalence is zero.
@@ -183,29 +197,60 @@ the coefficients of the spline model.  The first refers to the spline model for 
 appropriately to the data, but higher values give stronger smoothing, or
 lower values give weaker smoothing,  if required.}
 
-\item{scf_fixed}{If this is set to a number, then the parameter determining the smoothness of case fatality with age (i.e. the standard deviation of the spline basis coefficients) is fixed at this number.  If \code{scf_fixed=TRUE}, then an "empirical Bayes" method is used, where the posterior mode of this parameter is determined (using the prior defined by \code{sprior}), and the model is fitted again with the parameter fixed at this mode.  If \code{scf_fixed=NULL} (the default) then a "full Bayes" method is used where the full posterior of this parameter is estimated.   NOT IMPLEMENTED YET FOR HIERARCHICAL MODELS}
+\item{hp_fixed}{A list with one named element for each hyperparameter
+to be fixed.  The value should be either
+\itemize{
+\item a number (to fix the hyperparameter at this number)
+\item \code{TRUE} (to fix the hyperparameter at the posterior mode from a training run
+where it is not fixed)
+}
 
-\item{scfmale_fixed}{Set to a number to fix the smoothness parameter for the gender effect at this number.  Only for models with additive gender and area effects.  Set to \code{TRUE} to fix this parameter at its posterior mode, which the function finds automatically through a training run.}
+If the element is either \code{NULL}, \code{FALSE}, or omitted from the list,
+then the hyperparameter is given a prior and estimated as part of the Bayesian model.
 
-\item{sinc_fixed}{As \code{scf_fixed}, but for incidence instead of case fatality.}
+The hyperparameters that can be fixed are
+\itemize{
+\item \code{scf} Smoothness parameter for the spline relating case fatality to age.
+\item \code{sinc} Smoothness parameter for the spline relating incidence to age.
+\item \code{scfmale} Smoothness parameter for the spline defining how the gender
+effect relates to age.  Only for models with additive gender and area effects.
+\item \code{sd_int} Standard deviation of random intercepts for case fatality.
+\item \code{sd_slope} Standard deviation of random slopes for case fatality.
+}
 
-\item{nfold_int_guess}{Prior guess at the ratio of case fatality between a high risk (97.5\% quantile) and low risk (2.5\% quantile) area.}
+For example, to fix the case fatality smoothness to 1.2, fix the incidence
+smoothness to its posterior mode, and estimate all the other hyperparameters,
+specify \code{hp_fixed = list(scf=1.2, sinc=TRUE)}.}
 
-\item{nfold_int_upper}{Prior upper 95\% credible limit for the ratio in average case fatality between a high risk (97.5\% quantile) and low risk (2.5\% quantile) area.}
+\item{nfold_int_guess}{Prior guess at the ratio of case fatality between a
+high risk (97.5\% quantile) and low risk (2.5\% quantile) area.}
 
-\item{nfold_slope_guess, nfold_slope_upper}{This argument and the next argument define the prior distribution for the variance in the random linear effects of age on log case fatality.   They define a prior guess and upper 95\% credible limit for the ratio of case fatality slopes between a high trend (97.5\% quantile) and low risk (2.5\% quantile) area.  (Note that the model is not exactly linear, since departures from linearity are defined through a spline model.  See the Jackson et al. paper for details.).}
+\item{nfold_int_upper}{Prior upper 95\% credible limit for the ratio in
+average case fatality between a high risk (97.5\% quantile) and low risk
+(2.5\% quantile) area.}
 
-\item{mean_int_prior}{Vector of two elements giving the prior mean and standard deviation respectively for the mean random intercept for log case fatality.}
+\item{nfold_slope_guess, nfold_slope_upper}{This argument and the next
+argument define the prior distribution for the variance in the random
+linear effects of age on log case fatality.   They define a prior guess
+and upper 95\% credible limit for the ratio of case fatality slopes
+between a high trend (97.5\% quantile) and low risk (2.5\% quantile) area.
+(Note that the model is not exactly linear, since departures from
+linearity are defined through a spline model.  See the Jackson et al.
+paper for details.).}
 
-\item{mean_slope_prior}{Vector of two elements giving the prior mean and standard deviation respectively for the mean random slope for log case fatality.}
+\item{mean_int_prior}{Vector of two elements giving the prior mean and
+standard deviation respectively for the mean random intercept for log case
+fatality.}
 
-\item{gender_int_priorsd}{Prior standard deviation for the additive effect of gender on log case fatality}
+\item{mean_slope_prior}{Vector of two elements giving the prior mean and
+standard deviation respectively for the mean random slope for log case
+fatality.}
 
-\item{gender_slope_priorsd}{Prior standard deviation for the additive effect of gender on the linear age slope of log case fatality}
+\item{gender_int_priorsd}{Prior standard deviation for the additive effect
+of gender on log case fatality}
 
-\item{sd_int_fixed}{Set this to a number to fix the random effect standard deviation of the area-specific intercepts for log case fatality to this number, instead of estimating.  If this is set to \code{TRUE} then an "empirical Bayes" method is used, where this SD is fixed at its posterior mode under a model where it wasn't fixed.}
-
-\item{sd_slope_fixed}{Set this to a number to fix the random effect standard deviation of the area-specific slopes for log case fatality to this number, instead of estimating. If this is set to \code{TRUE} then an "empirical Bayes" method is used, where this SD is fixed at its posterior mode under a model where it wasn't fixed.}
+\item{gender_slope_priorsd}{Prior standard deviation for the additive effect
+of gender on the linear age slope of log case fatality}
 
 \item{inc_prior}{Vector of two elements giving the Gamma shape and rate parameters of the
 prior for the incidence rate.  Only used if \code{inc_model="indep"}, for each age-specific rate.}
@@ -214,41 +259,39 @@ prior for the incidence rate.  Only used if \code{inc_model="indep"}, for each a
 prior for the remission rate, used in both \code{rem_model="const"} and \code{rem_model="fixed"}.}
 
 \item{method}{String indicating the inference method, defaulting to
-  \code{"opt"}.
+\code{"opt"}.
 
-  If \code{method="mcmc"} then a sample from the posterior is drawn using Markov Chain Monte Carlo
-  sampling, via \pkg{rstan}'s \code{\link[rstan:stanmodel-method-sampling]{rstan::sampling()}} function.   This is the most
-  accurate but the slowest method.
+If \code{method="mcmc"} then a sample from the posterior is drawn using Markov Chain Monte Carlo
+sampling, via \pkg{rstan}'s \code{\link[rstan:stanmodel-method-sampling]{rstan::sampling()}} function.   This is the most
+accurate but the slowest method.
 
-  If \code{method="opt"}, then instead of an MCMC sample from the posterior,
-  `disbayes` returns the posterior mode calculated using optimisation, via
-  \pkg{rstan}'s \code{\link[rstan:stanmodel-method-optimizing]{rstan::optimizing()}} function.
-  A sample from a normal approximation to the (real-line-transformed)
-  posterior distribution is drawn in order to obtain credible intervals.
+If \code{method="opt"}, then instead of an MCMC sample from the posterior,
+\code{disbayes} returns the posterior mode calculated using optimisation, via
+\pkg{rstan}'s \code{\link[rstan:stanmodel-method-optimizing]{rstan::optimizing()}} function.
+A sample from a normal approximation to the (real-line-transformed)
+posterior distribution is drawn in order to obtain credible intervals.
 
-  If the optimisation fails to converge (non-zero return code), try increasing the
-  number of iterations from the default 1000, e.g. `disbayes(...,
-  iter=10000, ...)`, or changing the algorithm to `disbayes(...,
-  algorithm="Newton", ...)`.
+If the optimisation fails to converge (non-zero return code), try increasing the
+number of iterations from the default 1000, e.g. \code{disbayes(..., iter=10000, ...)}, or changing the algorithm to \code{disbayes(..., algorithm="Newton", ...)}.
 
-  If there is an error message that mentions `chol`, then
-  the computed Hessian matrix is not positive definite at the reported optimum, hence credible intervals
-  cannot be computed.
-  This can occur either because of numerical error in computation of the Hessian, or because the
-  reported optimum is wrong.  If you are willing to believe
-  the optimum and live without credible intervals, then set \code{draws=0} to skip
-  computation of the Hessian.   To examine the problematic Hessian, set
-  \code{hessian=TRUE,draws=0}, then look at the \code{$fit$hessian} component of the
-  `disbayes` return object.   If it can be inverted, do \code{sqrt(diag(solve()))} on the Hessian, and
-check for \code{NaN}s, indicating the problematic parameters. 
+If there is an error message that mentions \code{chol}, then
+the computed Hessian matrix is not positive definite at the reported optimum, hence credible intervals
+cannot be computed.
+This can occur either because of numerical error in computation of the Hessian, or because the
+reported optimum is wrong.  If you are willing to believe
+the optimum and live without credible intervals, then set \code{draws=0} to skip
+computation of the Hessian.   To examine the problematic Hessian, set
+\code{hessian=TRUE,draws=0}, then look at the \code{$fit$hessian} component of the
+\code{disbayes} return object.   If it can be inverted, do \code{sqrt(diag(solve()))} on the Hessian, and
+check for \code{NaN}s, indicating the problematic parameters.
 Otherwise, diagonal entries of the Hessian matrix that are very small
-  may indicate parameters that are poorly identified from the data, leading to computational
-  problems. 
+may indicate parameters that are poorly identified from the data, leading to computational
+problems.
 
-  If \code{method="vb"}, then variational Bayes methods are used, via \pkg{rstan}'s
-  \code{\link[rstan:stanmodel-method-vb]{rstan::vb()}} function.  This is labelled as "experimental" by
-  \pkg{rstan}.  It might give a better approximation to the posterior
-  than \code{method="opt"}, but has not been investigated much for `disbayes` models.}
+If \code{method="vb"}, then variational Bayes methods are used, via \pkg{rstan}'s
+\code{\link[rstan:stanmodel-method-vb]{rstan::vb()}} function.  This is labelled as "experimental" by
+\pkg{rstan}.  It might give a better approximation to the posterior
+than \code{method="opt"}, but has not been investigated much for \code{disbayes} models.}
 
 \item{draws}{Number of draws from the normal approximation to the posterior
 when using \code{method="opt"}.}
@@ -263,13 +306,9 @@ control MCMC sampling, or \code{\link[rstan:stanmodel-method-optimizing]{rstan::
 optimisation, in Stan.}
 }
 \description{
-Bayesian estimation of chronic disease epidemiology from incomplete data - hierarchical model for case fatalities 
-This is computationally intensive.
+This is much more computationally
+intensive than the basic model in \code{\link{disbayes}}.
 }
 \details{
-For full details see Jackson et al. REF.
-
-Note that an independent incidence is estimated for each area and age group.  In principle this function
-would be straightforward to extend to model incidences as a smooth function of age and hierarchically by area.
-Please contact the author if you would be interested in this feature.
+For full details see Jackson et al. (in progress...)
 }

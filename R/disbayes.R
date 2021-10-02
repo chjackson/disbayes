@@ -1,14 +1,13 @@
 ##' Bayesian estimation of chronic disease epidemiology from incomplete data
 ##'
-##' Estimates a three-state disease model given data on incidence, prevalence
-##' and mortality.
-##'
+##' Estimates a three-state disease model from incomplete data. 
 ##' It is designed to estimate case fatality and incidence, given
 ##' data on mortality and at least one of incidence and prevalence.
-##' Remission may also be included.
+##' Remission may also be included in the data and modelled.
 ##'
 ##'
 ##' @rdname disbayes
+##' @md
 ##'
 ##' @param data  Data frame containing some of the variables below.  The
 ##'   variables below are provided as character strings naming columns in this
@@ -149,10 +148,27 @@
 ##'   appropriately to the data, but higher values give stronger smoothing, or
 ##'   lower values give weaker smoothing,  if required.
 ##'
-##' @param scf_fixed  If this is set to a number, then the parameter determining the smoothness of case fatality with age (i.e. the standard deviation of the spline basis coefficients) is fixed at this number.  If \code{scf_fixed=TRUE}, then an "empirical Bayes" method is used, where the posterior mode of this parameter is determined (using the prior defined by \code{sprior}), and the model is fitted again with the parameter fixed at this mode.  If \code{scf_fixed=NULL} (the default) then a "full Bayes" method is used where the full posterior of this parameter is estimated.   NOT IMPLEMENTED YET FOR HIERARCHICAL MODELS 
+##' @param hp_fixed A list with one named element for each hyperparameter
+##' to be fixed.  The value should be either 
+##' 
+##' * a number (to fix the hyperparameter at this number) 
+##' 
+##' * \code{TRUE} (to fix the hyperparameter at the posterior mode from a training run
+##' where it is not fixed)
+##' 
+##' If the element is either \code{NULL}, \code{FALSE}, or omitted from the list, 
+##' then the hyperparameter is given a prior and estimated as part of the Bayesian model.  
+##' 
+##' The hyperparameters that can be fixed are 
+##' 
+##' * \code{scf} Smoothness parameter for the spline relating case fatality to age.
+##' 
+##' * \code{sinc} Smoothness parameter for the spline relating incidence to age.  
 ##'
-##' @param sinc_fixed  As \code{scf_fixed}, but for incidence instead of case fatality.
-##'
+##' For example, to fix the case fatality smoothness to 1.2 and fix the incidence
+##' smoothness to its posterior mode, 
+##' specify \code{hp_fixed = list(scf=1.2, sinc=TRUE)}.
+##' 
 ##' @param inc_prior Vector of two elements giving the Gamma shape and rate parameters of the
 ##' prior for the incidence rate.  Only used if \code{inc_model="indep"}, for each age-specific rate. 
 ##' 
@@ -273,8 +289,7 @@ disbayes <- function(data,
                      eqagehi = NULL,
                      loo = TRUE, 
                      sprior = c(1,1),
-                     scf_fixed = NULL, 
-                     sinc_fixed = NULL, 
+                     hp_fixed = NULL, 
                      rem_prior = c(1.1, 1), 
                      inc_prior = c(2, 0.1), 
                      cf_prior = c(2, 0.1), 
@@ -330,10 +345,9 @@ disbayes <- function(data,
   
   if (increasing_cf) smooth_cf <- TRUE
   if (const_cf) increasing_cf <- TRUE
-  if (isFALSE(scf_fixed)) scf_fixed <- NULL
-  if (isFALSE(sinc_fixed)) sinc_fixed <- NULL
-  scf_isfixed <- !is.null(scf_fixed)
-  sinc_isfixed <- !is.null(sinc_fixed)
+
+  # handle fixed hyperparameters
+  hp <- eb_disbayes(.disbayes_hp, hp_fixed, dbcall, disbayes, method, list(...))
   
   if (smooth_cf | smooth_inc) {
     cf_smooth <- init_smooth(log(initrates$cf), eqage, eqagehi, s_opts=NULL)
@@ -348,22 +362,6 @@ disbayes <- function(data,
       prevdata_ind  <-  if (bias_model %in% c("prev", "incprev")) 2 else 1
     }
     
-    normalapprox_wanted <- ((method=="opt") &&
-                              ((is.null(list(...)$draws) || list(...)$draws> 1)))
-    unc_wanted <- (method %in% c("mcmc","vb") || normalapprox_wanted)
-    if (unc_wanted && (isTRUE(scf_fixed) || isTRUE(sinc_fixed))) {
-      modes <- eb_find_modes(as.list(dbcall),
-                             dbfn=disbayes,
-                             args=c("scf_fixed", "sinc_fixed"))
-      if (isTRUE(scf_fixed)) scf_fixed <- modes["lambda_cf[1]"] 
-      if (isTRUE(sinc_fixed)) sinc_fixed <- modes["lambda_inc[1]"] 
-      scf_fixed <- max(scf_fixed, 0.01)
-    } else {
-      modes <- NULL
-    } 
-    if (is.null(scf_fixed)) scf_fixed <- 1
-    if (is.null(sinc_fixed)) sinc_fixed <- 1 # dummy values
-    
     datstans <- c(dat, list(smooth_cf=as.numeric(smooth_cf),
                             increasing_cf=as.numeric(increasing_cf),
                             const_cf=as.numeric(const_cf),
@@ -376,9 +374,10 @@ disbayes <- function(data,
                             incdata_ind = incdata_ind, 
                             prevdata_ind = prevdata_ind,
                             inc_prior = inc_prior, cf_prior = cf_prior, rem_prior = rem_prior,
-                            scf_isfixed = scf_isfixed,  sinc_isfixed = sinc_isfixed, 
-                            lambda_cf_fixed = as.numeric(scf_fixed), 
-                            lambda_inc_fixed = as.numeric(sinc_fixed), 
+                            scf_isfixed = hp["scf","isfixed"],
+                            sinc_isfixed = hp["sinc","isfixed"], 
+                            lambda_cf_fixed = as.numeric(hp["scf","vals"]), 
+                            lambda_inc_fixed = as.numeric(hp["sinc","vals"]), 
                             X=cf_smooth$X, K=ncol(cf_smooth$X), sprior=sprior, eqage=eqage))
     if (trend) {
       datstans$inc_trend <- inc_trend
@@ -392,10 +391,10 @@ disbayes <- function(data,
     }
     initsc <- initlist_const(initrates, cf_smooth, inc_smooth, remission, 
                              eqage, smooth_inc, smooth_cf, const_cf, increasing_cf,
-                             const_rem, nbias, scf_isfixed, sinc_isfixed)
+                             const_rem, nbias, hp["scf","isfixed"], hp["sinc","isfixed"])
     initsr <- initlist_random(nage, initrates, cf_smooth, inc_smooth, remission, 
                               eqage, smooth_inc, smooth_cf, const_cf, increasing_cf,
-                              const_rem, nbias, scf_isfixed, sinc_isfixed)
+                              const_rem, nbias, hp["scf","isfixed"], hp["sinc","isfixed"])
     if (method=="opt") { 
       opts <- rstan::optimizing(stanmodels$disbayes, data=datstans, init=initsc, draws=draws,
                                 iter=iter,  ...)
@@ -427,7 +426,8 @@ disbayes <- function(data,
   res <- c(list(call=dbcall),
            res,
            list(nage=nage, dat=dat, stan_data=datstans, stan_inits=initsc,
-                modes=modes, trend=trend))
+                trend=trend))
+  res$hp_fixed <- setNames(hp$vals, hp$pars)[hp$include & hp$isfixed]
   class(res) <- "disbayes"
   res
 }

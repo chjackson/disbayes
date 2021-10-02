@@ -178,9 +178,9 @@ attr(.disbayes_trend_vars, "order") <- c("age", "year", "bias", "state", "term")
         indnames = c("area"),
         varnames = c("lcfbase")),
     term = list(indnames="term",
-                varnames = c("bmale")),
-    const = c("lambda_cf","lambda_cf_male","lambda_inc","lambda_inc_male",
-              "mean_inter","mean_slope","sd_inter","sd_slope")
+                varnames = c("bmale", "sd_inter", "mean_slope", "sd_slope",
+                             "lambda_cf","lambda_cf_male","lambda_inc")),
+    const = c("mean_inter")
 )
 attr(.disbayes_hier_vars, "numerics") <- c("age", "state", "term")
 attr(.disbayes_hier_vars, "factors") <- data.frame(vars = c("area","gender"),

@@ -7,6 +7,8 @@ runs_todo <- 1:nrow(hierrundf)
 i <- runs_todo[task_id]
 
 if (0) { 
+  setwd("metahit")
+  source("paper_analyses_header.r")
   i <- 1 
   nchains <-1
 }
@@ -25,7 +27,7 @@ db <- disbayes_hier(data=mhi,
                     cf_model = hierrundf$model[i],
                     inc_model = "indep",
                     inc_prior = c(1.1, 1), 
-                    scf_fixed = 2.65, 
+                    hp_fixed = list(scf=2.65), 
                     eqage = hierrundf$eqage[i],
                     nfold_int_guess = 5, nfold_int_upper =  50,
                     nfold_slope_guess = 2, nfold_slope_upper =  20,
@@ -49,7 +51,7 @@ res <- tidy(db) %>%
   mutate(gender=hierrundf$gender[i], disease=hierrundf$disease[i])
 
 loo <- looi_disbayes_hier(db) %>%
-    mutate(gender=rundf$gender[i], disease=rundf$disease[i])
+    mutate(gender=hierrundf$gender[i], disease=hierrundf$disease[i])
 
 saveRDS(list(res=res,loo=loo), file= paste0("results_hier/res", i, ".rds"))
 cat(sprintf("Fitted model for case %s\n", i), file="metahit-hpc-log.txt", append=TRUE)

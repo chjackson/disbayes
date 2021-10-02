@@ -1,57 +1,114 @@
-##' Bayesian estimation of chronic disease epidemiology from incomplete data - hierarchical model for case fatalities 
-##' This is computationally intensive.  
+##' Bayesian estimation of chronic disease epidemiology from incomplete data -
+##' hierarchical model for case fatalities.  
 ##' 
-##' @param group Variable in the data representing the area (or other grouping factor). 
-##' 
-##' @param gender If \code{NULL} (the default) then the data are one homogenous gender, and there should be one row per year of age.  Otherwise, set \code{gender} to a character string naming the variable in the data representing gender (or other binary grouping factor).  Gender will then treated as a fixed additive effect, so the linear effect of gender on log case fatality is the same in each area.  The data should have one row per year of age and gender.  
+##' This is much more computationally 
+##' intensive than the basic model in \code{\link{disbayes}}.
 ##'
-##' @param cf_model The following alternative models for case fatality are supported:
+##' @param group Variable in the data representing the area (or other grouping
+##'   factor).
 ##'
-##' \code{"default"} (the default). Random intercepts and slopes, and no further restriction. 
+##' @param gender If \code{NULL} (the default) then the data are one homogenous
+##'   gender, and there should be one row per year of age.  Otherwise, set
+##'   \code{gender} to a character string naming the variable in the data
+##'   representing gender (or other binary grouping factor).  Gender will then
+##'   treated as a fixed additive effect, so the linear effect of gender on log
+##'   case fatality is the same in each area.  The data should have one row per
+##'   year of age and gender.
 ##'
-##' \code{"interceptonly"}.  Random intercepts, but common slopes.
+##' @param cf_model The following alternative models for case fatality are
+##'   supported:
 ##'
-##' \code{"increasing"}. Case fatality is assumed to be an increasing function of age (note it is constant below \code{"eqage"} in all models) with a common slope for all groups. 
+##'   \code{"default"} (the default). Random intercepts and slopes, and no
+##'   further restriction.
 ##'
-##' \code{"const"} Case fatality is assumed to be constant with age, for all ages.
+##'   \code{"interceptonly"}.  Random intercepts, but common slopes.
 ##'
-##' In all models, case fatality is a smooth function of age, and incidence rates are is estimated independently for each age.
+##'   \code{"increasing"}. Case fatality is assumed to be an increasing function
+##'   of age (note it is constant below \code{"eqage"} in all models) with a
+##'   common slope for all groups.
+##'
+##'   \code{"const"} Case fatality is assumed to be constant with age, for all
+##'   ages.
+##'
+##'   In all models, case fatality is a smooth function of age, and incidence
+##'   rates are is estimated independently for each age.
 ##'
 ##' @param inc_model Model for how incidence varies with age.
 ##'
-##' \code{"smooth"} (the default). Incidence is modelled as a smooth spline function of age, independently for eahc area (and gender). 
+##'   \code{"smooth"} (the default). Incidence is modelled as a smooth spline
+##'   function of age, independently for eahc area (and gender).
 ##'
-##' \code{"indep"} Incidence rates for each year of age, area (and gender) are estimated independently. 
+##'   \code{"indep"} Incidence rates for each year of age, area (and gender) are
+##'   estimated independently.
+##'
+##' @param rem_model Model for how remission varies with age.  Currently
+##'   supported models are \code{"const"} for a constant remission rate over all
+##'   ages, or \code{"indep"} for a different remission rates estimated
+##'   independently for each age with no smoothing.
+##'
+##' @param hp_fixed A list with one named element for each hyperparameter
+##' to be fixed.  The value should be either 
 ##' 
-##' @param rem_model Model for how remission varies with age.  Currently supported models are \code{"const"} for a constant remission rate over all ages, or \code{"indep"} for a different remission rates estimated independently for each age with no smoothing.
-##'
-##' @param scfmale_fixed  Set to a number to fix the smoothness parameter for the gender effect at this number.  Only for models with additive gender and area effects.  Set to \code{TRUE} to fix this parameter at its posterior mode, which the function finds automatically through a training run. 
-##'
-##' @param nfold_int_guess  Prior guess at the ratio of case fatality between a high risk (97.5\% quantile) and low risk (2.5\% quantile) area.  
-##'
-##' @param nfold_int_upper  Prior upper 95\% credible limit for the ratio in average case fatality between a high risk (97.5\% quantile) and low risk (2.5\% quantile) area. 
-##'
-##' @param nfold_slope_guess,nfold_slope_upper This argument and the next argument define the prior distribution for the variance in the random linear effects of age on log case fatality.   They define a prior guess and upper 95\% credible limit for the ratio of case fatality slopes between a high trend (97.5\% quantile) and low risk (2.5\% quantile) area.  (Note that the model is not exactly linear, since departures from linearity are defined through a spline model.  See the Jackson et al. paper for details.).
-##'
-##' @param mean_int_prior Vector of two elements giving the prior mean and standard deviation respectively for the mean random intercept for log case fatality.
-##'
-##' @param mean_slope_prior Vector of two elements giving the prior mean and standard deviation respectively for the mean random slope for log case fatality.
-##'
-##' @param gender_int_priorsd Prior standard deviation for the additive effect of gender on log case fatality
-##'
-##' @param gender_slope_priorsd Prior standard deviation for the additive effect of gender on the linear age slope of log case fatality
-##'
-##' @param sd_int_fixed Set this to a number to fix the random effect standard deviation of the area-specific intercepts for log case fatality to this number, instead of estimating.  If this is set to \code{TRUE} then an "empirical Bayes" method is used, where this SD is fixed at its posterior mode under a model where it wasn't fixed. 
-##'
-##' @param sd_slope_fixed Set this to a number to fix the random effect standard deviation of the area-specific slopes for log case fatality to this number, instead of estimating. If this is set to \code{TRUE} then an "empirical Bayes" method is used, where this SD is fixed at its posterior mode under a model where it wasn't fixed. 
+##' * a number (to fix the hyperparameter at this number) 
 ##' 
+##' * \code{TRUE} (to fix the hyperparameter at the posterior mode from a training run
+##' where it is not fixed)
+##' 
+##' If the element is either \code{NULL}, \code{FALSE}, or omitted from the list, 
+##' then the hyperparameter is given a prior and estimated as part of the Bayesian model.  
+##' 
+##' The hyperparameters that can be fixed are 
+##' 
+##' * \code{scf} Smoothness parameter for the spline relating case fatality to age.
+##' 
+##' * \code{sinc} Smoothness parameter for the spline relating incidence to age.  
+##' 
+##' * \code{scfmale} Smoothness parameter for the spline defining how the gender 
+##' effect relates to age.  Only for models with additive gender and area effects. 
+##' 
+##' * \code{sd_int} Standard deviation of random intercepts for case fatality.
+##' 
+##' * \code{sd_slope} Standard deviation of random slopes for case fatality.
+##' 
+##' For example, to fix the case fatality smoothness to 1.2, fix the incidence
+##' smoothness to its posterior mode, and estimate all the other hyperparameters, 
+##' specify \code{hp_fixed = list(scf=1.2, sinc=TRUE)}.
+##'
+##' @param nfold_int_guess  Prior guess at the ratio of case fatality between a
+##'   high risk (97.5% quantile) and low risk (2.5% quantile) area.
+##'
+##' @param nfold_int_upper  Prior upper 95% credible limit for the ratio in
+##'   average case fatality between a high risk (97.5% quantile) and low risk
+##'   (2.5% quantile) area.
+##'
+##' @param nfold_slope_guess,nfold_slope_upper This argument and the next
+##'   argument define the prior distribution for the variance in the random
+##'   linear effects of age on log case fatality.   They define a prior guess
+##'   and upper 95% credible limit for the ratio of case fatality slopes
+##'   between a high trend (97.5% quantile) and low risk (2.5% quantile) area.
+##'   (Note that the model is not exactly linear, since departures from
+##'   linearity are defined through a spline model.  See the Jackson et al.
+##'   paper for details.).
+##'
+##' @param mean_int_prior Vector of two elements giving the prior mean and
+##'   standard deviation respectively for the mean random intercept for log case
+##'   fatality.
+##'
+##' @param mean_slope_prior Vector of two elements giving the prior mean and
+##'   standard deviation respectively for the mean random slope for log case
+##'   fatality.
+##'
+##' @param gender_int_priorsd Prior standard deviation for the additive effect
+##'   of gender on log case fatality
+##'
+##' @param gender_slope_priorsd Prior standard deviation for the additive effect
+##'   of gender on the linear age slope of log case fatality
+##'
 ##' @inheritParams disbayes
-##' 
-##' @details For full details see Jackson et al. REF.
 ##'
-##' Note that an independent incidence is estimated for each area and age group.  In principle this function
-##' would be straightforward to extend to model incidences as a smooth function of age and hierarchically by area.
-##' Please contact the author if you would be interested in this feature. 
+##' @details For full details see Jackson et al. (in progress...)
+##'
+##' @md
 ##' 
 ##' @export
 disbayes_hier <- function(data,
@@ -71,14 +128,11 @@ disbayes_hier <- function(data,
                           prev_zero = FALSE, 
                           loo = TRUE, 
                           sprior = c(1,1),
-                          scf_fixed = NULL,
-                          scfmale_fixed = NULL,
-                          sinc_fixed = NULL, 
+                          hp_fixed = NULL,
                           nfold_int_guess = 5,  nfold_int_upper = 100,
                           nfold_slope_guess = 5, nfold_slope_upper = 100,
                           mean_int_prior = c(0,10), mean_slope_prior = c(5,5),
                           gender_int_priorsd = 0.82, gender_slope_priorsd = 0.82, 
-                          sd_int_fixed = NULL, sd_slope_fixed = NULL,
                           inc_prior = c(2, 0.1), 
                           rem_prior = c(2, 1), 
                           method = "mcmc",
@@ -88,6 +142,7 @@ disbayes_hier <- function(data,
                           ...
                           )
 {
+    dbcall <- match.call()
     cf_model <- match.arg(cf_model, c("default","interceptonly","increasing","const"))
     inc_model <- match.arg(inc_model, c("smooth", "indep"))
     rem_model <- match.arg(rem_model, c("const", "indep"))
@@ -143,45 +198,18 @@ disbayes_hier <- function(data,
     betainc_in <- inc_smooth$beta 
     lam_in <- laminc_in <- 0.5 
     K <- ncol(cf_smooth$X)
-# do we still need this weird tweak?     
-#   if (cf_smooth$beta[K-1] < 0) { 
-#        beta_mu <- c(0.01, mean(log(initrates$cf)))
-#    } else beta_mu <- cf_smooth$beta[c(K-1, K)]
-#    beta_in <- c(rep(0, K-2), beta_mu) 
-        
+
     interceptonly <- (cf_model=="interceptonly") 
     increasing <- (cf_model=="increasing")
     const_cf <- (cf_model=="const")
 
-    if (isFALSE(sd_int_fixed)) sd_int_fixed <- NULL
-    if (isFALSE(sd_slope_fixed)) sd_slope_fixed <- NULL
-    sd_int_isfixed <- !is.null(sd_int_fixed)
-    sd_slope_isfixed <- !is.null(sd_slope_fixed)
-
-    ## TODO get numeric input working for these before trying EB 
-    scf_isfixed <- !is.null(scf_fixed)
-    scfmale_isfixed <- !is.null(scfmale_fixed) || (ng==1)
-    sinc_isfixed <- !is.null(sinc_fixed)
-
-    ## Empirical Bayes. Fix random effects variances at their posterior modes.
-    ## Only do this if we are trying to get an uncertainty distribution 
-    ## either by using mcmc, vb or posterior mode normal approximation 
-    normalapprox_wanted <- ((method=="opt") && isTRUE(list(...)$hessian) && 
-                              !is.null(list(...)$draws) && list(...)$draws> 1)
-    unc_wanted <- (method %in% c("mcmc","vb") || normalapprox_wanted)
-    if (unc_wanted & isTRUE(sd_int_fixed) || isTRUE(sd_slope_fixed)) {
-      modes <- eb_find_modes(as.list(match.call()), dbfn=disbayes_hier, args=c("sd_int_fixed","sd_slope_fixed"))
-      if (isTRUE(sd_int_fixed)) sd_int_fixed <- modes["sd_inter[1]"] else sd_int_fixed <- 1 
-      if (isTRUE(sd_slope_fixed)) sd_slope_fixed <- modes["sd_slope[1]"] else sd_slope_fixed <- 1
-    } else {
-        modes <- NULL
-        if (!is.numeric(sd_int_fixed)) sd_int_fixed <- 1 # dummy values
-        if (!is.numeric(sd_slope_fixed)) sd_slope_fixed <- 1
+    ## Handle fixed hyperparameters and empirical Bayes estimation
+    hp <- eb_disbayes(.disbayes_hier_hp, hp_fixed, dbcall, disbayes_hier, method, list(...))
+    if (ng==1) {
+      hp$include[hp$pars=="scfmale"] <- FALSE
+      hp["scfmale","isfixed"] <- TRUE
     }
-    if (is.null(scf_fixed)) scf_fixed <- 1
-    if (is.null(scfmale_fixed)) scfmale_fixed <- 1
-    if (is.null(sinc_fixed)) sinc_fixed <- 1 # dummy values
-
+    
     inits_hier_fn <- function() { 
       inc_init  <- rlnorm(nage, meanlog=log(initrates$inc), sdlog=initrates$inc/10)
       rem_init  <- rlnorm(nage, meanlog=log(initrates$rem), sdlog=initrates$rem/10)
@@ -206,12 +234,13 @@ disbayes_hier <- function(data,
                                           dim=c(K*smooth_inc, narea, ng)),
                          lcfbase = if (increasing) rep(beta_in[K-1], narea) else numeric(),
                          mean_inter = if (beta_in[K-1] > 0) beta_in[K] else mean(log(initrates$cf)),
-                         mean_slope = if (const_cf) numeric() else if (beta_in[K-1] > 0) as.array(beta_in[K-1]) else as.array(0.01), 
-                         sd_inter = if (sd_int_isfixed) numeric() else as.array(sd_in),
-                         sd_slope = if (interceptonly || increasing || const_cf || sd_slope_isfixed) numeric() else as.array(sd_in),
-                         lambda_cf = if (const_cf || scf_isfixed) numeric() else as.array(lam_in),
-                         lambda_cf_male = if (ng==1  || scfmale_isfixed) numeric() else as.array(lam_in), 
-                         lambda_inc = if (!smooth_inc || sinc_isfixed) numeric() else as.array(laminc_in)
+                         mean_slope = if (const_cf) numeric() else as.array(beta_in[K-1]), 
+                         sd_inter = if (hp["sd_int","isfixed"]) numeric() else as.array(sd_in),
+                         sd_slope = if (interceptonly || increasing || const_cf || 
+                                        hp["sd_slope","isfixed"]) numeric() else as.array(sd_in),
+                         lambda_cf = if (const_cf || hp["scf","isfixed"]) numeric() else as.array(lam_in),
+                         lambda_cf_male = if (ng==1  || hp["scfmale","isfixed"]) numeric() else as.array(lam_in), 
+                         lambda_inc = if (!smooth_inc || hp["sinc","isfixed"]) numeric() else as.array(laminc_in)
       )
       inits_hier
     }
@@ -219,8 +248,7 @@ disbayes_hier <- function(data,
     gpint <- gammapars_hier(nfold_int_guess, nfold_int_upper)
     gpslope <- gammapars_hier(nfold_slope_guess, nfold_slope_upper)
 
-    datstans <- c(dat, list(#inc = array(rep(initrates$inc, ng), dim=c(nage, ng)),
-                            interceptonly=interceptonly, 
+    datstans <- c(dat, list(interceptonly=interceptonly, 
                             increasing=increasing, narea=narea, ng=ng,
                             const_cf = as.numeric(const_cf), 
                             smooth_inc=as.numeric(smooth_inc), # or should this be mandated? 
@@ -235,14 +263,16 @@ disbayes_hier <- function(data,
                             gpslope_a = gpslope["a"] + 2, gpslope_b =  gpslope["b"],
                             gender_int_priorsd = gender_int_priorsd,
                             gender_slope_priorsd = gender_slope_priorsd,
-                            sd_int_isfixed = sd_int_isfixed, sd_slope_fixed = sd_slope_isfixed, 
-                            sd_int_fixed = sd_int_fixed, sd_slope_fixed = sd_slope_fixed,
-                            scf_isfixed = scf_isfixed,
-                            scfmale_isfixed = scfmale_isfixed,
-                            sinc_isfixed = sinc_isfixed, 
-                            lambda_cf_fixed = as.numeric(scf_fixed), 
-                            lambda_cf_male_fixed = as.numeric(scfmale_fixed), 
-                            lambda_inc_fixed = as.numeric(sinc_fixed)
+                            sd_int_isfixed = hp["sd_int","isfixed"],
+                            sd_slope_isfixed = hp["sd_slope","isfixed"], 
+                            sd_int_fixed = hp["sd_int","vals"], 
+                            sd_slope_fixed = hp["sd_slope","vals"],
+                            scf_isfixed = hp["scf","isfixed"],
+                            scfmale_isfixed = hp["scfmale","isfixed"],
+                            sinc_isfixed = hp["sinc","isfixed"], 
+                            lambda_cf_fixed = as.numeric(hp["scf","vals"]), 
+                            lambda_cf_male_fixed = as.numeric(hp["scfmale","vals"]), 
+                            lambda_inc_fixed = as.numeric(hp["sinc","vals"])
                             ))
 
         if (method=="opt") { 
@@ -259,7 +289,7 @@ disbayes_hier <- function(data,
             res <- list(fit=fits, loo=loo, method="mcmc")
         } else stop(sprintf("Unknown method: `%s`", method))
     res <- c(res, list(nage=nage, narea=narea, ng=ng, groups=glevs, genders=genlevs))
-    if (!is.null(modes)) res$modes <- modes
+    res$hp_fixed <- setNames(hp$vals, hp$pars)[hp$include & hp$isfixed]
     class(res) <- c("disbayes_hier","disbayes")
     res
 }

@@ -271,67 +271,69 @@ ggplot(rescf, aes(x=age, col=area)) +
   facet_wrap(~disease, ncol=2) + 
   xlab("Age (years)") 
 
-## Show whether gender effect is common between areas 
-## todo pick diseases to illustrate.  IHD, LC biggesc contrast 
-## how to show for all ages. 
+## Get curves of m/f CF risk ratios by age and area, from the hier model with 
+## different gender effect for each area 
+reshi <- resh %>%  
+  mutate(disease = fct_recode(disease, !!!disease_shorten)) %>%
+  filter(! disease %in% c("Breast cancer", "Stomach cancer", "Uterine cancer"), 
+         area %in% cityregions, 
+         var=="cf") %>%
+  mutate(est = log(`50%`), se=(log(`97.5%`)-log(`2.5%`))/4) 
+reshie <- reshi %>%
+  select(age, gender, area, disease, est) %>% 
+  pivot_wider(names_from=gender, values_from=est) %>%
+  mutate(lhrmale = Male - Female) %>%
+  select(age, area, disease, lhrmale)
+reshis <- reshi %>%
+  select(age, gender, area, disease, se) %>% 
+  pivot_wider(names_from=gender, values_from=se) %>%
+  mutate(sediff = sqrt(Male^2 + Female^2)) %>%
+  select(age, area, disease, sediff) %>%
+  left_join(reshie, by=c("age","area","disease")) %>%
+  mutate(est = exp(lhrmale), 
+         lower=exp(lhrmale - 2*sediff),
+         upper=exp(lhrmale + 2*sediff))
 
-dat <- resall %>%
-  filter(var=="cf",
-         model %in% c("Hierarchical","Hierarchical joint gender"),
-         disease %in% c("Ischemic heart disease", "Stroke", "Lung cancer", "Colon and rectum cancer", "Dementia", "COPD")) %>%
-  filter(disease %in% c("Ischemic heart disease", "Lung cancer")) %>%
-  mutate(model = fct_recode(model, 
-                            "Different between areas" = "Hierarchical",
-                            "Common effect" = "Hierarchical joint gender"))
-example_age <- 70 
+## Superimpose the equivalent common curve from the common effect model
+resgi <- resg %>%  
+  filter(! disease %in% c("Breast cancer", "Stomach cancer", "Uterine cancer"), 
+         area %in% cityregions, 
+         var=="cf") %>%
+  mutate(disease = fct_recode(disease, !!!disease_shorten)) %>%
+  mutate(est = log(`50%`), se=(log(`97.5%`)-log(`2.5%`))/4) 
+resgie <- resgi %>%
+  select(age, gender, area, disease, est) %>% 
+  pivot_wider(names_from=gender, values_from=est) %>%
+  mutate(lhrmale = Male - Female) %>%
+  select(age, area, disease, lhrmale)
+resgis <- resgi %>%
+  select(age, gender, area, disease, se) %>% 
+  pivot_wider(names_from=gender, values_from=se) %>%
+  mutate(sediff = sqrt(Male^2 + Female^2)) %>%
+  select(age, area, disease, sediff) %>%
+  left_join(resgie, by=c("age","area","disease")) %>%
+  mutate(est = exp(lhrmale), 
+         lower=exp(lhrmale - 2*sediff),
+         upper=exp(lhrmale + 2*sediff))
 
-#DEBUGME SHOW RAW MORT DATA FOR LC FOR AREAS, SEE IF GENDER DIFFERENCE
-gbd %>% filter(ageyr==70, 
-               disease=="Tracheal, bronchus, and lung cancer", 
-               area %in% c("Bristol","Liverpool","West Midlands (city region)")) %>%
-  mutate(p_mort = mort_num/mort_denom, p_prev=prev_num/prev_denom, mpratio=p_mort/p_prev) %>%
-  select(sex, area, mort_num, mort_denom, p_mort, p_prev, mpratio)
-## YES: MORT/PREV AGREES WITH CF 
+## Put this in the paper 
+## Hazard ratio for men compared to women for case fatality 
+## This is good evidence that the general pattern is common among areas 
+## TODO Confirm this or otherwise by LOO CV 
 
-i <- 3
-resi <- readRDS(sprintf("results_hier_gender/res%s.rds",i))
-resi <- readRDS(sprintf("results_hier/res%s.rds",3))
-resi <- readRDS(sprintf("results_hier/res%s.rds",10))
-
-resi[[1]] %>% 
-  filter(var=="cf", between(age, 68, 72), area==1)
-resi[[1]] %>% 
-  filter(var=="cf", between(age, 68, 72), area==1)
-
-gbd %>% filter(ageyr==70, 
-               disease=="Tracheal, bronchus, and lung cancer", 
-               area %in% c("Bristol","Liverpool","West Midlands (city region)")) %>%
-  group_by(area) %>%
-  mutate(mort_num=sum(mort_num), mort_denom=sum(mort_denom), 
-         prev_num=sum(prev_num), prev_denom=sum(prev_denom)) %>%
-  mutate(p_mort = mort_num/mort_denom, p_prev=prev_num/prev_denom, mpratio=p_mort/p_prev) %>%
-  select(sex, area, mort_num, mort_denom, p_mort, p_prev, mpratio)
-
-pdf("../write/gender.pdf", width=6, height=4) # NOTE one for IHD, one for lung cancer 
-
-dat %>% filter(age==example_age) %>%
-ggplot(aes(x=`50%`, y=area, lty=model, col=gender)) +
-  #    coord_cartesian(xlim=c(0.001, 0.2)) +
-  facet_wrap(~disease, nrow=1, scales="free_x") + 
-  geom_point(position=ggstance::position_dodgev(height=0.6), size=1.5) +
-  geom_errorbarh(aes(xmin=`2.5%`, xmax=`97.5%`),
-                 position=ggstance::position_dodgev(height=0.6),
-                 lwd = 0.7) +
-  xlab(sprintf("Case fatality for age %s", example_age) ) + ylab("") + 
-  scale_linetype_manual(values = c("Common effect" = "solid",
-                                   "Different between areas" = "dashed"
-                                   )) +
-  labs(col="", lty="Gender effect") +
-  theme_bw() + 
-  theme(legend.text = element_text(size=7)) +  
-  guides(linetype = guide_legend(reverse = TRUE))
-
+pdf("../../write/gender_hr.pdf")
+ggplot(reshis %>% filter(age > 60), 
+       aes(x=age, y=est, group=area, col=area)) + 
+  geom_ribbon(aes(ymin=lower, ymax=upper), fill="gray", col=NA, alpha=0.2) + 
+  geom_hline(yintercept = 1) +
+  geom_line(lwd=0.8) +
+  geom_line(data=resgis %>% filter(age>60), col="black", lty=2) +
+  facet_wrap(~disease) +
+  labs(col="Area") +
+  coord_cartesian(ylim=c(0,3)) + 
+  ylab("Case fatality rate ratio (men/women)") + xlab("Age (years)")
 dev.off()
+
 
 ```
 
@@ -411,14 +413,22 @@ ggplot(loosub, aes(x=agemid, y=elpd_diff, colour=area)) +
 
 Then compare hier with hier additive gender
 
-
 ```{r}
+
+## FIXME rerun hier with bugfix in saving loo output .  was triggered when we changed rundf
+## to exclude (stmc and?) utrc 
+
+looall %>% filter(var=="mort", area=="Bristol", gender=="Male", disease=="Lung cancer", 
+                  model=="Hierarchical", age==1)
 
 # elpd : high is good. positive elpd diff favours additive gender model 
 loohg <- looall %>% 
   filter(model %in% c("Hierarchical","Hierarchical joint gender")) %>%
   select(var, area, age, gender, disease, model, elpd_loo) %>%
-  pivot_wider(names_from=model, values_from=elpd_loo) %>%
+  pivot_wider(names_from=model, values_from=elpd_loo, values_fn=length) 
+
+
+%>%
   mutate(elpd_diff = `Hierarchical joint gender` - `Hierarchical`) %>%
   mutate(agegroup = cut(age, seq(0,100,5), right=FALSE, include.lowest = TRUE)) %>%
   group_by(var, area, gender, disease, agegroup) %>%
@@ -450,179 +460,3 @@ loohg %>%
 
 
 ```
-
-
-
-
-
-
-# Time trends 
-
-Damn, Absolute incidence estimates are way off both the model results, 
-but closest to the non trend one where they match up to age 70. 
-
-why.  We are adjusting them to be consistent with prevalence and mortality data. 
-But we want to give more weight somehow to current incidence data.  Why tho, if we also believe the current 
-prev and mort data? are we trying to make them all fit into a bad model? 
-
-Right the fitted values for year 2010 and earlier match up with current data.  There's a big jump around 2010 
-
-But then they will carry on changing through time in the future if we use them in a model
-
-
-```{r}
-
-pdf("../write/trend_res.pdf")
-
-datt <- gbd %>% 
-  filter(area=="Leeds", disease=="Ischemic heart disease") %>%
-  mutate(inc_prob = inc_num / inc_denom, 
-         inc_rate = -log(1-inc_prob), 
-         var = "Incidence", 
-         gender = sex)
-
-resoy <- resall %>% filter(model=="Time trends", 
-                            year == 2017,
-                            area=="Leeds", 
-                            disease=="Ischemic heart disease",
-                            var %in% c("inc")) %>% mutate(var="Incidence")
-                           
-rest <- resall %>% filter((model == "Independent areas") | (model=="Time trends" & year==2017),
-                          area=="Leeds", 
-                          disease=="Ischemic heart disease",
-                          var %in% c("inc","cf")
-#                          gender=="Male"
-) %>% full_join(resoy)
-
-resopt <- readRDS(file="resopt_trend.rds") %>% 
-  filter(disease=="Ischemic heart disease",area=="Leeds",
-         var %in% c("inc","cf"), year==99) %>%
-  mutate(var = fct_recode(var, "Incidence"="inc", "Case fatality"="cf"))
-
-rest %>% 
-  filter(between(age, 50, 90)) %>% 
-  mutate(var = fct_recode(var, "Incidence"="inc", "Case fatality"="cf"),
-         model = fct_recode(model, "No time trends" = "Independent areas")) %>%
-ggplot(aes(x=age, y=`50%`, col=model, fill=model, 
-           group=interaction(gender, model))) +
-  coord_cartesian(ylim=c(0.0,0.04)) +
-  geom_ribbon(aes(ymin=`2.5%`, ymax=`97.5%`), alpha=0.2) +
-  facet_wrap(vars(gender, var), nrow=2, scales="free_y") +
-  geom_line() + 
-  xlab("Age") + ylab("") + 
-  labs(col="", fill="") + 
-  geom_line(data=datt, aes(x=ageyr, y=inc_rate), inherit.aes = FALSE) +
-  geom_line(data=resopt, aes(x=age, y=par), inherit.aes=FALSE, col="blue")
-
-## Point estimates are accurate, so we can use them to diagnose the bias 
-
-#  geom_line(data=resoy, aes(x=age, y=`50%`, col=factor(year), group=year), lty=2, inherit.aes = FALSE)
-dev.off()
-
-## Experimental sensitivity analyses to different trends
-## what was it? 2003-2010 continues. saved in restrs 
-## where's the conclusion from this?  estimates vary a lot
-
-rest_saved <- rest %>% 
-  filter(between(age, 50, 90), model=="Time trends", 
-         gender=="Male", var %in% c("inc","cf")) 
-res_saved <- resnh %>% filter(between(age, 50, 90), model=="Independent areas", disease=="Ischemic heart disease", area=="Leeds", gender=="Male", var %in% c("inc","cf"))
-  
-restrs <- restrs %>% 
-  mutate(trendin = ifelse(inctrend & cftrend, "both", 
-  ifelse(inctrend, "inc", ifelse(cftrend, "cf", "neither")))) %>%
-  mutate(trendin = ifelse(trsens=="zero", "neither", trendin))
-
-dat <- restrs %>% 
-  filter(var %in% c("inc","cf"), model=="smoothed", trsens %in% c("hi", "zero"))
-dat$age <- rep(1:100, length.out=nrow(dat))
-dat %>%
-  filter(age < 80) %>%
-ggplot(aes(x=age, y=`50%`, col=trendin)) + 
-  geom_line(lwd=2) + 
-  facet_grid(cols=vars(var)) + 
-  geom_line(data=datt %>% filter(gender=="Male") %>% mutate(var=fct_recode(var,"inc"="Incidence")), 
-            aes(x=ageyr, y=inc_rate), inherit.aes = FALSE) 
-
-+ 
-  geom_line(data=rest_saved, col="black") + 
-  geom_line(data=res_saved, col="blue")
-
-restrs %>% 
-  filter(var %in% c("inc","cf")) %>%
-  mutate(age = rep(1:100, length.out=n())) %>%
-  filter(model=="smoothed", age==60, var=="cf", cftrend==TRUE, inctrend==TRUE) 
-
-
-```
-
-Right this is saying that it doesn't make much difference to CF, but big diff to inc as in Scar
-were the original plots wrong.   OK fine just axis limit distortion. 
-
-So the only problem left is disagreement with current empirical incidence 
-dismod2 types would say the model is "forcing consistency" 
-evidence of conflict between current inc and current CF  
-Hm is this evidence that the gbd data are consistent with themselves under a model that ignores trends.  
-
-Hey wot it does match.   Wot about original independent-areas results 
-
-cf - higher with inc or both, lower with cf or neither 
-inc - higher with cf only, then neither, then both, then lowest with inc. 
-
-So dose response is OK 
-but they interact in unpredictable ways 
-and need to fix the 5 year tihng 
-and reconcile the modest changes here with the big changes from the real data
-
-Compare real with artificial trend data.  Where does the difference come from? 
-Looks reasonably representative of CF to me.  Age 70 value is generous 
-Incidence: trend data is more noisy.  Pick an even higher value that's on the high end of the data. 
-
-```{r}
-ism <- inctrends_hi %>% as.data.frame() %>% 
-  mutate(age = 1:100) %>%
-  pivot_longer(names_to = "year", values_to = "p2017", cols = 1:100) %>%
-  mutate(year = as.numeric(year)) %>% 
-  filter(age %in% c(40,60,80,100), year > 1970) %>% 
-  mutate(age = factor(age), model = "sens")
-
-ihdtrends %>% 
-  filter(age %in% c(40,60,80,100), year > 1970, gender=="Male", outcome=="Incidence") %>% 
-  mutate(age = factor(age), model = "data") %>%
-  full_join(ism) %>%
-  ggplot(aes(x=year, y=p2017, col=age, lty=model)) + geom_line()
-
-```
-
-
-
-Well that's odd. 
-
-With inc trends on. 
-There's much less of an effect than there was with the real data. 
-Consistent dose response effect 
-CF trend makes no difference to current CF ests , but affects current inc ests. Wot? 
-
-With cf trends on
-Only an effect on cf if there is inc trends.
-Consistent dose response when there's an effect
-Inc est: both inc and cf trends make a difference.  moderate differences
-
-Is this a bug in the sens analysis setup??   cf trends are not affecting cf
-And why are there still those stupid 5 year artefacts for incidence?  didn't i transfer the new data? 
-
-OK think og it a new way 
-TREND IN: 
-inc but not cf : 
-cf but not inc : reduced inc 
-both inc and cf:     reduced inc 
-
-inc highest: 
-inctrend false, cftrend true
-inctrend true, cftrend true 
-cftrend false.   
-inc lowest 
-
-cf highest with 
-inctrend true, cftrend false or true 
-inctrend false 
