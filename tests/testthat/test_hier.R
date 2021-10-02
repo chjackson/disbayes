@@ -54,35 +54,33 @@ test_that("errors in specifying hierarchical model", {
   "one value per year of age")
 })
 
-## FIXED hyperparameters - either fixed or EB 
 
-if (0){ 
-  test_that("fixed CF smooth",{
-    
-    db <- disbayes_hier(ihdmale, age="age", group="area", 
-                        inc_num = "inc_num", inc_denom = "inc_denom",
-                        prev_num = "prev_num", prev_denom = "prev_denom",
-                        mort_num = "mort_num", mort_denom = "mort_denom",
-                        hp_fixed = list(scf = 1), 
-                        iter=10, chains=1, loo=FALSE, algorithm="Fixed_param")
-    db$hp_fixed
-    
-  })
 
-test_that("fixed incidence smooth",{})
+test_that("fixed hyperparameters",{
+  
+  db <- disbayes_hier(ihdmale, age="age", group="area", 
+                      inc_num = "inc_num", inc_denom = "inc_denom",
+                      prev_num = "prev_num", prev_denom = "prev_denom",
+                      mort_num = "mort_num", mort_denom = "mort_denom",
+                      hp_fixed = list(scf = 1), 
+                      iter=10, chains=1, loo=FALSE, algorithm="Fixed_param")
+  expect_equal(db$hp_fixed["scf"], 1)
 
-test_that("fixed random effect intercept SD",{})
+  db <- disbayes_hier(ihdmale, age="age", group="area", 
+                      inc_num = "inc_num", inc_denom = "inc_denom",
+                      prev_num = "prev_num", prev_denom = "prev_denom",
+                      mort_num = "mort_num", mort_denom = "mort_denom",
+                      hp_fixed = list(scf = 1, sd_int = 1), 
+                      iter=10, chains=1, loo=FALSE, algorithm="Fixed_param")
+  expect_equal(db$hp_fixed["sd_int"], 1)
 
-test_that("fixed random slope SD",{})
+  db <- disbayes_hier(ihdmale, age="age", group="area", 
+                      inc_num = "inc_num", inc_denom = "inc_denom",
+                      prev_num = "prev_num", prev_denom = "prev_denom",
+                      mort_num = "mort_num", mort_denom = "mort_denom",
+                      hp_fixed = list(scf = TRUE, sinc = 1.234, sd_int = TRUE), 
+                      iter=10, chains=1, loo=FALSE, algorithm="Fixed_param")
+  expect_equal(db$hp_fixed["sinc"], 1.234)
+  expect_type(db$hp_fixed["scf"], "double")
 
-## Empirical Bayes estimated hyperparameters 
-
-    db <- disbayes_hier(ihdmale, age="age", group="area", 
-                        inc_num = "inc_num", inc_denom = "inc_denom",
-                        prev_num = "prev_num", prev_denom = "prev_denom",
-                        mort_num = "mort_num", mort_denom = "mort_denom",
-                        hp_fixed = list(scf = TRUE, sinc = 1.234, sd_int = TRUE), 
-                        iter=10, chains=1, loo=FALSE, algorithm="Fixed_param")
-    db$hp_fixed
-
-  }
+})

@@ -8,6 +8,6 @@ test_that("standard disbayes model, optimisation",{
                     mort_num = "mort_num", mort_denom = "mort_denom",
                     eqage = 40, loo=FALSE, seed=1)
   res <- tidy(db) %>% filter(var=="cf", age==60)
-  expect_equal(res$mode, 0.0172128687091707)
-  expect_equal(res$`50%`, 0.0173084702459764)
+  expect_equal(res$mode, 0.0172128687091707, tol=1e-04)
+  expect_equal(res$`50%`, 0.0173084702459764, tol=1e-04)
 })
