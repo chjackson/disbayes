@@ -6,6 +6,11 @@ task_id <- as.numeric(Sys.getenv("SLURM_ARRAY_TASK_ID"))
 runs_todo <- 1:nrow(hierrundf) 
 i <- runs_todo[task_id]
 
+if (0) { 
+  i <- 1 
+  nchains <-1
+}
+
 mhi <- gbd %>%
   filter(gender==hierrundf$gender[i], disease==hierrundf$disease[i]) %>%
   droplevels 
@@ -18,14 +23,16 @@ db <- disbayes_hier(data=mhi,
                     rem_num = if (hierrundf$remission[i]) "rem_num" else NULL, 
                     rem_denom = if (hierrundf$remission[i]) "rem_denom" else NULL,
                     cf_model = hierrundf$model[i],
+                    inc_model = "indep",
+                    inc_prior = c(1.1, 1), 
+                    scf_fixed = 2.65, 
                     eqage = hierrundf$eqage[i],
                     nfold_int_guess = 5, nfold_int_upper =  50,
                     nfold_slope_guess = 2, nfold_slope_upper =  20,
                     # method="opt", hessian=TRUE, draws=1000
                     method="mcmc", refresh = 1, chains=nchains, iter=1000,
-                    stan_control=list(max_treedepth=20)
+                    stan_control=list(max_treedepth=15)
                     )
-
 
 # saveRDS(db, file="~/scratch/chronic/db_hier_test.rds")
 

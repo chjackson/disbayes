@@ -17,15 +17,6 @@ mhi <- gbd %>%
     filter(disease==hierrungdf$disease[i]) %>%
     droplevels
 
-
-## what is the difference from before?  can compare with github 
-## - improper lognormal prior on inc 
-## - exponential rather than gamma priors on lam
-## perhaps it hadn't worked well enough before given divergences 
-## Anyway this works with optimisation.  Smoothnesses fixed at values for IHD in nonhier
-##resnh %>% 
-##  filter(disease=="Ischemic heart disease", area=="Leeds", gender=="Male", grepl("lambda",var))
-
 db <- disbayes_hier(data=mhi,
                     group = "area",
                     gender = "gender",

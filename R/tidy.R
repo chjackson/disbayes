@@ -224,12 +224,14 @@ tidy_stansumm <- function(summ, varlist, stats, levs=NULL){
     for (i in attr(varlist, "numerics")){
         summ[[i]] <- as.numeric(summ[[i]])
     }
+    summ <- summ %>% relocate(all_of(c("var", attr(varlist, "order"))))
     facs <- attr(varlist, "factors")
     if (!is.null(facs)){
-        for (i in 1:nrow(facs)){
-            summ[[facs$vars[i]]] <- factor(summ[[facs$vars[i]]], labels=levs[[facs$levs[i]]])
-        }
+      for (i in 1:nrow(facs)){
+        if (!is.null(levs[[facs$levs[i]]]))
+          summ[[facs$vars[i]]] <- factor(summ[[facs$vars[i]]], labels=levs[[facs$levs[i]]])
+        else summ[[facs$vars[i]]] <- NULL
+      }
     }
-    summ <- summ %>% relocate(all_of(c("var", attr(varlist, "order"))))
     summ
 }
