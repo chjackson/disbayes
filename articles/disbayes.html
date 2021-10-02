@@ -325,12 +325,12 @@
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">var</span><span class="op">==</span><span class="st">"cf"</span>, <span class="fu"><a href="https://dplyr.tidyverse.org/reference/between.html">between</a></span><span class="op">(</span><span class="va">age</span>,<span class="fl">60</span>,<span class="fl">65</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">age</span>, <span class="va">`25%`</span>, <span class="va">`50%`</span>, <span class="va">`75%`</span><span class="op">)</span></code></pre></div>
 <pre><code>##   age        25%        50%        75%
-## 1  60 0.01556518 0.01660066 0.01775507
-## 2  61 0.01573319 0.01682099 0.01790573
-## 3  62 0.01594453 0.01703240 0.01805930
-## 4  63 0.01620812 0.01722971 0.01825765
-## 5  64 0.01646473 0.01747725 0.01849670
-## 6  65 0.01678857 0.01774340 0.01876234</code></pre>
+## 1  60 0.01537974 0.01653076 0.01765274
+## 2  61 0.01560539 0.01676720 0.01781738
+## 3  62 0.01586882 0.01697884 0.01804664
+## 4  63 0.01615309 0.01721127 0.01826454
+## 5  64 0.01641191 0.01747123 0.01853106
+## 6  65 0.01670051 0.01771984 0.01881353</code></pre>
 <p>The default <code>plot</code> method for objects returned by <code>disbayes</code> plots the posterior summaries for case fatality, allowing a quick check of the model results. Or do <code><a href="https://rdrr.io/r/graphics/plot.default.html">plot(..., variable="inc")</a></code> for incidence. The function returns a <code>ggplot2</code> object that can be modified with <code>ggplot2</code> functions, e.g. to add axis labels.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span>
