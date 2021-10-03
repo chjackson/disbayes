@@ -44,4 +44,4 @@ If this fails, make sure that the `rstan` package is set up properly, as [explai
 
 ## Introduction and worked example
 
-[Bayesian estimation of chronic disease epidemiology from incomplete data: the disbayes package](https://chjackson.github.io/disbayes/doc/disbayes.html)
+[Bayesian estimation of chronic disease epidemiology from incomplete data: the disbayes package](https://chjackson.github.io/disbayes/articles/disbayes.html)
