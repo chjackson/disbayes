@@ -209,6 +209,10 @@ disbayes_hier <- function(data,
       hp$include[hp$pars=="scfmale"] <- FALSE
       hp["scfmale","isfixed"] <- TRUE
     }
+    if (inc_model=="indep"){
+      hp$include[hp$pars=="sinc"] <- FALSE
+      hp["sinc","isfixed"] <- TRUE
+    }
     
     inits_hier_fn <- function() { 
       inc_init  <- rlnorm(nage, meanlog=log(initrates$inc), sdlog=initrates$inc/10)
