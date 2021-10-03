@@ -64,7 +64,7 @@ test_that("fixed hyperparameters",{
                       mort_num = "mort_num", mort_denom = "mort_denom",
                       hp_fixed = list(scf = 1), 
                       iter=10, chains=1, loo=FALSE, algorithm="Fixed_param")
-  expect_equal(db$hp_fixed["scf"], 1)
+  expect_equivalent(db$hp_fixed["scf"], 1)
 
   db <- disbayes_hier(ihdmale, age="age", group="area", 
                       inc_num = "inc_num", inc_denom = "inc_denom",
@@ -72,7 +72,7 @@ test_that("fixed hyperparameters",{
                       mort_num = "mort_num", mort_denom = "mort_denom",
                       hp_fixed = list(scf = 1, sd_int = 1), 
                       iter=10, chains=1, loo=FALSE, algorithm="Fixed_param")
-  expect_equal(db$hp_fixed["sd_int"], 1)
+  expect_equivalent(db$hp_fixed["sd_int"], 1)
 
   db <- disbayes_hier(ihdmale, age="age", group="area", 
                       inc_num = "inc_num", inc_denom = "inc_denom",
@@ -80,7 +80,7 @@ test_that("fixed hyperparameters",{
                       mort_num = "mort_num", mort_denom = "mort_denom",
                       hp_fixed = list(scf = TRUE, sinc = 1.234, sd_int = TRUE), 
                       iter=10, chains=1, loo=FALSE, algorithm="Fixed_param")
-  expect_equal(db$hp_fixed["sinc"], 1.234)
+  expect_equivalent(db$hp_fixed["sinc"], 1.234)
   expect_type(db$hp_fixed["scf"], "double")
 
 })
