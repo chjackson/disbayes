@@ -30,3 +30,4 @@ RCPP_MODULE(stan_fit4disbayes_mod) {
     .method("standalone_gqs", &rstan::stan_fit<stan_model, boost::random::ecuyer1988> ::standalone_gqs)
     ;
 }
+
