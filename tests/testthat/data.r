@@ -1,4 +1,5 @@
 library(dplyr)
+library(tidyr)
 
 ihdbristol <- ihdengland %>% 
   dplyr::filter(area=="Bristol", gender=="Male") %>%

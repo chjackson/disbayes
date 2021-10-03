@@ -282,7 +282,8 @@ rnh <- readRDS("resoptunc_nonhier.rds") %>%
     filter(disease=="Ischemic heart disease",
            gender=="Male", 
            area=="Leeds") %>%
-    mutate(model="No trends")
+    mutate(model="No trends") 
+if (!is.null(rnh$mode)) rnh$mode <- rnh$par  # TODO remove if rerun
 
 ## Excluding incidence data
 mhi <- gbd %>%
@@ -292,7 +293,7 @@ db <- disbayes(data=mhi,
                prev_num = "prev_num", prev_denom = "prev_denom",
                eqage=30, 
                seed = 1, 
-               method = "opt", hessian=TRUE, sprior = 1, draws=1000)
+               method = "opt", hessian=TRUE, draws=1000)
 rnh_noinc <- tidy(db) %>% 
     mutate(model="No trends, no incidence data")
 
@@ -307,7 +308,7 @@ obsdat <- tidy_obsdat(dbt$dat) %>%
     mutate(model="Observed data")
 
 fitdatp <- rest_all %>% 
-    rename(est=par, lower=`2.5%`, upper=`97.5%`) %>%
+    rename(est=mode, lower=`2.5%`, upper=`97.5%`) %>%
     mutate(var = fct_recode(var, "inc"="inc_prob")) %>%
     full_join(obsdat %>% mutate(lower=NULL, upper=NULL)) %>%
     filter(age>60, age < 100) %>%
@@ -370,9 +371,7 @@ dbt_sens <- disbayes(data = mhi,
                      mort_num = "mort_num", mort_denom = "mort_denom",
                      rem_num = if (trendrundf$remission[i]) "rem_num" else NULL, 
                      rem_denom = if (trendrundf$remission[i]) "rem_denom" else NULL,
-                     increasing_cf = trendrundf$increasing[i], 
-                     const_cf = FALSE,
-                     smooth_cf=TRUE, smooth_inc = TRUE,
+                     cf_model = if (trendrundf$increasing[i]) "increasing" else "smooth", 
                      inc_trend = trends, cf_trend = cftrends_sens,
                      eqage= trendrundf$eqage[i],
                      method = "opt", iter = 10000, verbose = TRUE , hessian=TRUE, draws=1000
@@ -387,9 +386,7 @@ dbt_sensbig <- disbayes(data = mhi,
                         mort_num = "mort_num", mort_denom = "mort_denom",
                         rem_num = if (trendrundf$remission[i]) "rem_num" else NULL, 
                         rem_denom = if (trendrundf$remission[i]) "rem_denom" else NULL,
-                        increasing_cf = trendrundf$increasing[i], 
-                        const_cf = FALSE,
-                        smooth_cf=TRUE, smooth_inc = TRUE,
+                        cf_model = if (trendrundf$increasing[i]) "increasing" else "smooth", 
                         inc_trend = trends, cf_trend = cftrends_sensbig,
                         eqage= trendrundf$eqage[i],
                         method = "opt", iter = 10000, verbose = TRUE, hessian=TRUE, draws=1000
@@ -403,13 +400,13 @@ rnh <- readRDS("resoptunc_nonhier.rds") %>%
            gender=="Male", 
            area=="Leeds") %>%
     mutate(model="No time trends")
-
+if (!is.null(rnh$mode)) rnh$mode <- rnh$par  # TODO remove if rerun
 
 rest_sens_all <- rbind(rest %>% mutate(model="2003-2010 trend continues"), 
                        rest_sens, 
                        rest_sensbig) %>%
     full_join(rnh) %>%
-    rename(est=par, lower=`2.5%`, upper=`97.5%`) %>%
+    rename(est=mode, lower=`2.5%`, upper=`97.5%`) %>%
     filter(var %in% c("inc","cf")) 
 saveRDS(rest_sens_all, file="res_trend_sens.rds")
 

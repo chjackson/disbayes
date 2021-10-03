@@ -47,3 +47,5 @@ metahit/slurm*out
 /doc/
 metahit/results_nonhier
 docs
+configure
+*\#*

@@ -74,7 +74,7 @@ transformed parameters {
   vector<lower=0>[nage] rem;
   vector<lower=0,upper=1>[nage] rem_prob;
   
-  row_vector[3] state_probs[nage+1,nbias]; 
+  row_vector[3] state_probs[(nage+1)*(1-trend),nbias]; 
   row_vector[3] tmp;
   matrix<lower=0,upper=1>[3,3] P;
   matrix<lower=0>[nage,nbias] prev;
@@ -143,6 +143,11 @@ transformed parameters {
 	state_probs_yr[1,b,k,1] = 1;
 	state_probs_yr[1,b,k,2] = 0;
 	state_probs_yr[1,b,k,3] = 0;
+	// initialise state occupancy at other ages to keep Stan happy that all array elements are initialised
+	// only the upper diagonal of this (year >= age) is needed
+	for (a in 2:(nage+1)){
+	  state_probs_yr[a,b,k,1:3] = rep_row_vector(0, 3);
+	}
       }
     }
   } else {
@@ -163,11 +168,6 @@ transformed parameters {
 	    P = trans_probs(inc_yr[b-1, y-1, k], cf_yr[b-1, y-1], rem[b-1]);
 	    tmp = state_probs_yr[b-1, y-1, k, 1:3] * P;
 	    state_probs_yr[b, y, k, 1:3] = tmp;
-	  }
-	  if (a+1 <= nyr) { 
-	    for (b in (a+1):nyr) {
-	      state_probs_yr[b, y, k, 1:3] = rep_row_vector(0, 3);
-	    }
 	  }
 	}
 	// data are the outcomes at the end of the current year
