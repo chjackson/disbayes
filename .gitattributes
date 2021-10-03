@@ -1,0 +1,4 @@
+Makevars    eol=lf
+*.cpp	    eol=lf
+*.cc	    eol=lf
+*.h	    eol=lf
