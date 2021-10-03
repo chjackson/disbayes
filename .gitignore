@@ -34,9 +34,6 @@ inst/stan/*.rds
 src/*.o
 src/*.so
 src/*.dll
-src/*.cc
-src/*.cpp
-src/*.h
 metahit/TODO.md
 dbh.rds
 vignettes/dbh.rds
