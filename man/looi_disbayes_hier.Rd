@@ -13,3 +13,11 @@ looi_disbayes_hier(x)
 Return observation-level leave-one-out cross-validatory statistics from a disbayes_hier fit
 as a tidy data frame.
 }
+\details{
+The data frame has one row per observed age-specific mortality, incidence, prevalence and/or
+remission data-point, and per area and gender, containing leave-one-out cross validation 
+statistics representing how well the model would predict that observation if it were left 
+out of the fit. 
+
+These are computed with the \pkg{loo} package.
+}

@@ -26,12 +26,25 @@
 ##'   \code{"increasing"}. Case fatality is assumed to be an increasing function
 ##'   of age (note it is constant below \code{"eqage"} in all models) with a
 ##'   common slope for all groups.
+##'   
+##'   \code{"common"} Case fatality is an unconstrained function of age
+##'   which is common to all areas, i.e. it has the same parameter values in
+##'   every area.  This and \code{"increasing_common"} are used in situations
+##'   where you want to compare a model with area-specific rates with a single model for
+##'   the data aggregated over areas.  Modelling the area-disaggregated data using
+##'   a common function for all areas is equivalent to a model for the aggregated data,
+##'   and can be statistically compared (using cross-validation) with a model with
+##'   area-specific rates. 
+##' 
+##'   \code{"increasing_common"} Case fatality is an increasing function of age
+##'   which is common to all areas. 
 ##'
 ##'   \code{"const"} Case fatality is assumed to be constant with age, for all
-##'   ages.
+##'   ages, but different in each area. 
 ##'
-##'   In all models, case fatality is a smooth function of age, and incidence
-##'   rates are is estimated independently for each age.
+##'   \code{"const_common"} Case fatality is a constant over all ages and areas. 
+##'
+##' In all models, case fatality is a smooth function of age.
 ##'
 ##' @param inc_model Model for how incidence varies with age.
 ##'
@@ -143,7 +156,8 @@ disbayes_hier <- function(data,
                           )
 {
     dbcall <- match.call()
-    cf_model <- match.arg(cf_model, c("default","interceptonly","increasing","const"))
+    cf_model <- match.arg(cf_model, c("default","interceptonly","increasing",
+                                      "common", "increasing_common", "const", "const_common"))
     inc_model <- match.arg(inc_model, c("smooth", "indep"))
     rem_model <- match.arg(rem_model, c("const", "indep"))
     const_rem <- (rem_model=="const")
@@ -200,10 +214,15 @@ disbayes_hier <- function(data,
     K <- ncol(cf_smooth$X)
 
     interceptonly <- (cf_model=="interceptonly") 
-    increasing <- (cf_model=="increasing")
-    const_cf <- (cf_model=="const")
+    increasing <- (cf_model %in% c("increasing","increasing_common"))
+    common <- (cf_model %in% c("common", "increasing_common","const_common"))
+    const_cf <- (cf_model %in% c("const", "const_common"))
 
     ## Handle fixed hyperparameters and empirical Bayes estimation
+    if (inc_model %in% c("indep") && !is.null(hp_fixed[["sinc"]])) hp_fixed[["sinc"]] <- NULL
+    if (cf_model %in% c("const") && !is.null(hp_fixed[["scf"]])) hp_fixed[["scf"]] <- NULL
+    if (ng==1 && !is.null(hp_fixed[["scfmale"]])) hp_fixed[["scfmale"]] <- NULL 
+    if (!(cf_model %in% c("default")) && !is.null(hp_fixed[["sd_slope"]])) hp_fixed[["sd_slope"]] <- NULL
     hp <- eb_disbayes(.disbayes_hier_hp, hp_fixed, dbcall, disbayes_hier, method, list(...))
     if (ng==1) {
       hp$include[hp$pars=="scfmale"] <- FALSE
@@ -230,13 +249,16 @@ disbayes_hier <- function(data,
                                          dim=c(nage*(1 - smooth_inc), narea, ng)), # remove if mandating SI
                          rem_par = array(rep(rem_init, ng*remission), 
                                          dim=c(remission*(nage*(1-const_rem) + 1*const_rem), ng)),
-                         barea = matrix(0, nrow=(K-2)*(1-const_cf), ncol=narea),
-                         barea_slope = matrix(0, nrow=(1-interceptonly)*(1-const_cf), ncol=narea),
-                         barea_inter = matrix(0, nrow=1, ncol=narea),
+                         barea = matrix(0, nrow=(K-2)*(1-const_cf),
+                                        ncol = narea*(1-common) + 1*common),
+                         barea_slope = matrix(0, nrow=(1-interceptonly)*(1-const_cf),
+                                              ncol=narea*(1-common) + 1*common),
+                         barea_inter = matrix(0, nrow=1, ncol=narea*(1-common)),
                          bmale = if (ng==1) numeric() else rep(0, K),
                          beta_inc = array(rep(betainc_in, narea*ng),
                                           dim=c(K*smooth_inc, narea, ng)),
-                         lcfbase = if (increasing) rep(beta_in[K-1], narea) else numeric(),
+                         lcfbase = if (increasing) as.array(rep(beta_in[K-1],
+                                                       narea*(1-common) + 1*common)) else numeric(),
                          mean_inter = if (beta_in[K-1] > 0) beta_in[K] else mean(log(initrates$cf)),
                          mean_slope = if (const_cf) numeric() else as.array(beta_in[K-1]), 
                          sd_inter = if (hp["sd_int","isfixed"]) numeric() else as.array(sd_in),
@@ -253,7 +275,10 @@ disbayes_hier <- function(data,
     gpslope <- gammapars_hier(nfold_slope_guess, nfold_slope_upper)
 
     datstans <- c(dat, list(interceptonly=interceptonly, 
-                            increasing=increasing, narea=narea, ng=ng,
+                            increasing=increasing, 
+                            common=common, 
+                            narea=narea, 
+                            ng=ng,
                             const_cf = as.numeric(const_cf), 
                             smooth_inc=as.numeric(smooth_inc), # or should this be mandated? 
                             prev_zero=as.numeric(prev_zero),
@@ -302,23 +327,27 @@ disbayes_hier <- function(data,
 ##'
 ##' Return observation-level leave-one-out cross-validatory statistics from a disbayes_hier fit
 ##' as a tidy data frame.
+##' 
+##' The data frame has one row per observed age-specific mortality, incidence, prevalence and/or
+##' remission data-point, and per area and gender, containing leave-one-out cross validation 
+##' statistics representing how well the model would predict that observation if it were left 
+##' out of the fit. 
+##' 
+##' These are computed with the \pkg{loo} package.
+##'
 ##'
 ##' @param x Object returned by \code{\link{disbayes_hier}}
 ##'
 ##'
 ##' @export
 looi_disbayes_hier <- function(x) {
-    looi <- looi_disbayes(x)
-    nout <- length(unique(looi$var))
-    if (x$ng == 1){
-      areas <- seq_len(x$narea)
-      looi$area <- rep(rep(areas, each=x$nage), nout)
-    } else {
-      inds <- array_indvecs(age = x$nage, area = x$narea, gender = x$ng, outcome = nout)
-      looi <- cbind(looi, inds[,c("area","gender")])
-      ## should be equivalent to array_indvecs(age=x$nage, area=x$narea, outcome=nout)[,"area"]
-    }
-    looi
+  # gender index varies fastest in Stan code
+  inds <- array_indvecs(gender = x$ng, area=x$narea, age = x$nage)
+  loodf <- get_loodf(x, inds) %>%
+    arrange(outcome, gender, area, age) %>%
+    relocate(outcome, gender, area, age)
+  if (x$ng==1) loodf$gender <- NULL 
+  loodf
 }
 
 hierdata_to_agg <- function(dat, groups){
@@ -373,7 +402,8 @@ gammapars_hier <- function(nfold_mean=5, nfold_upper=100){
 ##' @importFrom stats setNames
 ##' 
 array_indvecs <- function(...){
-  args <- list(...)
+    args <- list(...)
+    if (is.null(names(args))) names(args) <- paste0("V",seq_along(args))
   dnames <- names(args)
   dims <- unlist(args)
   z <- array(dim=dims)

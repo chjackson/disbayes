@@ -346,7 +346,9 @@ disbayes <- function(data,
   if (increasing_cf) smooth_cf <- TRUE
   if (const_cf) increasing_cf <- TRUE
 
-  # handle fixed hyperparameters
+  # Handle fixed hyperparameters
+  if (inc_model %in% c("indep") && !is.null(hp_fixed[["sinc"]])) hp_fixed[["sinc"]] <- NULL
+  if (cf_model %in% c("indep","const") && !is.null(hp_fixed[["scf"]])) hp_fixed[["scf"]] <- NULL
   hp <- eb_disbayes(.disbayes_hp, hp_fixed, dbcall, disbayes, method, list(...))
   
   if (smooth_cf | smooth_inc) {
@@ -449,29 +451,38 @@ get_loo <- function(fits, remission=FALSE) {
 ##' 
 ##' Return observation-level leave-one-out cross-validatory statistics from a disbayes fit
 ##' as a tidy data frame. 
+##'
 ##' The data frame has one row per observed age-specific mortality, incidence, prevalence and/or
-##' remission data-point, containing leave-one-out cross validation statistics for that observation. 
+##' remission data-point, containing leave-one-out cross validation statistics representing how
+##' well the model would predict that observation if it were left out of the fit. 
+##' 
 ##' These are computed with the \pkg{loo} package.
 ##'
-##' @param x Object returned by \code{\link{disbayes}}
+##' @param x Object returned by \code{\link{disbayes}}.
 ##'
 ##' @param looname \code{loo} for smoothed model, \code{loou} for unsmoothed model. 
 ##' 
 ##' @export
-looi_disbayes <- function(x, looname="loo") {
+looi_disbayes <- function(x) {
+  inds <- array_indvecs(age = x$nage)
+  loodf <- get_loodf(x, inds) %>%
+    arrange(outcome, age) %>%
+    relocate(outcome) %>%
+    remove_rownames()
+}
+
+get_loodf <- function(x, inds){
   age <- var <- NULL 
-  outcomes <- names(x[[looname]])
+  outcomes <- names(x[["loo"]])
   looi <- vector(length(outcomes), mode="list")
   names(looi) <- outcomes 
   for (out in outcomes) {
-    looimat <- x[[looname]][[out]]$pointwise
-    looi[[out]] <- as.data.frame(looimat) %>%
-      mutate(age = rep(1:x$nage, length.out=nrow(looimat)),
-             var = out) %>%
-      relocate(var, age) 
+    looi[[out]] <- 
+      as.data.frame(x[["loo"]][[out]]$pointwise) %>%
+      mutate(outcome = out) %>%
+      cbind(inds)
   }
-  do.call("rbind", looi) %>%
-    remove_rownames()
+  loodf <- do.call("rbind", looi) %>% remove_rownames()
 }
 
 get_column <- function(data, str){

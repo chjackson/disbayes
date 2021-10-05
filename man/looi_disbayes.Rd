@@ -4,17 +4,21 @@
 \alias{looi_disbayes}
 \title{Observation-level leave-one-out cross-validatory statistics from a disbayes fit}
 \usage{
-looi_disbayes(x, looname = "loo")
+looi_disbayes(x)
 }
 \arguments{
-\item{x}{Object returned by \code{\link{disbayes}}}
+\item{x}{Object returned by \code{\link{disbayes}}.}
 
 \item{looname}{\code{loo} for smoothed model, \code{loou} for unsmoothed model.}
 }
 \description{
 Return observation-level leave-one-out cross-validatory statistics from a disbayes fit
-as a tidy data frame. 
+as a tidy data frame.
+}
+\details{
 The data frame has one row per observed age-specific mortality, incidence, prevalence and/or
-remission data-point, containing leave-one-out cross validation statistics for that observation. 
+remission data-point, containing leave-one-out cross validation statistics representing how
+well the model would predict that observation if it were left out of the fit. 
+
 These are computed with the \pkg{loo} package.
 }

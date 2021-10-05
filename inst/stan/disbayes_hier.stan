@@ -35,6 +35,7 @@ data {
   // alternative models
   int interceptonly;
   int increasing;
+  int common;
   int const_cf; 
   int const_rem;
   int smooth_inc;
@@ -61,14 +62,14 @@ parameters {
   real<lower=0> rem_par[remission*(nage*(1-const_rem) + 1*const_rem),ng];
 
    // standard normal terms contributing to area-specific coefficients in non-centered parameterisation.
-  matrix[(K-2)*(1-const_cf), narea] barea; 
-  matrix[(1-interceptonly)*(1 - const_cf), narea] barea_slope; 
-  matrix[1, narea] barea_inter; 
+  matrix[(K-2)*(1-const_cf), narea*(1 - common) + 1*(common)] barea; 
+  matrix[(1-interceptonly)*(1 - const_cf), narea*(1 - common) + 1*common] barea_slope; 
+  matrix[1, narea*(1 - common)] barea_inter; 
 
   vector[K*(ng-1)] bmale;        // male effect on beta 
   
   // for model with increasing slopes
-  vector[narea*increasing] lcfbase;
+  vector[(narea*(1-common) + 1*common)*increasing] lcfbase;
 
   real beta_inc[K*smooth_inc,narea,ng];
   
@@ -103,6 +104,7 @@ transformed parameters {
   real<lower=0> lambda_cf_use;
   real<lower=0> lambda_cf_male_use;
   real<lower=0> lambda_inc_use;
+  vector[narea*increasing] lcfbase_use;
 
   if (sd_int_isfixed) sdint_use = sd_int_fixed; else sdint_use = sd_inter[1];
   if (sd_slope_isfixed || const_cf || interceptonly || increasing) sdslope_use = sd_slope_fixed; else sdslope_use = sd_slope[1];
@@ -111,6 +113,31 @@ transformed parameters {
   if (sinc_isfixed || !smooth_inc) lambda_inc_use = lambda_inc_fixed; else lambda_inc_use = lambda_inc[1];
 
   for (j in 1:narea){
+    if (common) {  // no difference between areas. implemented to allow statistical model comparison
+      if (increasing) { lcfbase_use[j] = lcfbase[1]; }
+      if (const_cf){
+	for (i in 1:(K-1)) {
+	  bareat[i,j] = 0; // constant 
+	}
+      } else { 
+	for (i in 1:(K-2)){
+	  bareat[i,j] = barea[i,1] * lambda_cf_use;
+	}
+	if (increasing) { // increasing and smooth
+	  bareat[K-1,j] = barea_slope[1,1] * lambda_cf_use; // slope for increments. shrunk. 
+	} else { // unconstrained and smooth
+	  bareat[K-1,j] = mean_slope[1];
+	}
+      }
+      if (increasing) {
+	bareat[K,j] = mean_slope[1]; // common slope (ie intercept for increments)
+      } else { 
+	bareat[K,j] = mean_inter; // area-level random intercept
+      }
+    }
+
+    else {  // area-specific terms 
+      if (increasing) { lcfbase_use[j] = lcfbase[j]; }
       if (const_cf){
 	for (i in 1:(K-1)) {
 	  bareat[i,j] = 0;
@@ -122,7 +149,7 @@ transformed parameters {
 	if (interceptonly) {
 	    bareat[K-1,j] = mean_slope[1];   // common slope between areas 
 	} else if (increasing) {
-	  bareat[K-1,j] = barea_slope[1,j] * lambda_cf_use;
+	  bareat[K-1,j] = barea_slope[1,j] * lambda_cf_use; // slope for increments. shrunk.
 	} else { // default
 	  bareat[K-1,j] = mean_slope[1] + barea_slope[1,j] * sdslope_use; // area-level random slope 
 	}
@@ -134,6 +161,8 @@ transformed parameters {
       }
     }
 
+  }
+    
   for (g in 1:ng)  {
     for (j in 1:narea) { 
 	for (a in 1:nage){ 
@@ -166,7 +195,7 @@ transformed parameters {
 	}
 	// Baseline for eqage (e.g. age 50) is a random effect
 	for (a in 1:(eqage-1)){
-	  cf[a,j,g] = exp(lcfbase[j]);
+	  cf[a,j,g] = exp(lcfbase_use[j]);
 	}
 	for (a in eqage:nage){
 	  cf[a,j,g] = cf[a-1,j,g] + dcf[a,j,g];
@@ -208,18 +237,25 @@ transformed parameters {
 model {    
   mean_inter ~ normal(mipm, mips);
 
-  // TODO prior pars apply for cf and inc 
-
   // These all get transformed in different ways according to the model 
   if (!const_cf) { 
     mean_slope ~ normal(mism, miss); 
-    for (j in 1:narea){
+    if (common) {
       for (i in 1:(K-2)){ 
-	    barea[i,j] ~ normal(0, 1);
+	barea[i,1] ~ normal(0, 1);
+      }     
+      if (!interceptonly && !const_cf){
+	barea_slope[1,1] ~ normal(0, 1);
+      }
+    } else {
+      for (j in 1:narea){
+	for (i in 1:(K-2)){ 
+	  barea[i,j] ~ normal(0, 1);
 	}     
-      barea_inter[1,j] ~ normal(0, 1);
-      if (!interceptonly){
-	barea_slope[1,j] ~ normal(0, 1);
+	barea_inter[1,j] ~ normal(0, 1);
+	if (!interceptonly && !const_cf){
+	  barea_slope[1,j] ~ normal(0, 1);
+	}
       }
     }
   }
@@ -241,6 +277,9 @@ model {
   }
 
   // Model for the data
+  if (increasing && common) {
+    lcfbase[1] ~ normal(0, 100);
+  }
   for (j in 1:narea){
     for (g in 1:ng) {
       mort_num[,j,g] ~ binomial(mort_denom[,j,g], mort[,j,g]);
@@ -250,8 +289,8 @@ model {
 	rem_num[,j,g] ~ binomial(rem_denom[,j,g], rem_prob[,j,g]);
       }
     }
-    if (increasing){
-      lcfbase[j] ~ normal(mean_inter, sd_inter);  
+    if (increasing && !common){
+      lcfbase[j] ~ normal(mean_inter, sd_inter);
     }
   }
   if (remission){
@@ -273,7 +312,7 @@ model {
   if (smooth_inc && !sinc_isfixed){
     lambda_inc ~ gamma(2, sprior[1]);
   }
-    if ((!interceptonly) && (!increasing)){
+  if ((!interceptonly) && (!increasing) && (!const_cf)){
 	// Variation in slopes 
       sd_slope ~ gamma(gpslope_a, gpslope_b);
     }

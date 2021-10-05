@@ -166,11 +166,24 @@ further restriction.
 of age (note it is constant below \code{"eqage"} in all models) with a
 common slope for all groups.
 
-\code{"const"} Case fatality is assumed to be constant with age, for all
-ages.
+\code{"common"} Case fatality is an unconstrained function of age
+which is common to all areas, i.e. it has the same parameter values in
+every area.  This and \code{"increasing_common"} are used in situations
+where you want to compare a model with area-specific rates with a single model for
+the data aggregated over areas.  Modelling the area-disaggregated data using
+a common function for all areas is equivalent to a model for the aggregated data,
+and can be statistically compared (using cross-validation) with a model with
+area-specific rates.
 
-In all models, case fatality is a smooth function of age, and incidence
-rates are is estimated independently for each age.}
+\code{"increasing_common"} Case fatality is an increasing function of age
+which is common to all areas.
+
+\code{"const"} Case fatality is assumed to be constant with age, for all
+ages, but different in each area.
+
+\code{"const_common"} Case fatality is a constant over all ages and areas.
+
+In all models, case fatality is a smooth function of age.}
 
 \item{inc_model}{Model for how incidence varies with age.
 

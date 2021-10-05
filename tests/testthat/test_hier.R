@@ -84,3 +84,4 @@ test_that("fixed hyperparameters",{
   expect_type(db$hp_fixed["scf"], "double")
 
 })
+
