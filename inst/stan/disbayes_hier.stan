@@ -108,7 +108,7 @@ transformed parameters {
 
   if (sd_int_isfixed) sdint_use = sd_int_fixed; else sdint_use = sd_inter[1];
   if (sd_slope_isfixed || const_cf || interceptonly || increasing) sdslope_use = sd_slope_fixed; else sdslope_use = sd_slope[1];
-  if (scf_isfixed) lambda_cf_use = lambda_cf_fixed; else lambda_cf_use = lambda_cf[1];
+  if (scf_isfixed || const_cf) lambda_cf_use = lambda_cf_fixed; else lambda_cf_use = lambda_cf[1];
   if (scfmale_isfixed || (ng==1)) lambda_cf_male_use = lambda_cf_male_fixed; else lambda_cf_male_use = lambda_cf_male[1];
   if (sinc_isfixed || !smooth_inc) lambda_inc_use = lambda_inc_fixed; else lambda_inc_use = lambda_inc[1];
 

@@ -1740,7 +1740,7 @@ public:
                 stan::math::assign(sdslope_use, get_base1(sd_slope, 1, "sd_slope", 1));
             }
             current_statement_begin__ = 200;
-            if (as_bool(scf_isfixed)) {
+            if (as_bool((primitive_value(scf_isfixed) || primitive_value(const_cf)))) {
                 current_statement_begin__ = 200;
                 stan::math::assign(lambda_cf_use, lambda_cf_fixed);
             } else {
@@ -3054,7 +3054,7 @@ public:
                 stan::math::assign(sdslope_use, get_base1(sd_slope, 1, "sd_slope", 1));
             }
             current_statement_begin__ = 200;
-            if (as_bool(scf_isfixed)) {
+            if (as_bool((primitive_value(scf_isfixed) || primitive_value(const_cf)))) {
                 current_statement_begin__ = 200;
                 stan::math::assign(lambda_cf_use, lambda_cf_fixed);
             } else {
