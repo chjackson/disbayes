@@ -460,10 +460,9 @@ get_loo <- function(fits, remission=FALSE) {
 ##'
 ##' @param x Object returned by \code{\link{disbayes}}.
 ##'
-##' @param looname \code{loo} for smoothed model, \code{loou} for unsmoothed model. 
-##' 
 ##' @export
 looi_disbayes <- function(x) {
+  outcome <- age <- NULL
   inds <- array_indvecs(age = x$nage)
   loodf <- get_loodf(x, inds) %>%
     arrange(outcome, age) %>%

@@ -342,6 +342,7 @@ disbayes_hier <- function(data,
 ##' @export
 looi_disbayes_hier <- function(x) {
   # gender index varies fastest in Stan code
+  outcome <- gender <- area <- age <- NULL
   inds <- array_indvecs(gender = x$ng, area=x$narea, age = x$nage)
   loodf <- get_loodf(x, inds) %>%
     arrange(outcome, gender, area, age) %>%
