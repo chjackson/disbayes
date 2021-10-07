@@ -28,17 +28,15 @@ These scripts are used to estimate models by full MCMC sampling.  Models for dif
 
 * `slurm_bsu.sh` Example of a SLURM shell script used to call one of the `paper_analyses_` R scripts in SLURM array mode.  The analyses are defined in data frames in `paper_analyses_header.r`, e.g. `rundf` for the non-hierarchical, independent areas model.  Each row of the data frame corresponds to the same model fitted to a different dataset.  The SLURM script iterates over this data frame, performing each model fit on a different compute node.
 
-* `read_model_results.r`: Reads results from the `paper_analyses` scripts above, and collates them into a tidy data frame.
-
-This script is used to estimate the posterior mode using optimisation, along with approximate credible intervals, where this is required.   This includes the analyses that accounted for time trends and conflicts between data sources, and associated plots. 
-
-* `paper_analyses_pointests.r`
+* `read_model_results.r`: Reads results from the `paper_analyses` scripts above, and collates them into a tidy data frame, called `resall.rds`.
 
 
 ## Plots of data and plots and summaries of analysis results 
 
-Includes all figures that appear in the paper. 
+Includes code to generate figures for the paper, for all models fitted by MCMC. 
 
 * `paper_analyses.Rmd`
 
+The following script is used to estimate the posterior mode using optimisation, along with approximate credible intervals, where this is required.   This includes the analyses that accounted for time trends and conflicts between data sources, and associated plots. 
 
+* `paper_analyses_pointests.r`

@@ -9,13 +9,17 @@ i <- runs_todo[task_id]
 if (0) { 
   setwd("metahit")
   source("paper_analyses_header.r")
-  i <- 1 
+  i <- 1
   nchains <-1
+  mhi <- gbd %>%
+    filter(gender==hierrundf$gender[i], disease==hierrundf$disease[i]) %>%
+    droplevels 
 }
 
 mhi <- gbd %>%
   filter(gender==hierrundf$gender[i], disease==hierrundf$disease[i]) %>%
   droplevels 
+hpfixed <- if (hierrundf$model[i]=="const") list(sd_int=TRUE,sinc=1) else list(scf=2.5,sinc=5)
 
 db <- disbayes_hier(data=mhi,
                     group = "area",
@@ -25,12 +29,11 @@ db <- disbayes_hier(data=mhi,
                     rem_num = if (hierrundf$remission[i]) "rem_num" else NULL, 
                     rem_denom = if (hierrundf$remission[i]) "rem_denom" else NULL,
                     cf_model = hierrundf$model[i],
-                    inc_model = "indep",
-                    inc_prior = c(1.1, 1), 
-                    hp_fixed = list(scf=2.65), 
+                    inc_model = "smooth",
+                    rem_prior = c(1.1, 1),
                     eqage = hierrundf$eqage[i],
+                    hp_fixed = hpfixed, 
                     nfold_int_guess = 5, nfold_int_upper =  50,
-                    nfold_slope_guess = 2, nfold_slope_upper =  20,
                     # method="opt", hessian=TRUE, draws=1000
                     method="mcmc", refresh = 1, chains=nchains, iter=1000,
                     stan_control=list(max_treedepth=15)
@@ -55,11 +58,3 @@ loo <- looi_disbayes_hier(db) %>%
 
 saveRDS(list(res=res,loo=loo), file= paste0("results_hier/res", i, ".rds"))
 cat(sprintf("Fitted model for case %s\n", i), file="metahit-hpc-log.txt", append=TRUE)
-
-
-if (0){
-  
-  plot.disbayes_hier(db)
-  
-  
-}

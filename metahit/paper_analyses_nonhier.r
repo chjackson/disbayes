@@ -8,6 +8,9 @@ i <- runs_todo[task_id]
 
 mhi <- gbd %>%
   filter(gender==rundf$gender[i], disease==rundf$disease[i], area==rundf$area[i])
+hpfixed <- list(scf=NULL, sinc=NULL)
+if (!is.na(rundf$scf_fixed[i])) hpfixed$scf <- rundf$scf_fixed[i]
+if (!is.na(rundf$sinc_fixed[i])) hpfixed$sinc <- rundf$sinc_fixed[i]
 
 db <- disbayes(data=mhi,
                inc_num = "inc_num", inc_denom = "inc_denom",
@@ -17,16 +20,16 @@ db <- disbayes(data=mhi,
                rem_denom = if (rundf$remission[i]) "rem_denom" else NULL,
                eqage = rundf$eqage[i],
                cf_model = if (rundf$increasing[i]) "increasing" else "smooth",
-               scf_fixed = if(is.na(rundf$scf_fixed[i])) NULL else rundf$scf_fixed[i],
-               sinc_fixed = if(is.na(rundf$sinc_fixed[i])) NULL else rundf$sinc_fixed[i],
-               method = "mcmc", chains=nchains, iter=5000, refresh=10
+               hp_fixed = hpfixed, 
+               method = "mcmc", chains=nchains, iter=100, refresh=10,
+               stan_control=list(max_treedepth=15)
                )
 
 res <- tidy(db) %>%
   mutate(gender=rundf$gender[i], disease=rundf$disease[i], area=rundf$area[i])
 loo <- looi_disbayes(db) %>%
     mutate(gender=rundf$gender[i], disease=rundf$disease[i], area=rundf$area[i])
-saveRDS(list(res=res, loo=loo), file= paste0("results_nonhier/res", i, ".rds"))
+saveRDS(list(res=res, loo=loo), file= paste0("results_nonhier_noinc/res", i, ".rds"))
 
 
 if (0){

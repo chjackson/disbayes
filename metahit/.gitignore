@@ -6,4 +6,4 @@ gbddb*.rds
 resall.rda
 metahit-hpc-log.txt
 res*.rds
-
+hpc.sh

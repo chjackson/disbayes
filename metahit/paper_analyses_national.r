@@ -14,8 +14,8 @@ db <- disbayes(data = gbdeng %>% filter(disease==natrundf$disease[i],
                rem_num = if (natrundf$remission[i]) "rem_num" else NULL, 
                rem_denom = if (natrundf$remission[i]) "rem_denom" else NULL,
                eqage= natrundf$eqage[i], 
-               cf_model = if (rundf$increasing[i]) "increasing" else "smooth",
-               method="mcmc", chains=nchains, iter=5000
+               cf_model = if (natrundf$increasing[i]) "increasing" else "smooth",
+               #method="mcmc", chains=nchains, iter=3000
                )
 
 res <- tidy(db) %>%

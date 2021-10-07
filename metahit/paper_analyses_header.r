@@ -7,9 +7,9 @@ library("disbayes")
 gbd <- readRDS("~/work/chronic/disbayes/metahit/gbddb.rds")
 
 nage <- 100
-areas <- unique(gbd$area)
-cityregions <- unique(gbd$area[gbd$areatype=="cityregion"])
-genders <- unique(gbd$gender)
+areas <- unique(as.character(gbd$area))
+cityregions <- unique(as.character(gbd$area)[gbd$areatype=="cityregion"])
+genders <- unique(as.character(gbd$gender))
 diseases_male <- c("Ischemic heart disease", "Stroke", "Tracheal, bronchus, and lung cancer", "Colon and rectum cancer","Alzheimer's disease and other dementias", "Chronic obstructive pulmonary disease","Stomach cancer") # no remission data for liver 
 diseases_female <- c(diseases_male, "Breast cancer","Uterine cancer")
 diseases <- unique(c(diseases_male, diseases_female))
@@ -58,7 +58,9 @@ hierrundf <- data.frame(gender = rep(c("Male","Female"), c(length(diseases_male)
                            disease %in% "Uterine cancer"  ~  "const",
                            TRUE  ~  "interceptonly"),
          remission = disease %in% cancers,
-         eqage = case_when(disease == "Alzheimer's disease and other dementias" ~ 70, 
+         eqage = case_when(disease == "Ischemic heart disease" ~ 30, 
+                           disease == "Stroke" ~ 30,
+                           disease == "Alzheimer's disease and other dementias" ~ 70, 
                            disease == "Uterine cancer" ~ 70, 
                            disease == "Stomach cancer" ~ 70, 
                            TRUE ~ 50)
@@ -71,7 +73,9 @@ hierrungdf <- data.frame(disease = diseases_male) %>%
                                           "Uterine cancer") ~  "increasing",
                            TRUE  ~  "interceptonly"),
          remission = disease %in% cancers,
-         eqage = case_when(disease == "Alzheimer's disease and other dementias" ~ 70, 
+         eqage = case_when(disease == "Ischemic heart disease" ~ 30, 
+                           disease == "Stroke" ~ 30,
+                           disease == "Alzheimer's disease and other dementias" ~ 70, 
                            disease == "Uterine cancer" ~ 70, 
                            disease == "Stomach cancer" ~ 70, 
                            TRUE ~ 50))
@@ -106,6 +110,10 @@ gbdeng <- gbd %>% select(-areatype) %>%
             .groups = "drop") 
 
 
+disease_order <- c("Ischemic heart disease", "Stroke", "Dementia",
+                                          "COPD", "Breast cancer", "Lung cancer", 
+                                          "Colon and rectum cancer","Stomach cancer",
+                                          "Uterine cancer")
 gbdplot <- gbd %>% 
   filter(disease %in% diseases, 
          area %in% cityregions) %>%
@@ -124,12 +132,13 @@ gbdplot <- gbd %>%
          disease = fct_recode(disease, "Dementia" = "Alzheimer's disease and other dementias",
                             "Lung cancer" = "Tracheal, bronchus, and lung cancer",
                             "COPD" = "Chronic obstructive pulmonary disease"),
-         disease = factor(disease, levels = c("Ischemic heart disease", "Stroke", "Dementia",
-                                          "COPD", "Breast cancer", "Lung cancer", 
-                                          "Colon and rectum cancer","Stomach cancer",
-                                          "Uterine cancer")))
+         disease = factor(disease, levels = disease_order))
 gbdplotf <- gbdplot %>% filter(gender=="Female")
 gbdplotm <- gbdplot %>% filter(gender=="Male", disease != "Breast cancer")
+
+stmcrundf <- hierrundf %>% 
+    filter(disease %in% c("Stomach cancer")) %>%
+    mutate(runid = 1:n())
 
 rundf <- rundf %>%
     filter(!disease %in% c("Stomach cancer", "Uterine cancer")) %>%

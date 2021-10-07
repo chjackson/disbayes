@@ -20,12 +20,8 @@ if (0){
 mhi <- gbd %>%
     filter(disease==hierrungdf$disease[i]) %>%
     droplevels
-
-## TODO find posterior mode of lambda_cf_male so we can fix it at this plausible value in MCMC
-## OK mode is 1.3 here.  So how can we use it in the real run. cd just set TRUE
-## did we try this before 
-## TODO use new EB code from disbayes_hier in disbayes. any sharing ? needs to handle subset of 5 pars cleanly  
-## TODO test all EB cases, put in testthat
+hpfixed <- if (hierrungdf$model[i]=="const") NULL else list(scf=2.5, sinc=5, scfmale=1)
+## mode of scfmale is 1.3, so 1 ensures no less smooth
 
 db <- disbayes_hier(data=mhi,
                     group = "area",
@@ -36,14 +32,14 @@ db <- disbayes_hier(data=mhi,
                     rem_num = if (hierrungdf$remission[i]) "rem_num" else NULL,
                     rem_denom = if (hierrungdf$remission[i]) "rem_denom" else NULL,
                     cf_model = hierrungdf$model[i],
-                    inc_model = "indep",
-                    inc_prior = c(1.1, 1), 
-                    hp_fixed = list(scf = 2.65, sint = 2.65),
-                    eqage = hierrundf$eqage[i], 
+                    inc_model = "smooth",
+                    rem_prior = c(1.1, 1),
+                    hp_fixed = hpfixed, 
+                    eqage = hierrungdf$eqage[i], 
                     nfold_int_guess = 5, nfold_int_upper =  50,
                     nfold_slope_guess = 2, nfold_slope_upper =  20,
-                    method="opt", hessian=TRUE, draws=1000, iter=10000, verbose=TRUE
-                    #method="mcmc", refresh = 1, chains=nchains, iter=1000,
+                    #method="opt", hessian=TRUE, draws=1000, iter=10000, verbose=TRUE
+                    method="mcmc", refresh = 1, chains=nchains, iter=1000,
                     #stan_control=list(max_treedepth=15)
 )
 

@@ -1,6 +1,7 @@
 ### Analyses for the paper which use optimisation to produce posterior modes
 ### with credible intervals based on a normal approximation
 
+setwd("metahit")
 source("paper_analyses_header.r")
 
 ### Non-hierarchical model
@@ -43,17 +44,15 @@ if (0){
 
 resopt_nonhier <- do.call("rbind", resopt_nonhier)
 saveRDS(resopt_nonhier, file="resopt_nonhier.rds")
-readRDS(file="resopt_nonhier.rds") %>% 
-    filter(disease=="Ischemic heart disease", gender=="Female", area=="London")
+resopt_nonhier <- readRDS(file="resopt_nonhier.rds") 
 
-resopt_nonhier %>%
-    filter(disease=="Ischemic heart disease", gender=="Female", area=="London")
 
+    
 
 ## Point estimates of smoothness parameters without uncertainty,
 ## produced for specific cases where MCMC doesn't converge
-## An easier way might be to return the modes along with the tidied results 
-## for the empirical Bayes fits done above. 
+## Used to provide fixed values in paper_analyses_header.r 
+## It'd be easier to just request an EB fit directly when using MCMC - do this if we update the data
 
 resbad <- vector(3, mode="list")
 badids <- c(47,85,86)
@@ -80,9 +79,7 @@ resbad <- do.call("rbind", resbad)
 resbad %>% filter(grepl("lambda",var))
 
 
-
-
-### National estimates 
+### National estimates (uterine and stomach cancer)
 
 resopt_nat <- vector(nrow(natrundf), mode="list")
 
@@ -112,40 +109,35 @@ resopt_nat <- readRDS(file="resopt_nat.rds")
 
 
 
+### Hierarchical models for stomach and uterine cancers, using optimisation 
+### Not shown in paper 
+### MCMC doesn't work for uterine cancer, and gives noisy results for stomach cancer
 
-### Hierarchical.  EB normal approx for all, sprior = 100 and tighter re var priors 
-### We only need results for uterine cancer here, since MCMC works for the rest 
-resopt_hier <- vector(nrow(hierrundf), mode="list")
+hoptdf <- hierrundf %>% 
+    filter(disease %in% c("Stomach cancer","Uterine cancer"))
+resopt_hier <- vector(nrow(hoptdf), mode="list")
 
-## Settings needed for normal approx sampler to work in specific cases
-hierrundf$sprior_inc <- rep(1, nrow(hierrundf))
-hierrundf$sprior_inc[c(16)] <- 100
-hierrundf$inc_model <- "smooth" 
-hierrundf$inc_model[14] <- "indep" 
-
-for (i in 1:nrow(hierrundf)){ 
+for (i in 1:nrow(hoptdf)){ 
     mhi <- gbd %>%
-        filter(gender==hierrundf$gender[i], disease==hierrundf$disease[i]) %>%
+        filter(gender==hoptdf$gender[i], disease==hoptdf$disease[i]) %>%
         droplevels 
     db <- disbayes_hier(data=mhi,
                         group = "area",
                         inc_num = "inc_num", inc_denom = "inc_denom",
                         mort_num = "mort_num", mort_denom = "mort_denom",
                         prev_num = "prev_num", prev_denom = "prev_denom",
-                        rem_num = if (hierrundf$remission[i]) "rem_num" else NULL, 
-                        rem_denom = if (hierrundf$remission[i]) "rem_denom" else NULL,
-                        cf_model = hierrundf$model[i], 
-                        inc_model = hierrundf$inc_model[i], 
-                        eqage=hierrundf$eqage[i],
-                        prev_zero = TRUE,
-                        nfold_int_guess = 1.5,
-                        nfold_int_upper =  5,
-                        sd_int_fixed = TRUE,
-                        sprior = c(hierrundf$sprior_inc[i], 100),
+                        rem_num = if (hoptdf$remission[i]) "rem_num" else NULL, 
+                        rem_denom = if (hoptdf$remission[i]) "rem_denom" else NULL,
+                        cf_model = hoptdf$model[i],
+                        inc_model = "smooth",
+                        rem_prior = c(1.1, 1),
+                        eqage = hoptdf$eqage[i],
+                        hp_fixed = if (hoptdf$model[i]=="const") NULL else list(scf=2.5,sinc=5), 
+                        nfold_int_guess = 5, nfold_int_upper =  50,
                         method = "opt", iter=10000, hessian=TRUE, draws=1000, verbose=TRUE
     )
-    resopt_hier[[i]] <- rh <- tidy(db) %>% 
-        mutate(gender=hierrundf$gender[i], disease=hierrundf$disease[i])
+    resopt_hier[[i]] <- tidy(db) %>% 
+        mutate(gender=hoptdf$gender[i], disease=hoptdf$disease[i])
     cat(sprintf("Completed %s\n", i))
 }
 
@@ -155,9 +147,11 @@ resopt_hier <- readRDS("resopt_hier.rds")
 
 
 ## Quick plot to check that the hierarchical results look reasonable
+## STMC results look like the mcmc ones. weird load of shapes 
+# no advantage of optimisation in that case 
 
 resopt_hier %>% 
-    filter(var=="cf", gender=="Female", between(age, 70,90)) %>%
+    filter(var=="cf",  between(age, 60,90)) %>%
     ggplot(aes(x=age, y=mode, group=area)) + 
     geom_ribbon(aes(ymin=`2.5%`,ymax=`97.5%`), col="lightblue", alpha=0.1) + 
     geom_line() + 
@@ -188,38 +182,10 @@ ggplot(resh_stu, aes(x=age, y=mode, group=area)) +
 dev.off()
 
 
-### Hierarchical with additive gender effect 
-### Not investigated in the paper 
-
-i <- 1
-db <- disbayes_hier(data=gbd %>% filter(disease==hierrungdf$disease[i]) %>% droplevels,
-                    group = "area",
-                    gender = "gender",
-                    inc_num = "inc_num", inc_denom = "inc_denom",
-                    mort_num = "mort_num", mort_denom = "mort_denom",
-                    prev_num = "prev_num", prev_denom = "prev_denom",
-                    rem_num = if (hierrungdf$remission[i]) "rem_num" else NULL, 
-                    rem_denom = if (hierrungdf$remission[i]) "rem_denom" else NULL,
-                    cf_model = hierrungdf$model[i], 
-                    inc_model = "indep",
-                    eqage=hierrundf$eqage[i], 
-                    nfold_int_guess = 5, nfold_int_upper =  50,
-                    nfold_slope_guess = 2, nfold_slope_upper =  20,
-                    sd_int_fixed = 0.3,
-                    cf_init = 0.1,  # TODO Is this needed? 
-                    method="opt", iter=10000, verbose=TRUE, hessian=TRUE
-)
-
-## Converges by about 3000 its with pos def hess, given a fixed SD 
-## TODO debug why MCMC doesn't converge.  The incidence pars have the biggest vars 
-## its lambda_inc that has the negative eigenvalue. 
-
-(sort(diag(-db$fit$hessian)))[1:10]
-eigen(-db$fit$hessian)$values
 
 
-### Time trends
-### TREND AND BIAS ANALYSIS - USING ONE CASE, IHD LEEDS MALE 
+
+### TIME TREND AND BIAS ANALYSIS - USING ONE CASE, IHD, LEEDS, MALE 
 
 i <- 9 
 mhi <- gbd %>% filter(disease== "Ischemic heart disease",
