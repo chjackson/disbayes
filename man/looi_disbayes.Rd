@@ -8,8 +8,6 @@ looi_disbayes(x)
 }
 \arguments{
 \item{x}{Object returned by \code{\link{disbayes}}.}
-
-\item{looname}{\code{loo} for smoothed model, \code{loou} for unsmoothed model.}
 }
 \description{
 Return observation-level leave-one-out cross-validatory statistics from a disbayes fit
