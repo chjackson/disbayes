@@ -195,13 +195,12 @@ attr(.disbayes_hier_vars, "order") <- c("age", "gender", "area", "state", "term"
 ## tidybayes::spread_draws has one col per variable and rows for different indices, iterations and draws
 ## gather_draws does the same in long format with a .variable col
 ## Then ggdist::median_qi is used to get summary statistica
-## 
+
 tidy_stansumm <- function(summ, varlist, stats, levs=NULL){
-  var <- varorig <- NULL
+    var <- varorig <- NULL
     summc <- summ %>%
-        filter(varorig %in% varlist$const) %>%
-        mutate(var = varorig) %>%
-        select(-varorig) 
+      filter(var %in% varlist$const) %>%
+      select(-varorig)
 
     varnc <- varlist[names(varlist)!="const"]
     nvartypes <- length(varnc)
