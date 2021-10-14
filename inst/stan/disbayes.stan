@@ -102,7 +102,6 @@ transformed parameters {
     }
     else rem = rem_par;
   } else rem = rep_vector(0, nage);
-  rem_prob = 1 - exp(-rem);
   
   // Infer age zero prevalence from data if there are any data at age zero, or if we asked it to
   for (k in 1:nbias) { 
@@ -186,7 +185,10 @@ transformed parameters {
 	  prev[a,k] = state_probs[a,k,2] / (state_probs[a,k,1] + state_probs[a,k,2]);
 	tmp = state_probs[a,k,1:3] * P;  // temp variable to avoid warning
 	state_probs[a+1,k,1:3] = tmp;
-	if (k==1) { mort[a] = P[1,3]*(1 - prev[a,1]) + P[2,3]*prev[a,1]; } 
+	if (k==1) {
+	  mort[a] = P[1,3]*(1 - prev[a,1]) + P[2,3]*prev[a,1];
+	  rem_prob[a] = P[2,1];
+	}
       }      
 
     }

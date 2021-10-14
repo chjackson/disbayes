@@ -2023,17 +2023,17 @@ public:
                     current_statement_begin__ = 309;
                     for (int a = 1; a <= nage; ++a) {
                         current_statement_begin__ = 310;
-                        stan::model::assign(rem_prob, 
-                                    stan::model::cons_list(stan::model::index_uni(a), stan::model::cons_list(stan::model::index_uni(j), stan::model::cons_list(stan::model::index_uni(g), stan::model::nil_index_list()))), 
-                                    (1 - stan::math::exp(-(get_base1(get_base1(get_base1(rem, a, "rem", 1), j, "rem", 2), g, "rem", 3)))), 
-                                    "assigning variable rem_prob");
-                        current_statement_begin__ = 311;
                         stan::math::assign(P, trans_probs(get_base1(get_base1(get_base1(inc, a, "inc", 1), j, "inc", 2), g, "inc", 3), get_base1(get_base1(get_base1(cf, a, "cf", 1), j, "cf", 2), g, "cf", 3), get_base1(get_base1(get_base1(rem, a, "rem", 1), j, "rem", 2), g, "rem", 3), pstream__));
-                        current_statement_begin__ = 312;
+                        current_statement_begin__ = 311;
                         stan::model::assign(inc_prob, 
                                     stan::model::cons_list(stan::model::index_uni(a), stan::model::cons_list(stan::model::index_uni(j), stan::model::cons_list(stan::model::index_uni(g), stan::model::nil_index_list()))), 
                                     (get_base1(P, 1, 2, "P", 1) + get_base1(P, 1, 3, "P", 1)), 
                                     "assigning variable inc_prob");
+                        current_statement_begin__ = 312;
+                        stan::model::assign(rem_prob, 
+                                    stan::model::cons_list(stan::model::index_uni(a), stan::model::cons_list(stan::model::index_uni(j), stan::model::cons_list(stan::model::index_uni(g), stan::model::nil_index_list()))), 
+                                    get_base1(P, 2, 1, "P", 1), 
+                                    "assigning variable rem_prob");
                         current_statement_begin__ = 313;
                         if (as_bool(logical_gt(a, 1))) {
                             current_statement_begin__ = 314;
@@ -3337,17 +3337,17 @@ public:
                     current_statement_begin__ = 309;
                     for (int a = 1; a <= nage; ++a) {
                         current_statement_begin__ = 310;
-                        stan::model::assign(rem_prob, 
-                                    stan::model::cons_list(stan::model::index_uni(a), stan::model::cons_list(stan::model::index_uni(j), stan::model::cons_list(stan::model::index_uni(g), stan::model::nil_index_list()))), 
-                                    (1 - stan::math::exp(-(get_base1(get_base1(get_base1(rem, a, "rem", 1), j, "rem", 2), g, "rem", 3)))), 
-                                    "assigning variable rem_prob");
-                        current_statement_begin__ = 311;
                         stan::math::assign(P, trans_probs(get_base1(get_base1(get_base1(inc, a, "inc", 1), j, "inc", 2), g, "inc", 3), get_base1(get_base1(get_base1(cf, a, "cf", 1), j, "cf", 2), g, "cf", 3), get_base1(get_base1(get_base1(rem, a, "rem", 1), j, "rem", 2), g, "rem", 3), pstream__));
-                        current_statement_begin__ = 312;
+                        current_statement_begin__ = 311;
                         stan::model::assign(inc_prob, 
                                     stan::model::cons_list(stan::model::index_uni(a), stan::model::cons_list(stan::model::index_uni(j), stan::model::cons_list(stan::model::index_uni(g), stan::model::nil_index_list()))), 
                                     (get_base1(P, 1, 2, "P", 1) + get_base1(P, 1, 3, "P", 1)), 
                                     "assigning variable inc_prob");
+                        current_statement_begin__ = 312;
+                        stan::model::assign(rem_prob, 
+                                    stan::model::cons_list(stan::model::index_uni(a), stan::model::cons_list(stan::model::index_uni(j), stan::model::cons_list(stan::model::index_uni(g), stan::model::nil_index_list()))), 
+                                    get_base1(P, 2, 1, "P", 1), 
+                                    "assigning variable rem_prob");
                         current_statement_begin__ = 313;
                         if (as_bool(logical_gt(a, 1))) {
                             current_statement_begin__ = 314;

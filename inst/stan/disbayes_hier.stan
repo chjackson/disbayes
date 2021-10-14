@@ -218,9 +218,9 @@ transformed parameters {
 	  rem[,j,g] = rem_par[,g];
       } else { 	for (a in 1:nage) { rem[a,j,g] = 0; } }
       for (a in 1:nage){
-	rem_prob[a,j,g] = 1 - exp(-rem[a,j,g]);
 	P = trans_probs(inc[a,j,g], cf[a,j,g], rem[a,j,g]);
 	inc_prob[a,j,g] = P[1,2] + P[1,3];
+	rem_prob[a,j,g] = P[2,1];
 	if (a > 1)
 	  prev[a,j,g] = state_probs[a,2] / (state_probs[a,1] + state_probs[a,2]);
 	tmp = state_probs[a,1:3] * P;  // temp variable to avoid warning
