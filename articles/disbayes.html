@@ -74,7 +74,7 @@
                         <h4 class="author">Chris Jackson <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk" class="email">chris.jackson@mrc-bsu.cam.ac.uk</a>
 </h4>
             
-            <h4 class="date">2021-10-14</h4>
+            <h4 class="date">2021-10-18</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/chjackson/disbayes/blob/master/vignettes/disbayes.Rmd"><code>vignettes/disbayes.Rmd</code></a></small>
       <div class="hidden name"><code>disbayes.Rmd</code></div>
@@ -325,12 +325,12 @@
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">var</span><span class="op">==</span><span class="st">"cf"</span>, <span class="fu"><a href="https://dplyr.tidyverse.org/reference/between.html">between</a></span><span class="op">(</span><span class="va">age</span>,<span class="fl">60</span>,<span class="fl">65</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">age</span>, <span class="va">`25%`</span>, <span class="va">`50%`</span>, <span class="va">`75%`</span><span class="op">)</span></code></pre></div>
 <pre><code>##   age        25%        50%        75%
-## 1  60 0.01549161 0.01666410 0.01776932
-## 2  61 0.01572466 0.01682695 0.01796822
-## 3  62 0.01600031 0.01702050 0.01816600
-## 4  63 0.01625600 0.01724546 0.01839095
-## 5  64 0.01652159 0.01749987 0.01865341
-## 6  65 0.01681667 0.01778363 0.01888302</code></pre>
+## 1  60 0.01546701 0.01661919 0.01782606
+## 2  61 0.01578789 0.01690756 0.01799778
+## 3  62 0.01600031 0.01709024 0.01820182
+## 4  63 0.01626404 0.01731535 0.01844748
+## 5  64 0.01651924 0.01760257 0.01872332
+## 6  65 0.01675048 0.01791022 0.01896876</code></pre>
 <p>The default <code>plot</code> method for objects returned by <code>disbayes</code> plots the posterior summaries for case fatality, allowing a quick check of the model results. Or do <code><a href="https://rdrr.io/r/graphics/plot.default.html">plot(..., variable="inc")</a></code> for incidence. The function returns a <code>ggplot2</code> object that can be modified with <code>ggplot2</code> functions, e.g. to add axis labels.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span>
@@ -355,7 +355,8 @@
 <ul>
 <li><p><code>cf_model</code>. Model for how case fatality varies with age. As well as the default spline smooth model and unsmoothed models illustrated above, <code>cf_model="increasing"</code> fits a model where case fatality is restricted to increase with age, and <code>cf_model="const"</code> specifies a constant case fatality with age.</p></li>
 <li><p><code>inc_model</code>. By default, incidence rates are smoothed as a function of age using a spline, as with case fatality rates. <code>inc_model="indep"</code> estimates independent incidence rates for each age.</p></li>
-<li><p><code>rem_model</code>. If no remission data are supplied, then the disease is assumed to have zero remission rate. If remission data are supplied, then remission rates are estimate. By default, these are assumed to be a constant function of age (<code>rem_model="const"</code>). To estimate independent remission rates for each age, supply <code>rem_model="indep"</code>. Currently no spline smoothing option or other constraint is implemented.</p></li>
+<li><p><code>rem_model</code>. If no remission data are supplied, then the disease is assumed to have zero remission rate. If remission data are supplied, then remission rates are estimate. By default, these are assumed to be a constant function of age (<code>rem_model="const"</code>). To estimate independent remission rates for each age, supply <code>rem_model="indep"</code>. To model remission rates as a smooth spline function of age, use <code>rem_model="smooth"</code>.</p></li>
+<li><p><code>hp_fixed</code>. A list of “hyperparameters” to fix at constant values. If using smooth spline functions, this option may be required if the appropriate level of smoothness for the spline cannot be determined from the data. When using the default optimisation method, this can lead to an error message mentioning <code>Error in chol.default(-H)</code>. In these cases, the smoothness can be fixed in advance, e.g. <code>hp_fixed = list(scf=1)</code> to fix the case fatality smoothness parameter to a typical value of 1. Lower values give more smoothness, higher values give wigglier curves.</p></li>
 </ul>
 </div>
 </div>

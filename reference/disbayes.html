@@ -159,7 +159,7 @@ Remission may also be included in the data and modelled.</p>
   eqage <span class='op'>=</span> <span class='fl'>30</span>,
   eqagehi <span class='op'>=</span> <span class='cn'>NULL</span>,
   loo <span class='op'>=</span> <span class='cn'>TRUE</span>,
-  sprior <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>1</span><span class='op'>)</span>,
+  sprior <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>1</span>, <span class='fl'>1</span><span class='op'>)</span>,
   hp_fixed <span class='op'>=</span> <span class='cn'>NULL</span>,
   rem_prior <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1.1</span>, <span class='fl'>1</span><span class='op'>)</span>,
   inc_prior <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>2</span>, <span class='fl'>0.1</span><span class='op'>)</span>,
@@ -182,9 +182,12 @@ variables below are provided as character strings naming columns in this
 data frame.   For each disease measure available, one of the following three
 combinations of variables must be specified:</p>
 <p>(1) numerator and denominator (2) estimate and denominator (3) estimate
-with lower and upper credible limits</p>
+with lower and upper credible limits.</p>
 <p>Mortality must be supplied, and at least one of incidence and prevalence.
 If remission is assumed to be possible, then remission data should also be supplied (see below).</p>
+<p>Estimates refer to the probability of having some event within a year, rather than rates.  Rates per year $r$ can be
+converted to probabilities $p$ as $p = 1 - exp(-r)$, assuming the rate is constant
+within the year.</p>
 <p>For estimates based on registry data assumed to cover the whole
 population, then the denominator will be the population size.</p></td>
     </tr>
@@ -207,7 +210,7 @@ give the data source half its original weight.</p></td>
     </tr>
     <tr>
       <th>inc</th>
-      <td><p>Estimate of incidence.</p></td>
+      <td><p>Estimate of the incidence probability</p></td>
     </tr>
     <tr>
       <th>inc_lower</th>
@@ -219,7 +222,8 @@ give the data source half its original weight.</p></td>
     </tr>
     <tr>
       <th>prev_num</th>
-      <td><p>Numerator for the estimate of prevalence</p></td>
+      <td><p>Numerator for the estimate of prevalence, i.e.
+number of people currently with a disease.</p></td>
     </tr>
     <tr>
       <th>prev_denom</th>
@@ -228,7 +232,7 @@ of the survey used to obtain the prevalence estimate)</p></td>
     </tr>
     <tr>
       <th>prev</th>
-      <td><p>Estimate of prevalence</p></td>
+      <td><p>Estimate of the prevalence probability</p></td>
     </tr>
     <tr>
       <th>prev_lower</th>
@@ -240,17 +244,18 @@ of the survey used to obtain the prevalence estimate)</p></td>
     </tr>
     <tr>
       <th>mort_num</th>
-      <td><p>Numerator for the estimate of the mortality rate</p></td>
+      <td><p>Numerator for the estimate of the mortality probability, i.e
+number of deaths attributed to the disease under study within a year</p></td>
     </tr>
     <tr>
       <th>mort_denom</th>
-      <td><p>Denominator for the estimate of the mortality rate (e.g.
+      <td><p>Denominator for the estimate of the mortality probability (e.g.
 the population size, if the estimates were obtained from a comprehensive
 register)</p></td>
     </tr>
     <tr>
       <th>mort</th>
-      <td><p>Estimate of the mortality rate</p></td>
+      <td><p>Estimate of the mortality probability</p></td>
     </tr>
     <tr>
       <th>mort_lower</th>
@@ -262,7 +267,9 @@ register)</p></td>
     </tr>
     <tr>
       <th>rem_num</th>
-      <td><p>Numerator for the estimate of the remission rate.  Remission
+      <td><p>Numerator for the estimate of the remission probability, i.e number
+of people observed to recover from the disease within a year.</p>
+<p>Remission
 data should be supplied if remission is permitted in the model, either as
 a numerator and denominator or as an estimate and lower credible interval.
 Conversely, if no remission data are supplied, then remission is assumed
@@ -272,11 +279,11 @@ weaker prior information.</p></td>
     </tr>
     <tr>
       <th>rem_denom</th>
-      <td><p>Denominator for the estimate of the remission rate</p></td>
+      <td><p>Denominator for the estimate of the remission probability</p></td>
     </tr>
     <tr>
       <th>rem</th>
-      <td><p>Estimate of the remission rate</p></td>
+      <td><p>Estimate of the remission probability</p></td>
     </tr>
     <tr>
       <th>rem_lower</th>
@@ -292,24 +299,24 @@ weaker prior information.</p></td>
     </tr>
     <tr>
       <th>cf_model</th>
-      <td><p>Model for how case fatality varies with age.</p>
-<p><code>"smooth"</code> (the default). Case fatality is modelled as a smooth function of age,
+      <td><p>Model for how case fatality rate varies with age.</p>
+<p><code>"smooth"</code> (the default). Case fatality rate is modelled as a smooth function of age,
 using a spline.</p>
-<p><code>"indep"</code> Case fatalities are estimated independently for each year of age.  This may be
+<p><code>"indep"</code> Case fatality rates are estimated independently for each year of age.  This may be
 useful for determining how much information is in
 the data. That is, if the posterior from this model is identical to the
 prior for a certain age, then there is no information in the data alone
 about case fatality at that age, indicating that some other structural
 assumption (such as a smooth function of age) or external data are equired
 to give more precise estimates.</p>
-<p><code>"increasing"</code> Case fatality is modelled as a smooth and increasing
+<p><code>"increasing"</code> Case fatality rate is modelled as a smooth and increasing
 function of age.</p>
-<p><code>"const"</code> Case fatality is modelled as constant with age.</p></td>
+<p><code>"const"</code> Case fatality rate is modelled as constant with age.</p></td>
     </tr>
     <tr>
       <th>inc_model</th>
-      <td><p>Model for how incidence varies with age.</p>
-<p><code>"smooth"</code> (the default). Incidence is modelled as a smooth spline function of age.</p>
+      <td><p>Model for how incidence rates vary with age.</p>
+<p><code>"smooth"</code> (the default). Incidence rates are modelled as a smooth spline function of age.</p>
 <p><code>"indep"</code> Incidence rates for each year of age are estimated independently.</p></td>
     </tr>
     <tr>
@@ -317,6 +324,7 @@ function of age.</p>
       <td><p>Model for how remission rates vary with age, which are typically
 less well-informed by data, compared to incidence and case fatality.</p>
 <p><code>"const"</code> (the default). Constant remission rate over all ages.</p>
+<p><code>"smooth"</code> Remission rates are modelled as a smooth spline function of age.</p>
 <p><code>"indep"</code> Remission rates estimated independently over all ages.</p></td>
     </tr>
     <tr>
@@ -359,12 +367,12 @@ average age.</p></td>
     </tr>
     <tr>
       <th>eqage</th>
-      <td><p>Case fatalities (and incidences) are assumed to be equal for
+      <td><p>Case fatalities (and incidence and remission rates) are assumed to be equal for
 all ages below this age, inclusive, when using the smoothed model.</p></td>
     </tr>
     <tr>
       <th>eqagehi</th>
-      <td><p>Case fatalities (and incidences) are assumed to be equal for
+      <td><p>Case fatalities (and incidence and remission rates) are assumed to be equal for
 all ages above this age, inclusive, when using the smoothed model.</p></td>
     </tr>
     <tr>
@@ -373,10 +381,11 @@ all ages above this age, inclusive, when using the smoothed model.</p></td>
     </tr>
     <tr>
       <th>sprior</th>
-      <td><p>Vector of two elements, giving the rates of the exponential prior distributions used to penalise
-the coefficients of the spline model.  The first refers to the spline model for incidence, the second for case fatality.  The default of 1 should adapt
+      <td><p>Vector of three elements, giving the rates of the exponential prior distributions used to penalise
+the coefficients of the spline model.  The first refers to the spline model for incidence, the second for case fatality, the third for remission.  The default of 1 should adapt
 appropriately to the data, but higher values give stronger smoothing, or
-lower values give weaker smoothing,  if required.</p></td>
+lower values give weaker smoothing,  if required.  If one of the rates (e.g. remission)
+is not modelled with a spline, any number can be supplied here and it is just ignored.</p></td>
     </tr>
     <tr>
       <th>hp_fixed</th>
