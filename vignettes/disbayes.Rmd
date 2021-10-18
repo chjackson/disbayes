@@ -318,7 +318,10 @@ Full documentation is given in `help(disbayes)`.  Some more useful options inclu
 * `cf_model`.  Model for how case fatality varies with age.  As well as the default spline smooth model and unsmoothed models illustrated above, `cf_model="increasing"` fits a model where case fatality is restricted to increase with age, and `cf_model="const"` specifies a constant case fatality with age. 
 
 * `inc_model`. By default, incidence rates are smoothed as a function of age using a spline, as with case fatality rates.   `inc_model="indep"` estimates independent incidence rates for each age. 
-* `rem_model`.  If no remission data are supplied, then the disease is assumed to have zero remission rate.   If remission data are supplied, then remission rates are estimate.   By default, these are assumed to be a constant function of age (`rem_model="const"`).  To estimate independent remission rates for each age, supply `rem_model="indep"`.  Currently no spline smoothing option or other constraint is implemented. 
+
+* `rem_model`.  If no remission data are supplied, then the disease is assumed to have zero remission rate.   If remission data are supplied, then remission rates are estimate.   By default, these are assumed to be a constant function of age (`rem_model="const"`).  To estimate independent remission rates for each age, supply `rem_model="indep"`.  To model remission rates as a smooth spline function of age, use `rem_model="smooth"`.
+
+* `hp_fixed`.  A list of "hyperparameters" to fix at constant values.  If using smooth spline functions, this option may be required if the appropriate level of smoothness for the spline cannot be determined from the data.  When using the default optimisation method, this can lead to an error message mentioning `Error in chol.default(-H)`.  In these cases, the smoothness can be fixed in advance, e.g. `hp_fixed = list(scf=1)` to fix the case fatality smoothness parameter to a typical value of 1.  Lower values give more smoothness, higher values give wigglier curves.
 
 
 # Advanced models 

@@ -25,16 +25,17 @@ expand_hpfixed <- function(hp, hp_fixed){
 }
 
 .disbayes_hier_hp <- data.frame(
-  pars      = c("scf","sinc","scfmale","sd_int","sd_slope"),
-  row.names = c("scf","sinc","scfmale","sd_int","sd_slope"),
-  stannames = c("lambda_cf[1]","lambda_inc[1]","lambda_cf_male[1]", "sd_inter[1]","sd_slope[1]"),
+  pars      = c("scf","sinc","srem","scfmale","sd_int","sd_slope"),
+  row.names = c("scf","sinc","srem","scfmale","sd_int","sd_slope"),
+  stannames = c("lambda_cf[1]", "lambda_inc[1]", "lambda_rem[1]", 
+                "lambda_cf_male[1]", "sd_inter[1]", "sd_slope[1]"),
   stringsAsFactors=FALSE
 )
 
 .disbayes_hp <- data.frame(
-  pars      = c("scf","sinc"),
-  row.names = c("scf","sinc"),
-  stannames = c("lambda_cf[1]","lambda_inc[1]"),
+  pars      = c("scf","sinc","srem"),
+  row.names = c("scf","sinc","srem"),
+  stannames = c("lambda_cf[1]","lambda_inc[1]","lambda_rem[1]"),
   stringsAsFactors=FALSE
 )
 

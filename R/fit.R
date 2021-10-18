@@ -3,23 +3,33 @@ tidy_obsdat <- function(dat){
     prev <- data.frame(var="prev", num = dat$prev_num, denom = dat$prev_denom)
     mort <- data.frame(var="mort", num = dat$mort_num, denom = dat$mort_denom)
     tdat <- rbind(inc, prev, mort)
+    if (dat$remission) {
+        rem <- data.frame(var="rem", num = dat$rem_num, denom = dat$rem_denom)
+        tdat <- rbind(tdat, rem)
+    }
     tdat$age <- rep(1:dat$nage, length.out = nrow(tdat))
     tdat$est <- tdat$num/tdat$denom
     tdat$lower <- qbeta(0.025, tdat$num, tdat$denom-tdat$num)
     tdat$upper <- qbeta(0.975, tdat$num, tdat$denom-tdat$num)
     tdat
 }
-    
+
 plotfit_data_disbayes <- function(x, startyear=NULL){
-    var <- age <- est <- lower <- upper <- source <- mode <- `2.5%` <- `97.5%` <- NULL
+    var <- age <- est <- lower <- upper <- source <- mode <- `50%` <- `2.5%` <- `97.5%` <- NULL
     datobs <- tidy_obsdat(x$dat) %>% 
         select(var, age, est, lower, upper) %>% 
         mutate(source="Observed")
-    res <- tidy(x, startyear=startyear) %>% 
-        filter(var %in% c("inc","prev","mort")) %>%
-        rename(est=mode, lower=`2.5%`, upper=`97.5%`) %>%
-##        select(var, age, est, lower, upper) %>% 
-        mutate(source="Fitted") %>%
+    vars <- c("inc_prob","prev","mort")
+    if (x$dat$remission) vars <- c(vars, "rem_prob")
+    res <- tidy(x, startyear=startyear)
+    res$est <- if(is.null(res$mode)) res$`50%` else res$mode
+    res <- res %>% 
+        filter(var %in% vars) %>%
+        rename(lower=`2.5%`, upper=`97.5%`) %>%
+        select(var, age, est, lower, upper) %>% 
+        mutate(source="Fitted",
+               var = ifelse(var=="inc_prob", "inc", var),
+               var = ifelse(var=="rem_prob", "rem", var)) %>%
         full_join(datobs, by = c("var", "age", "est", "lower", "upper", "source"))
     res
 }

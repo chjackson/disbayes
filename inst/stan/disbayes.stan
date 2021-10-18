@@ -3,6 +3,7 @@
 data {
   int smooth_cf;
   int smooth_inc;
+  int smooth_rem;
   int remission; 
   int trend;
   int prev_zero;
@@ -21,7 +22,7 @@ data {
   // only in smoothed model 
   int<lower=0> K; // number of spline basis variables including the intercept
   matrix[nage,K] X;
-  real<lower=0> sprior[2]; 
+  real<lower=0> sprior[3]; 
 
   // alternative models
   int increasing_cf; // requires smooth_cf 
@@ -45,18 +46,22 @@ data {
   // Empirical Bayes method where smoothing parameters are fixed
   int scf_isfixed;
   int sinc_isfixed;
+  int srem_isfixed;
   real<lower=0> lambda_cf_fixed;
   real<lower=0> lambda_inc_fixed;
+  real<lower=0> lambda_rem_fixed;
 }
 
 parameters {
   vector<lower=0>[nage*(1-smooth_inc)] inc_par;
   vector<lower=0>[nage*(1-smooth_cf)] cf_par;
-  vector<lower=0>[remission*(nage*(1 - const_rem) + 1*const_rem)] rem_par;
+  vector<lower=0>[remission*(1-smooth_rem)*(nage*(1 - const_rem) + 1*const_rem)] rem_par;
   vector[K*smooth_cf*(1-const_cf)] beta;
   vector<lower=0>[smooth_cf*(1-scf_isfixed)] lambda_cf;
   vector<lower=0>[smooth_inc*(1-sinc_isfixed)] lambda_inc;
   vector[K*smooth_inc] beta_inc;
+  vector<lower=0>[smooth_rem*(1-srem_isfixed)] lambda_rem;
+  vector[K*smooth_rem] beta_rem;
   vector<lower=0,upper=1>[prev_zero] prevzero;
 
   // Log HR between alternative incidence values in bias model, assumed common between ages
@@ -86,8 +91,10 @@ transformed parameters {
 
   real<lower=0> lambda_cf_use;
   real<lower=0> lambda_inc_use;
+  real<lower=0> lambda_rem_use;
   if (scf_isfixed || !smooth_cf) lambda_cf_use = lambda_cf_fixed; else lambda_cf_use = lambda_cf[1];
   if (sinc_isfixed || !smooth_inc) lambda_inc_use = lambda_inc_fixed; else lambda_inc_use = lambda_inc[1];
+  if (srem_isfixed || !smooth_rem) lambda_rem_use = lambda_rem_fixed; else lambda_rem_use = lambda_rem[1];
   
   /// Case fatality as smooth spline function of age
   /// Spline basis X passed from R
@@ -100,6 +107,7 @@ transformed parameters {
       for (a in 1:nage)
 	rem[a] = rem_par[1];
     }
+    else if (smooth_rem) rem = exp(X*beta_rem);
     else rem = rem_par;
   } else rem = rep_vector(0, nage);
   
@@ -204,12 +212,6 @@ model {
   prev_num ~ binomial(prev_denom, prev[1:nage,prevdata_ind]);
   if (remission) {
     rem_num ~ binomial(rem_denom, rem_prob);
-    if (const_rem) rem_par[1] ~ gamma(rem_prior[1], rem_prior[2]);
-    else { 
-      for (a in 1:nage){
-	rem_par[a] ~ gamma(rem_prior[1], rem_prior[2]);
-      }
-    }
   }
   
   if (smooth_cf)  {
@@ -232,6 +234,7 @@ model {
   if (increasing_cf) {
     cfbase[1] ~ gamma(cf_prior[1], cf_prior[2]);
   }
+
   if (smooth_inc)  { 
     for (i in 1:(K-2)) {
       beta_inc[i] ~ normal(0, lambda_inc_use);
@@ -245,6 +248,24 @@ model {
   else {
     for (a in 1:nage){
       inc_par[a] ~ gamma(inc_prior[1], inc_prior[2]);
+    }
+  }
+  
+  if (remission) { 
+    if (smooth_rem)  { 
+      for (i in 1:(K-2)) {
+	beta_rem[i] ~ normal(0, lambda_rem_use);
+      }
+      for (i in (K-1):K){
+	beta_rem[i] ~ normal(0, 100);
+      }
+      if (!srem_isfixed) 
+	lambda_rem[1] ~ gamma(2, sprior[3]); 
+    } else if (const_rem) rem_par[1] ~ gamma(rem_prior[1], rem_prior[2]);
+    else {
+      for (a in 1:nage){
+	rem_par[a] ~ gamma(rem_prior[1], rem_prior[2]);
+      }
     }
   }
   

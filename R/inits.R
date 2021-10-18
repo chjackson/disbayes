@@ -7,19 +7,23 @@ init_rates <- function(dat, mdata, idata,...){
     optu <- fit_unsmoothed_opt(dat, inc_init=inc_init, rem_init=rem_init,
                                mdata=mdata, idata=idata)
     optdf <- tidy_disbayes_opt(optu, .disbayes_vars)
-    cfcrude <- optdf$mode[optdf$var=="cf"] 
-    inccrude <- optdf$mode[optdf$var=="inc"]
+    cf <- optdf$mode[optdf$var=="cf"] 
+    inc <- optdf$mode[optdf$var=="inc"]
+    rem <- optdf$mode[optdf$var=="rem"]
     eqage <- mdata$eqage
     for (i in 1:eqage){
-        cfcrude[i] <- cfcrude[eqage+1]
-        inccrude[i] <- inccrude[eqage+1]
+        cf[i] <- cf[eqage+1]
+        inc[i] <- inc[eqage+1]
+        rem[i] <- rem[eqage+1]
     }
     init_eqage_hi <- 90 
     for (i in init_eqage_hi:dat$nage){
-        cfcrude[i] <- cfcrude[init_eqage_hi-1]
-        inccrude[i] <- inccrude[init_eqage_hi-1]
+        cf[i] <- cf[init_eqage_hi-1]
+        inc[i] <- inc[init_eqage_hi-1]
+        rem[i] <- rem[init_eqage_hi-1]
     }
-    list(cf=cfcrude, inc=inccrude, rem=rem_init, optu=optu)
+    if (mdata$const_rem) rem=rem_init
+    list(cf=cf, inc=inc, rem=rem, optu=optu)
 }
 
 init_rate <- function(rate, dat, agg=FALSE){
@@ -42,12 +46,14 @@ fit_unsmoothed_opt <- function(dat, inc_init=NULL, rem_init=NULL,
     Xdummy <- matrix(0, nrow=nage, ncol=2)
     datstanu <- c(dat, mdata)
     ## quantities in the data that are different for the purpose of this training model
-    data_fixed <- list(smooth_cf =  0, smooth_inc = 0, const_cf = 0, trend = 0, nyr=1, nbias=1,
+    data_fixed <- list(smooth_cf =  0, smooth_inc = 0, smooth_rem = 0, 
+                       const_cf = 0, trend = 0, nyr=1, nbias=1,
                        bias = 1, incdata_ind = 1, prevdata_ind = 1,
                        increasing_cf=0, K=2, X=Xdummy, 
                        inc_trend = array(1, dim=c(nage,1)),
                        cf_trend = array(1, dim=c(nage,1)),
-                       scf_isfixed=0, sinc_isfixed=0, lambda_cf_fixed=0, lambda_inc_fixed=0)
+                       scf_isfixed=0, sinc_isfixed=0, srem_isfixed=0,
+                       lambda_cf_fixed=0, lambda_inc_fixed=0, lambda_rem_fixed=0)
     for (i in names(data_fixed))
         datstanu[[i]] <- data_fixed[[i]]
     initu <- list(cf_par = rep(idata$cf_init,nage), 
@@ -83,19 +89,22 @@ init_smooth <- function(y, eqage, eqagehi, s_opts=NULL){
 
 ## Form constant initial value list to supply to Stan 
 
-initlist_const <- function(initrates, cf_smooth, inc_smooth, remission, 
+initlist_const <- function(initrates, cf_smooth, inc_smooth, remission, rem_smooth, 
                            eqage, smooth_inc, smooth_cf, const_cf,
-                           increasing_cf, const_rem, nbias,
-                           scf_isfixed, sinc_isfixed){
+                           increasing_cf, smooth_rem, const_rem, nbias,
+                           scf_isfixed, sinc_isfixed, srem_isfixed){
+    lam_init <- laminc_init <- lamrem_init <- 0.5 
     beta_init <- cf_smooth$beta 
-    lam_init <- laminc_init <- 0.5 
     betainc_init <- inc_smooth$beta
+    betarem_init <- rem_smooth$beta
     list(inc_par = if (smooth_inc) numeric() else initrates$inc,
-         rem_par = if (remission) as.array(initrates$rem) else numeric(),
+         rem_par = if (remission && !smooth_rem) as.array(initrates$rem) else numeric(),
          beta = if (smooth_cf && !const_cf) beta_init else numeric(),
          lambda_cf = if (smooth_cf && !scf_isfixed) as.array(lam_init) else numeric(),
          beta_inc = if (smooth_inc) betainc_init else numeric(),
          lambda_inc = if (smooth_inc && !sinc_isfixed) as.array(laminc_init) else numeric(),
+         beta_rem = if (smooth_rem) betarem_init else numeric(),
+         lambda_rem = if (smooth_rem && !srem_isfixed) as.array(lamrem_init) else numeric(),
          cfbase = if (const_cf | increasing_cf) as.array(initrates$cf[eqage]) else numeric(),
          bias_loghr = if (nbias > 1) as.array(rnorm(1)) else numeric()
          )
@@ -103,32 +112,38 @@ initlist_const <- function(initrates, cf_smooth, inc_smooth, remission,
 
 ## Form initial value list random generating function to supply to Stan 
 
-initlist_random <- function(nage, initrates, cf_smooth, inc_smooth, remission, 
+initlist_random <- function(nage, initrates, cf_smooth, inc_smooth, remission, rem_smooth,
                             eqage, smooth_inc, smooth_cf, const_cf, increasing_cf,
-                            const_rem, nbias, scf_isfixed, sinc_isfixed){
+                            smooth_rem, const_rem, nbias, scf_isfixed, sinc_isfixed, srem_isfixed){
+    lam_init <- laminc_init <- lamrem_init <- 0.5
     beta_init <- cf_smooth$beta 
-    lam_init <- laminc_init <- 0.5 
     betainc_init <- inc_smooth$beta
+    betarem_init <- rem_smooth$beta
     inits <- function(){
         list(
             inc_par = rlnorm(nage*(1-smooth_inc),
                              meanlog=log(initrates$inc),
                              sdlog=initrates$inc/10),
-            rem_par = as.array(rlnorm(remission*(nage*(1 - const_rem) + 1*const_rem),
+            rem_par = as.array(rlnorm(remission*(1-smooth_rem)*(nage*(1 - const_rem) + 1*const_rem),
                                       meanlog=log(initrates$rem),
                                       sdlog=initrates$rem/10)),
-            beta = rnorm(length(beta_init)*smooth_cf*(1 - const_cf),
-                         mean=beta_init,
-                         sd=abs(beta_init)/10),
+            beta = if (smooth_cf) rnorm(length(beta_init)*(1 - const_cf),
+                                        mean=beta_init,
+                                        sd=abs(beta_init)/10) else numeric(),
             lambda_cf = as.array(rlnorm(length(lam_init)*smooth_cf*(1-scf_isfixed),
                                      meanlog=log(lam_init),
                                      sdlog=lam_init/10)),
-            beta_inc = rnorm(length(betainc_init)*smooth_inc,
-                             mean=betainc_init,
-                             sd=abs(betainc_init)/10),
+            beta_inc = if (smooth_inc) rnorm(length(betainc_init),
+                                             mean=betainc_init,
+                                             sd=abs(betainc_init)/10) else numeric(),
             lambda_inc = as.array(rlnorm(length(laminc_init)*smooth_inc*(1-sinc_isfixed),
                                          meanlog=log(laminc_init),
                                          sdlog=laminc_init/10)),
+            beta_rem = if (remission && !const_rem) rnorm(length(betarem_init)*smooth_rem,
+                                            mean=betarem_init, sd=abs(betarem_init)/10) else numeric(),
+            lambda_rem = as.array(rlnorm(length(lamrem_init)*smooth_rem*(1-srem_isfixed),
+                                         meanlog=log(lamrem_init),
+                                         sdlog=lamrem_init/10)),
             cfbase = if (const_cf | increasing_cf) as.array(initrates$cf[eqage]) else numeric(),
             bias_loghr = if (nbias > 1) as.array(rnorm(1)) else numeric()
         )
@@ -136,7 +151,7 @@ initlist_random <- function(nage, initrates, cf_smooth, inc_smooth, remission,
     inits
 }
 
-fit_unsmoothed <- function(dat, inc_init=NULL, rem_init=NULL,
+fit_unsmoothed <- function(dat, inc_init=NULL, rem_init=NULL, 
                            mdata, idata, 
                            method = "mcmc",
                            iter = 1000, 
@@ -153,12 +168,13 @@ fit_unsmoothed <- function(dat, inc_init=NULL, rem_init=NULL,
                        increasing_cf=0, K=2, X=Xdummy, 
                        inc_trend = array(1, dim=c(nage,1)),
                        cf_trend = array(1, dim=c(nage,1)),
-                       scf_isfixed=0, sinc_isfixed=0, lambda_cf_fixed=0, lambda_inc_fixed=0)
+                       scf_isfixed=0, sinc_isfixed=0, srem_isfixed=0,
+                       lambda_cf_fixed=0, lambda_inc_fixed=0, lambda_rem_fixed=0)
     for (i in names(data_fixed))
         datstanu[[i]] <- data_fixed[[i]]
     initu <- function(){
         list(cf_par = rnorm(nage, mean=idata$cf_init, sd=idata$cf_init/10),
-             rem_par = rnorm(mdata$remission*(nage*(1 - mdata$const_rem) + 1*mdata$const_rem),
+             rem_par = rnorm(mdata$remission*(1 - mdata$smooth_rem)*(nage*(1 - mdata$const_rem) + 1*mdata$const_rem),
                              mean=rem_init, sd=rem_init/10),
              inc_par = rnorm(nage, mean=inc_init, sd=inc_init/10))
     }

@@ -21,7 +21,7 @@ First load required packages and specify local file paths
 library(tidyverse)
 library(progress)
 library(tempdisagg)
-relative_path_gbd <- "~/scratch/chronic/metahit_data"
+relative_path_gbd <- "~/scratch/chronic/metahit_data/2017"
 
 ```
 
@@ -528,11 +528,6 @@ gbddb <- gbddb %>%
   left_join(num_cancer) %>% 
   mutate(rem_num = replace_na(rem_num, 0),
          rem_denom = replace_na(rem_denom, 0))
-
-saveRDS(gbddb, file=file.path(relative_path_gbd, "gbddb.rds"))
-saveRDS(gbddb, file=file.path("~/work/chronic/disbayes/metahit", "gbddb.rds"))
-
-qbeta(c(0.025, 0.975), 128, 940-128) # 0.11 to 0.16.more plausible
 
 ```
 

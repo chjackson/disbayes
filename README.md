@@ -11,7 +11,7 @@ The development repository for the [disbayes](http://cran.r-project.org/package=
   
 * The underlying model is a three-state multi-state model with states given by no disease, disease and death.  Remission from the disease is optional.
 
-* Case fatality and incidence can be modelled as smooth functions of age, through a spline model.   Remission is either zero, or estimated, assuming either constant remission rate or independent remission for each age. 
+* Case fatality, incidence or remission rates can be modelled as smooth functions of age, through a spline model, or estimated independently for each age.  Case fatality or remission can also be modelled as age-constant.
 
 * Two alternative estimation methods can be used, both based on the [Stan](http://mc-stan.org) software.
 

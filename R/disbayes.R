@@ -15,10 +15,14 @@
 ##'   combinations of variables must be specified:
 ##'
 ##'   (1) numerator and denominator (2) estimate and denominator (3) estimate
-##'   with lower and upper credible limits
+##'   with lower and upper credible limits.
 ##'   
 ##'   Mortality must be supplied, and at least one of incidence and prevalence. 
 ##'   If remission is assumed to be possible, then remission data should also be supplied (see below).
+##'
+##'   Estimates refer to the probability of having some event within a year, rather than rates.  Rates per year $r$ can be
+##'   converted to probabilities $p$ as $p = 1 - exp(-r)$, assuming the rate is constant
+##'   within the year. 
 ##'
 ##'   For estimates based on registry data assumed to cover the whole
 ##'   population, then the denominator will be the population size.
@@ -38,26 +42,34 @@
 ##'   for example, multiplying both the numerator and denominator by 0.5 would
 ##'   give the data source half its original weight.
 ##'
-##' @param inc Estimate of incidence.
+##' @param inc Estimate of the incidence probability
 ##' @param inc_lower Lower credible limit for the incidence estimate
 ##' @param inc_upper Upper credible limit for the incidence estimate
 ##'
-##' @param prev_num Numerator for the estimate of prevalence
+##' @param prev_num Numerator for the estimate of prevalence, i.e.
+##' number of people currently with a disease. 
+##' 
 ##' @param prev_denom Denominator for the estimate of prevalence (e.g. the size
 ##'   of the survey used to obtain the prevalence estimate)
-##' @param prev Estimate of prevalence
+##' @param prev Estimate of the prevalence probability
 ##' @param prev_lower Lower credible limit for the prevalence estimate
 ##' @param prev_upper Upper credible limit for the prevalence estimate
 ##'
-##' @param mort_num Numerator for the estimate of the mortality rate
-##' @param mort_denom Denominator for the estimate of the mortality rate (e.g.
+##' @param mort_num Numerator for the estimate of the mortality probability, i.e
+##' number of deaths attributed to the disease under study within a year 
+##' 
+##' @param mort_denom Denominator for the estimate of the mortality probability (e.g.
 ##'   the population size, if the estimates were obtained from a comprehensive
 ##'   register)
-##' @param mort  Estimate of the mortality rate
+##' 
+##' @param mort  Estimate of the mortality probability
 ##' @param mort_lower Lower credible limit for the mortality estimate
 ##' @param mort_upper Upper credible limit for the mortality estimate
 ##'
-##' @param rem_num Numerator for the estimate of the remission rate.  Remission
+##' @param rem_num Numerator for the estimate of the remission probability, i.e number
+##' of people observed to recover from the disease within a year. 
+##'
+##' Remission
 ##'   data should be supplied if remission is permitted in the model, either as
 ##'   a numerator and denominator or as an estimate and lower credible interval.
 ##'   Conversely, if no remission data are supplied, then remission is assumed
@@ -65,19 +77,19 @@
 ##'   observation - lower denominators or wider credible limits represent
 ##'   weaker prior information. 
 ##'   
-##' @param rem_denom Denominator for the estimate of the remission rate
-##' @param rem  Estimate of the remission rate
+##' @param rem_denom Denominator for the estimate of the remission probability
+##' @param rem  Estimate of the remission probability
 ##' @param rem_lower Lower credible limit for the remission estimate
 ##' @param rem_upper Upper credible limit for the remission estimate
 ##'
 ##' @param age Variable in the data indicating the year of age
 ##'
-##' @param cf_model Model for how case fatality varies with age.
+##' @param cf_model Model for how case fatality rate varies with age.
 ##'
-##' \code{"smooth"} (the default). Case fatality is modelled as a smooth function of age,
+##' \code{"smooth"} (the default). Case fatality rate is modelled as a smooth function of age,
 ##'   using a spline.
 ##'
-##' \code{"indep"} Case fatalities are estimated independently for each year of age.  This may be
+##' \code{"indep"} Case fatality rates are estimated independently for each year of age.  This may be
 ##' useful for determining how much information is in
 ##'   the data. That is, if the posterior from this model is identical to the
 ##'   prior for a certain age, then there is no information in the data alone
@@ -85,14 +97,14 @@
 ##'   assumption (such as a smooth function of age) or external data are equired
 ##'   to give more precise estimates.
 ##'
-##' \code{"increasing"} Case fatality is modelled as a smooth and increasing
+##' \code{"increasing"} Case fatality rate is modelled as a smooth and increasing
 ##'   function of age.
 ##'
-##' \code{"const"} Case fatality is modelled as constant with age.
+##' \code{"const"} Case fatality rate is modelled as constant with age.
 ##'
-##' @param inc_model Model for how incidence varies with age.
+##' @param inc_model Model for how incidence rates vary with age.
 ##'
-##' \code{"smooth"} (the default). Incidence is modelled as a smooth spline function of age.
+##' \code{"smooth"} (the default). Incidence rates are modelled as a smooth spline function of age.
 ##'
 ##' \code{"indep"} Incidence rates for each year of age are estimated independently.
 ##'
@@ -100,6 +112,8 @@
 ##' less well-informed by data, compared to incidence and case fatality. 
 ##'
 ##' \code{"const"} (the default). Constant remission rate over all ages.
+##'
+##' \code{"smooth"} Remission rates are modelled as a smooth spline function of age. 
 ##'
 ##' \code{"indep"} Remission rates estimated independently over all ages. 
 ##'
@@ -135,18 +149,19 @@
 ##' @param cf_init Initial guess at a typical case fatality value, for an
 ##'   average age.
 ##'
-##' @param eqage Case fatalities (and incidences) are assumed to be equal for
+##' @param eqage Case fatalities (and incidence and remission rates) are assumed to be equal for
 ##'   all ages below this age, inclusive, when using the smoothed model.
 ##'
-##' @param eqagehi Case fatalities (and incidences) are assumed to be equal for
+##' @param eqagehi Case fatalities (and incidence and remission rates) are assumed to be equal for
 ##'   all ages above this age, inclusive, when using the smoothed model.
 ##'
 ##' @param loo Compute leave-one-out cross validation statistics (for \code{method="mcmc"} only). 
 ##'
-##' @param sprior Vector of two elements, giving the rates of the exponential prior distributions used to penalise
-##'   the coefficients of the spline model.  The first refers to the spline model for incidence, the second for case fatality.  The default of 1 should adapt
+##' @param sprior Vector of three elements, giving the rates of the exponential prior distributions used to penalise
+##'   the coefficients of the spline model.  The first refers to the spline model for incidence, the second for case fatality, the third for remission.  The default of 1 should adapt
 ##'   appropriately to the data, but higher values give stronger smoothing, or
-##'   lower values give weaker smoothing,  if required.
+##'   lower values give weaker smoothing,  if required.  If one of the rates (e.g. remission)
+##'  is not modelled with a spline, any number can be supplied here and it is just ignored. 
 ##'
 ##' @param hp_fixed A list with one named element for each hyperparameter
 ##' to be fixed.  The value should be either 
@@ -288,7 +303,7 @@ disbayes <- function(data,
                      eqage = 30,
                      eqagehi = NULL,
                      loo = TRUE, 
-                     sprior = c(1,1),
+                     sprior = c(1,1,1),
                      hp_fixed = NULL, 
                      rem_prior = c(1.1, 1), 
                      inc_prior = c(2, 0.1), 
@@ -317,12 +332,13 @@ disbayes <- function(data,
   
   cf_model <- match.arg(cf_model, c("smooth", "indep", "increasing", "const"))
   inc_model <- match.arg(inc_model, c("smooth", "indep"))
-  rem_model <- match.arg(rem_model, c("const", "indep"))
+  rem_model <- match.arg(rem_model, c("const", "smooth", "indep"))
   smooth_cf <- (cf_model=="smooth")
   increasing_cf <- (cf_model=="increasing")
   const_cf <- (cf_model=="const")
   const_rem <- (rem_model=="const")
   smooth_inc <- (inc_model=="smooth")
+  smooth_rem <- (remission && rem_model=="smooth")
   
   if (!is.null(inc_trend) || !is.null(cf_trend)) {
     trend <- TRUE
@@ -337,7 +353,8 @@ disbayes <- function(data,
   }
   prev_zero <- prev_zero || (!is.null(dat$prev_num) && dat$prev_num[1] > 0) 
   
-  mdata <- list(remission=remission, eqage=eqage, const_rem=const_rem, prev_zero=prev_zero,
+  mdata <- list(remission=remission, eqage=eqage, const_rem=const_rem,
+                smooth_rem=smooth_rem, prev_zero=prev_zero,
                 inc_prior=inc_prior, cf_prior=cf_prior, rem_prior=rem_prior)
   idata <- list(cf_init=cf_init) 
   
@@ -349,38 +366,52 @@ disbayes <- function(data,
   # Handle fixed hyperparameters
   if (inc_model %in% c("indep") && !is.null(hp_fixed[["sinc"]])) hp_fixed[["sinc"]] <- NULL
   if (cf_model %in% c("indep","const") && !is.null(hp_fixed[["scf"]])) hp_fixed[["scf"]] <- NULL
+  if (rem_model %in% c("indep","const") && !is.null(hp_fixed[["srem"]])) hp_fixed[["srem"]] <- NULL
   hp <- eb_disbayes(.disbayes_hp, hp_fixed, dbcall, disbayes, method, list(...))
-  
-  if (smooth_cf | smooth_inc) {
-    cf_smooth <- init_smooth(log(initrates$cf), eqage, eqagehi, s_opts=NULL)
-    inc_smooth <- init_smooth(log(initrates$inc), eqage, eqagehi, s_opts=NULL)
-    if (!is.null(bias_model))
+
+  if (!is.null(bias_model))
       bias_model <- match.arg(bias_model, c("inc","prev","incprev"))
-    nbias <- if (is.null(bias_model)) 1 else 2
-    if (nbias==1){
+  nbias <- if (is.null(bias_model)) 1 else 2
+  if (nbias==1){
       incdata_ind <- prevdata_ind <- 1 
-    } else if (nbias==2){
+  } else if (nbias==2){
       incdata_ind <-  if (bias_model %in% c("inc", "incprev")) 2 else 1
       prevdata_ind  <-  if (bias_model %in% c("prev", "incprev")) 2 else 1
-    }
-    
+  }
+  
+  if (smooth_cf | smooth_inc | smooth_rem) {
+    cf_smooth <- if (smooth_cf) init_smooth(log(initrates$cf), eqage, eqagehi, s_opts=NULL) else NULL
+    inc_smooth <- if (smooth_inc) init_smooth(log(initrates$inc), eqage, eqagehi, s_opts=NULL) else NULL
+    rem_smooth <- if (smooth_rem) init_smooth(log(initrates$rem), eqage, eqagehi, s_opts=NULL) else NULL
+    X <- cf_smooth$X
+    if (is.null(X)) X <- if (is.null(inc_smooth$X)) rem_smooth$X else inc_smooth$X
+
     datstans <- c(dat, list(smooth_cf=as.numeric(smooth_cf),
                             increasing_cf=as.numeric(increasing_cf),
                             const_cf=as.numeric(const_cf),
                             const_rem=as.numeric(const_rem),
                             smooth_inc=as.numeric(smooth_inc),
+                            smooth_rem=as.numeric(smooth_rem),
                             prev_zero=as.numeric(prev_zero),
                             trend=as.numeric(trend), 
+
                             nbias = nbias,
                             mortdata_ind = 1, remdata_ind = 1,
                             incdata_ind = incdata_ind, 
                             prevdata_ind = prevdata_ind,
+
                             inc_prior = inc_prior, cf_prior = cf_prior, rem_prior = rem_prior,
+
                             scf_isfixed = hp["scf","isfixed"],
                             sinc_isfixed = hp["sinc","isfixed"], 
+                            srem_isfixed = hp["srem","isfixed"], 
                             lambda_cf_fixed = as.numeric(hp["scf","vals"]), 
                             lambda_inc_fixed = as.numeric(hp["sinc","vals"]), 
-                            X=cf_smooth$X, K=ncol(cf_smooth$X), sprior=sprior, eqage=eqage))
+                            lambda_rem_fixed = as.numeric(hp["srem","vals"]), 
+
+                            X=X, K=ncol(X),
+
+                            sprior=sprior, eqage=eqage))
     if (trend) {
       datstans$inc_trend <- inc_trend
       datstans$cf_trend <- cf_trend
@@ -391,12 +422,14 @@ disbayes <- function(data,
       datstans$cf_trend <-  array(1, dim=c(nage,1)) 
       datstans$nyr <- 1
     }
-    initsc <- initlist_const(initrates, cf_smooth, inc_smooth, remission, 
+    initsc <- initlist_const(initrates, cf_smooth, inc_smooth, remission, rem_smooth, 
                              eqage, smooth_inc, smooth_cf, const_cf, increasing_cf,
-                             const_rem, nbias, hp["scf","isfixed"], hp["sinc","isfixed"])
-    initsr <- initlist_random(nage, initrates, cf_smooth, inc_smooth, remission, 
+                             smooth_rem, const_rem, nbias,
+                             hp["scf","isfixed"], hp["sinc","isfixed"], hp["srem","isfixed"])
+    initsr <- initlist_random(nage, initrates, cf_smooth, inc_smooth, remission, rem_smooth, 
                               eqage, smooth_inc, smooth_cf, const_cf, increasing_cf,
-                              const_rem, nbias, hp["scf","isfixed"], hp["sinc","isfixed"])
+                              smooth_rem, const_rem, nbias,
+                              hp["scf","isfixed"], hp["sinc","isfixed"], hp["srem","isfixed"])
     if (method=="opt") { 
       opts <- rstan::optimizing(stanmodels$disbayes, data=datstans, init=initsc, draws=draws,
                                 iter=iter,  ...)
@@ -416,11 +449,11 @@ disbayes <- function(data,
     if (method=="opt") { 
       res <- list(fit = initrates$optu, method="opt")
     } else {
-      fitu <- fit_unsmoothed(dat, inc_init=initrates$inc, cf_init=initrates$cf,
-                             rem_init=initrates$rem, remission=remission,
-                             method = method,
-                             iter = iter, stan_control = stan_control, 
-                             ...)
+        fitu <- fit_unsmoothed(dat, inc_init=initrates$inc, rem_init=initrates$rem, 
+                               mdata, idata, 
+                               method = method,
+                               iter = iter, stan_control = stan_control, 
+                               ...)
       loou <- if (loo) get_loo(fitu, remission=remission) else NULL 
       res <- list(fit=fitu, loo=loou, method="mcmc")
     }

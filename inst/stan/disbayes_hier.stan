@@ -20,7 +20,7 @@ data {
   
   int<lower=0> K; // number of spline basis variables including the intercept
   matrix[nage,K] X;
-  real<lower=0> sprior[2]; 
+  real<lower=0> sprior[3]; 
   real mipm;
   real<lower=0> mips;
   real mism;
@@ -39,6 +39,7 @@ data {
   int const_cf; 
   int const_rem;
   int smooth_inc;
+  int smooth_rem;
 
   // Empirical Bayes method where random effects hyperparameters are fixed
   int sd_int_isfixed;
@@ -52,14 +53,16 @@ data {
   int scf_isfixed;
   int scfmale_isfixed;
   int sinc_isfixed;
+  int srem_isfixed;
   real<lower=0> lambda_cf_fixed;
   real<lower=0> lambda_cf_male_fixed;
   real<lower=0> lambda_inc_fixed;
+  real<lower=0> lambda_rem_fixed;
 }
 
 parameters {
   real<lower=0> inc_par[nage*(1 - smooth_inc),narea,ng];
-  real<lower=0> rem_par[remission*(nage*(1-const_rem) + 1*const_rem),ng];
+  real<lower=0> rem_par[remission*(1-smooth_rem)*(nage*(1-const_rem) + 1*const_rem),ng];
 
    // standard normal terms contributing to area-specific coefficients in non-centered parameterisation.
   matrix[(K-2)*(1-const_cf), narea*(1 - common) + 1*(common)] barea; 
@@ -72,6 +75,7 @@ parameters {
   vector[(narea*(1-common) + 1*common)*increasing] lcfbase;
 
   real beta_inc[K*smooth_inc,narea,ng];
+  real beta_rem[K*smooth_rem,narea,ng];
   
   real mean_inter; // random effect mean intercept
   vector<lower=0>[1-sd_int_isfixed] sd_inter; 
@@ -80,6 +84,7 @@ parameters {
   vector<lower=0>[(1-const_cf)*(1-scf_isfixed)] lambda_cf;
   vector<lower=0>[(ng-1)*(1-scfmale_isfixed)] lambda_cf_male;
   vector<lower=0>[smooth_inc*(1-sinc_isfixed)] lambda_inc;
+  vector<lower=0>[remission*smooth_rem*(1-srem_isfixed)] lambda_rem;
   real<lower=0,upper=1> prevzero[narea*prev_zero,ng];
 }
 
@@ -104,6 +109,7 @@ transformed parameters {
   real<lower=0> lambda_cf_use;
   real<lower=0> lambda_cf_male_use;
   real<lower=0> lambda_inc_use;
+  real<lower=0> lambda_rem_use;
   vector[narea*increasing] lcfbase_use;
 
   if (sd_int_isfixed) sdint_use = sd_int_fixed; else sdint_use = sd_inter[1];
@@ -111,6 +117,7 @@ transformed parameters {
   if (scf_isfixed || const_cf) lambda_cf_use = lambda_cf_fixed; else lambda_cf_use = lambda_cf[1];
   if (scfmale_isfixed || (ng==1)) lambda_cf_male_use = lambda_cf_male_fixed; else lambda_cf_male_use = lambda_cf_male[1];
   if (sinc_isfixed || !smooth_inc) lambda_inc_use = lambda_inc_fixed; else lambda_inc_use = lambda_inc[1];
+  if (srem_isfixed || !smooth_rem) lambda_rem_use = lambda_rem_fixed; else lambda_rem_use = lambda_rem[1];
 
   for (j in 1:narea){
     if (common) {  // no difference between areas. implemented to allow statistical model comparison
@@ -211,7 +218,12 @@ transformed parameters {
       }
 	
       if (remission) {
-	if (const_rem) {
+	if (smooth_rem) {
+	  for (a in 1:nage){ 
+	    rem[a,j,g] = exp(X[a,]*to_vector(beta_rem[,j,g]));
+	  }
+	}
+	else if (const_rem) {
 	  for (a in 1:nage)
 	    rem[a,j,g] = rem_par[1,g];
 	} else 
@@ -294,7 +306,19 @@ model {
     }
   }
   if (remission){
-    if (const_rem) {
+    if (smooth_rem) {
+      for (j in 1:narea){
+	for (g in 1:ng){
+	  for (i in 1:(K-2)) {
+	    beta_rem[i,j,g] ~ normal(0, lambda_rem_use);
+	  }
+	  for (i in (K-1):K){
+	    beta_rem[i,j,g] ~ normal(0, 100);
+	  }
+	}
+      }
+    }
+    else if (const_rem) {
       for (g in 1:ng) rem_par[1,g] ~ gamma(rem_prior[1], rem_prior[2]);
     } else {
       for (g in 1:ng) {
@@ -311,6 +335,9 @@ model {
   }
   if (smooth_inc && !sinc_isfixed){
     lambda_inc ~ gamma(2, sprior[1]);
+  }
+  if (smooth_rem && !srem_isfixed){
+    lambda_rem ~ gamma(2, sprior[3]);
   }
   if ((!interceptonly) && (!increasing) && (!const_cf)){
 	// Variation in slopes 

@@ -38,7 +38,7 @@ disbayes_hier(
   rem_model = "const",
   prev_zero = FALSE,
   loo = TRUE,
-  sprior = c(1, 1),
+  sprior = c(1, 1, 1),
   hp_fixed = NULL,
   nfold_int_guess = 5,
   nfold_int_upper = 100,
@@ -48,8 +48,8 @@ disbayes_hier(
   mean_slope_prior = c(5, 5),
   gender_int_priorsd = 0.82,
   gender_slope_priorsd = 0.82,
-  inc_prior = c(2, 0.1),
-  rem_prior = c(2, 1),
+  inc_prior = c(1.1, 0.1),
+  rem_prior = c(1.1, 1),
   method = "mcmc",
   draws = 1000,
   iter = 10000,
@@ -64,10 +64,14 @@ data frame.   For each disease measure available, one of the following three
 combinations of variables must be specified:
 
 (1) numerator and denominator (2) estimate and denominator (3) estimate
-with lower and upper credible limits
+with lower and upper credible limits.
 
 Mortality must be supplied, and at least one of incidence and prevalence.
 If remission is assumed to be possible, then remission data should also be supplied (see below).
+
+Estimates refer to the probability of having some event within a year, rather than rates.  Rates per year $r$ can be
+converted to probabilities $p$ as $p = 1 - exp(-r)$, assuming the rate is constant
+within the year.
 
 For estimates based on registry data assumed to cover the whole
 population, then the denominator will be the population size.}
@@ -98,36 +102,41 @@ interval, the numerator and denominator could be multiplied by a constant,
 for example, multiplying both the numerator and denominator by 0.5 would
 give the data source half its original weight.}
 
-\item{inc}{Estimate of incidence.}
+\item{inc}{Estimate of the incidence probability}
 
 \item{inc_lower}{Lower credible limit for the incidence estimate}
 
 \item{inc_upper}{Upper credible limit for the incidence estimate}
 
-\item{prev_num}{Numerator for the estimate of prevalence}
+\item{prev_num}{Numerator for the estimate of prevalence, i.e.
+number of people currently with a disease.}
 
 \item{prev_denom}{Denominator for the estimate of prevalence (e.g. the size
 of the survey used to obtain the prevalence estimate)}
 
-\item{prev}{Estimate of prevalence}
+\item{prev}{Estimate of the prevalence probability}
 
 \item{prev_lower}{Lower credible limit for the prevalence estimate}
 
 \item{prev_upper}{Upper credible limit for the prevalence estimate}
 
-\item{mort_num}{Numerator for the estimate of the mortality rate}
+\item{mort_num}{Numerator for the estimate of the mortality probability, i.e
+number of deaths attributed to the disease under study within a year}
 
-\item{mort_denom}{Denominator for the estimate of the mortality rate (e.g.
+\item{mort_denom}{Denominator for the estimate of the mortality probability (e.g.
 the population size, if the estimates were obtained from a comprehensive
 register)}
 
-\item{mort}{Estimate of the mortality rate}
+\item{mort}{Estimate of the mortality probability}
 
 \item{mort_lower}{Lower credible limit for the mortality estimate}
 
 \item{mort_upper}{Upper credible limit for the mortality estimate}
 
-\item{rem_num}{Numerator for the estimate of the remission rate.  Remission
+\item{rem_num}{Numerator for the estimate of the remission probability, i.e number
+of people observed to recover from the disease within a year.
+
+Remission
 data should be supplied if remission is permitted in the model, either as
 a numerator and denominator or as an estimate and lower credible interval.
 Conversely, if no remission data are supplied, then remission is assumed
@@ -135,9 +144,9 @@ to be impossible.  These "data" may represent a prior judgement rather than
 observation - lower denominators or wider credible limits represent
 weaker prior information.}
 
-\item{rem_denom}{Denominator for the estimate of the remission rate}
+\item{rem_denom}{Denominator for the estimate of the remission probability}
 
-\item{rem}{Estimate of the remission rate}
+\item{rem}{Estimate of the remission probability}
 
 \item{rem_lower}{Lower credible limit for the remission estimate}
 
@@ -148,10 +157,10 @@ weaker prior information.}
 \item{cf_init}{Initial guess at a typical case fatality value, for an
 average age.}
 
-\item{eqage}{Case fatalities (and incidences) are assumed to be equal for
+\item{eqage}{Case fatalities (and incidence and remission rates) are assumed to be equal for
 all ages below this age, inclusive, when using the smoothed model.}
 
-\item{eqagehi}{Case fatalities (and incidences) are assumed to be equal for
+\item{eqagehi}{Case fatalities (and incidence and remission rates) are assumed to be equal for
 all ages above this age, inclusive, when using the smoothed model.}
 
 \item{cf_model}{The following alternative models for case fatality are
@@ -188,14 +197,14 @@ In all models, case fatality is a smooth function of age.}
 \item{inc_model}{Model for how incidence varies with age.
 
 \code{"smooth"} (the default). Incidence is modelled as a smooth spline
-function of age, independently for eahc area (and gender).
+function of age, independently for each area (and gender).
 
 \code{"indep"} Incidence rates for each year of age, area (and gender) are
 estimated independently.}
 
 \item{rem_model}{Model for how remission varies with age.  Currently
 supported models are \code{"const"} for a constant remission rate over all
-ages, or \code{"indep"} for a different remission rates estimated
+ages, \code{"const"} for a smooth spline,  or \code{"indep"} for a different remission rates estimated
 independently for each age with no smoothing.}
 
 \item{prev_zero}{If \code{TRUE}, attempt to estimate prevalence at age zero
@@ -205,10 +214,11 @@ otherwise.}
 
 \item{loo}{Compute leave-one-out cross validation statistics (for \code{method="mcmc"} only).}
 
-\item{sprior}{Vector of two elements, giving the rates of the exponential prior distributions used to penalise
-the coefficients of the spline model.  The first refers to the spline model for incidence, the second for case fatality.  The default of 1 should adapt
+\item{sprior}{Vector of three elements, giving the rates of the exponential prior distributions used to penalise
+the coefficients of the spline model.  The first refers to the spline model for incidence, the second for case fatality, the third for remission.  The default of 1 should adapt
 appropriately to the data, but higher values give stronger smoothing, or
-lower values give weaker smoothing,  if required.}
+lower values give weaker smoothing,  if required.  If one of the rates (e.g. remission)
+is not modelled with a spline, any number can be supplied here and it is just ignored.}
 
 \item{hp_fixed}{A list with one named element for each hyperparameter
 to be fixed.  The value should be either

@@ -49,14 +49,14 @@
 ##' @param inc_model Model for how incidence varies with age.
 ##'
 ##'   \code{"smooth"} (the default). Incidence is modelled as a smooth spline
-##'   function of age, independently for eahc area (and gender).
+##'   function of age, independently for each area (and gender).
 ##'
 ##'   \code{"indep"} Incidence rates for each year of age, area (and gender) are
 ##'   estimated independently.
 ##'
 ##' @param rem_model Model for how remission varies with age.  Currently
 ##'   supported models are \code{"const"} for a constant remission rate over all
-##'   ages, or \code{"indep"} for a different remission rates estimated
+##'   ages, \code{"const"} for a smooth spline,  or \code{"indep"} for a different remission rates estimated
 ##'   independently for each age with no smoothing.
 ##'
 ##' @param hp_fixed A list with one named element for each hyperparameter
@@ -140,14 +140,14 @@ disbayes_hier <- function(data,
                           rem_model = "const",
                           prev_zero = FALSE, 
                           loo = TRUE, 
-                          sprior = c(1,1),
+                          sprior = c(1, 1, 1),
                           hp_fixed = NULL,
                           nfold_int_guess = 5,  nfold_int_upper = 100,
                           nfold_slope_guess = 5, nfold_slope_upper = 100,
                           mean_int_prior = c(0,10), mean_slope_prior = c(5,5),
                           gender_int_priorsd = 0.82, gender_slope_priorsd = 0.82, 
-                          inc_prior = c(2, 0.1), 
-                          rem_prior = c(2, 1), 
+                          inc_prior = c(1.1, 0.1), 
+                          rem_prior = c(1.1, 1), 
                           method = "mcmc",
                           draws = 1000,
                           iter = 10000,
@@ -159,7 +159,7 @@ disbayes_hier <- function(data,
     cf_model <- match.arg(cf_model, c("default","interceptonly","increasing",
                                       "common", "increasing_common", "const", "const_common"))
     inc_model <- match.arg(inc_model, c("smooth", "indep"))
-    rem_model <- match.arg(rem_model, c("const", "indep"))
+    rem_model <- match.arg(rem_model, c("smooth", "const", "indep"))
     const_rem <- (rem_model=="const")
     smooth_inc <- (inc_model=="smooth")
     data <- as.data.frame(data)
@@ -195,22 +195,26 @@ disbayes_hier <- function(data,
 
     rem_data <- process_data(data, "rem", rem_num, rem_denom, rem, rem_lower, rem_upper, nage, narea, ng, hier=TRUE)
     remission <- rem_data$supplied
+    smooth_rem <- (remission && rem_model=="smooth")
 
     dat <- c(inc_data, prev_data, mort_data, rem_data, nage=nage, remission=as.numeric(remission))
     dat$supplied <- NULL
     datagg <- hierdata_to_agg(dat, area)
     prev_zero <- prev_zero || (!is.null(dat$prev_num) && any(dat$prev_num[1,,] > 0))
-    mdata <- list(remission=remission, eqage=eqage, const_rem=const_rem, prev_zero=prev_zero,
+    mdata <- list(remission=remission, eqage=eqage, const_rem=const_rem,
+                  smooth_rem=smooth_rem, prev_zero=prev_zero,
                   inc_prior=inc_prior, cf_prior=c(2,0.1), rem_prior=rem_prior)
     idata <- list(cf_init=cf_init) 
     
     initrates <- init_rates(datagg, mdata, idata, ...)
     cf_smooth <- init_smooth(log(initrates$cf), eqage, eqagehi, s_opts=NULL)
-    inc_smooth <- init_smooth(log(initrates$inc), eqage, eqagehi, s_opts=NULL)
+    inc_smooth <- if (smooth_inc) init_smooth(log(initrates$inc), eqage, eqagehi, s_opts=NULL) else NULL
+    rem_smooth <- if (smooth_rem) init_smooth(log(initrates$rem), eqage, eqagehi, s_opts=NULL) else NULL 
 
     beta_in <- cf_smooth$beta 
     betainc_in <- inc_smooth$beta 
-    lam_in <- laminc_in <- 0.5 
+    betarem_in <- rem_smooth$beta 
+    lam_in <- laminc_in <- lamrem_in <- 0.5 
     K <- ncol(cf_smooth$X)
 
     interceptonly <- (cf_model=="interceptonly") 
@@ -221,6 +225,7 @@ disbayes_hier <- function(data,
     ## Handle fixed hyperparameters and empirical Bayes estimation
     if (inc_model %in% c("indep") && !is.null(hp_fixed[["sinc"]])) hp_fixed[["sinc"]] <- NULL
     if (cf_model %in% c("const") && !is.null(hp_fixed[["scf"]])) hp_fixed[["scf"]] <- NULL
+    if (rem_model %in% c("const") && !is.null(hp_fixed[["srem"]])) hp_fixed[["srem"]] <- NULL
     if (ng==1 && !is.null(hp_fixed[["scfmale"]])) hp_fixed[["scfmale"]] <- NULL 
     if (!(cf_model %in% c("default")) && !is.null(hp_fixed[["sd_slope"]])) hp_fixed[["sd_slope"]] <- NULL
     hp <- eb_disbayes(.disbayes_hier_hp, hp_fixed, dbcall, disbayes_hier, method, list(...))
@@ -237,18 +242,20 @@ disbayes_hier <- function(data,
       inc_init  <- rlnorm(nage, meanlog=log(initrates$inc), sdlog=initrates$inc/10)
       rem_init  <- rlnorm(nage, meanlog=log(initrates$rem), sdlog=initrates$rem/10)
       beta_in <- rnorm(length(beta_in), beta_in, abs(beta_in)/10)
-      betainc_in <- rnorm(length(betainc_in), betainc_in, abs(betainc_in)/10)
+      betainc_in <- if (smooth_inc) rnorm(length(betainc_in), betainc_in, abs(betainc_in)/10) else numeric()
+      betarem_in <- if (smooth_rem) rnorm(length(betarem_in), betarem_in, abs(betarem_in)/10) else numeric()
       sd_in <- rlnorm(1, meanlog=log(0.1), sdlog=0.01)
       lam_in <- rlnorm(length(lam_in), meanlog=log(lam_in), sdlog=lam_in/10)
       laminc_in <- rlnorm(length(laminc_in), meanlog=log(laminc_in), sdlog=laminc_in/10)
+      lamrem_in <- rlnorm(length(lamrem_in), meanlog=log(lamrem_in), sdlog=lamrem_in/10)
       pz_in <- if (prev_zero) as.array(max(dat$prev_num[1],1)/max(dat$prev_denom[1],2)) else numeric()
 
       inits_hier <- list(prevzero = array(rep(pz_in, narea*prev_zero*ng),
                                           dim = c(narea*prev_zero, ng)),
                          inc_par = array(rep(initrates$inc, narea*ng),
                                          dim=c(nage*(1 - smooth_inc), narea, ng)), # remove if mandating SI
-                         rem_par = array(rep(rem_init, ng*remission), 
-                                         dim=c(remission*(nage*(1-const_rem) + 1*const_rem), ng)),
+                         rem_par = array(rep(rem_init, ng*remission*(1-smooth_rem)), 
+                                         dim=c(remission*(1-smooth_rem)*(nage*(1-const_rem) + 1*const_rem), ng)),
                          barea = matrix(0, nrow=(K-2)*(1-const_cf),
                                         ncol = narea*(1-common) + 1*common),
                          barea_slope = matrix(0, nrow=(1-interceptonly)*(1-const_cf),
@@ -257,6 +264,8 @@ disbayes_hier <- function(data,
                          bmale = if (ng==1) numeric() else rep(0, K),
                          beta_inc = array(rep(betainc_in, narea*ng),
                                           dim=c(K*smooth_inc, narea, ng)),
+                         beta_rem = array(rep(betarem_in, narea*ng),
+                                          dim=c(K*smooth_rem, narea, ng)),
                          lcfbase = if (increasing) as.array(rep(beta_in[K-1],
                                                        narea*(1-common) + 1*common)) else numeric(),
                          mean_inter = if (beta_in[K-1] > 0) beta_in[K] else mean(log(initrates$cf)),
@@ -266,7 +275,8 @@ disbayes_hier <- function(data,
                                         hp["sd_slope","isfixed"]) numeric() else as.array(sd_in),
                          lambda_cf = if (const_cf || hp["scf","isfixed"]) numeric() else as.array(lam_in),
                          lambda_cf_male = if (ng==1  || hp["scfmale","isfixed"]) numeric() else as.array(lam_in), 
-                         lambda_inc = if (!smooth_inc || hp["sinc","isfixed"]) numeric() else as.array(laminc_in)
+                         lambda_inc = if (!smooth_inc || hp["sinc","isfixed"]) numeric() else as.array(laminc_in),
+                         lambda_rem = if (!smooth_rem || hp["srem","isfixed"]) numeric() else as.array(lamrem_in)
       )
       inits_hier
     }
@@ -280,7 +290,8 @@ disbayes_hier <- function(data,
                             narea=narea, 
                             ng=ng,
                             const_cf = as.numeric(const_cf), 
-                            smooth_inc=as.numeric(smooth_inc), # or should this be mandated? 
+                            smooth_inc=as.numeric(smooth_inc),
+                            smooth_rem=as.numeric(smooth_rem),
                             prev_zero=as.numeric(prev_zero),
                             eqage=eqage, 
                             X=cf_smooth$X, K=K, sprior=sprior,
@@ -299,9 +310,11 @@ disbayes_hier <- function(data,
                             scf_isfixed = hp["scf","isfixed"],
                             scfmale_isfixed = hp["scfmale","isfixed"],
                             sinc_isfixed = hp["sinc","isfixed"], 
+                            srem_isfixed = hp["srem","isfixed"], 
                             lambda_cf_fixed = as.numeric(hp["scf","vals"]), 
                             lambda_cf_male_fixed = as.numeric(hp["scfmale","vals"]), 
-                            lambda_inc_fixed = as.numeric(hp["sinc","vals"])
+                            lambda_inc_fixed = as.numeric(hp["sinc","vals"]),
+                            lambda_rem_fixed = as.numeric(hp["srem","vals"])
                             ))
 
         if (method=="opt") { 
