@@ -97,7 +97,7 @@ transformed parameters {
   real<lower=0> prev[nage,narea,ng];
   real<lower=0> mort[nage,narea,ng];
   real<lower=0> rem[nage,narea,ng];
-  real<lower=0> rem_prob[nage,narea,ng];
+  real<lower=0> rem_prob[nage*remission,narea,ng];
   matrix[nage+1,3] state_probs; 
   row_vector[3] tmp;
   matrix[3,3] P;
@@ -232,7 +232,8 @@ transformed parameters {
       for (a in 1:nage){
 	P = trans_probs(inc[a,j,g], cf[a,j,g], rem[a,j,g]);
 	inc_prob[a,j,g] = P[1,2] + P[1,3];
-	rem_prob[a,j,g] = P[2,1];
+	if (remission) 
+	  rem_prob[a,j,g] = P[2,1];
 	if (a > 1)
 	  prev[a,j,g] = state_probs[a,2] / (state_probs[a,1] + state_probs[a,2]);
 	tmp = state_probs[a,1:3] * P;  // temp variable to avoid warning

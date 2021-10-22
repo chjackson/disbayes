@@ -77,7 +77,7 @@ transformed parameters {
   matrix<lower=0>[nage,nbias] inc;
   matrix<lower=0,upper=1>[nage,nbias] inc_prob;
   vector<lower=0>[nage] rem;
-  vector<lower=0,upper=1>[nage] rem_prob;
+  vector<lower=0,upper=1>[nage*remission] rem_prob;
   
   row_vector[3] state_probs[(nage+1)*(1-trend),nbias]; 
   row_vector[3] tmp;
@@ -195,7 +195,8 @@ transformed parameters {
 	state_probs[a+1,k,1:3] = tmp;
 	if (k==1) {
 	  mort[a] = P[1,3]*(1 - prev[a,1]) + P[2,3]*prev[a,1];
-	  rem_prob[a] = P[2,1];
+	  if (remission) 
+	    rem_prob[a] = P[2,1];
 	}
       }      
 
