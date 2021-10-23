@@ -157,11 +157,21 @@
 ##'
 ##' @param loo Compute leave-one-out cross validation statistics (for \code{method="mcmc"} only). 
 ##'
-##' @param sprior Vector of three elements, giving the rates of the exponential prior distributions used to penalise
-##'   the coefficients of the spline model.  The first refers to the spline model for incidence, the second for case fatality, the third for remission.  The default of 1 should adapt
-##'   appropriately to the data, but higher values give stronger smoothing, or
-##'   lower values give weaker smoothing,  if required.  If one of the rates (e.g. remission)
-##'  is not modelled with a spline, any number can be supplied here and it is just ignored. 
+##' @param sprior Rates of the exponential prior distributions used to penalise
+##'   the coefficients of the spline model.   The default of 1 should adapt
+##'   appropriately to the data, but Higher values give stronger smoothing, or
+##'   lower values give weaker smoothing,  if required.
+##'
+##'   This can be a named vector with names \code{"inc","cf","rem"} in any
+##'   order, giving the prior smoothness rates for incidence, case fatality and
+##'   remission.  If any of these are not smoothed they can be excluded, e.g.
+##'   \code{sprior = c(cf=10, inc=1)}.
+##'
+##'   This can also be an unnamed vector of three elements, where the first
+##'   refers to the spline model for incidence, the second for case fatality,
+##'   the third for remission. If one of the rates (e.g. remission) is not being
+##'   modelled with a spline, any number can be supplied here and it is just
+##'   ignored.
 ##'
 ##' @param hp_fixed A list with one named element for each hyperparameter
 ##' to be fixed.  The value should be either 
@@ -188,11 +198,11 @@
 ##' prior for the incidence rate.  Only used if \code{inc_model="indep"}, for each age-specific rate. 
 ##' 
 ##' @param cf_prior Vector of two elements giving the Gamma shape and rate parameters of the
-##' prior for the case fatality rate.  Only used if \code{cf_model="indep"}, for each age-specific rate,
+##' prior for the case fatality rate.  Only used if \code{cf_model="const"}, or if \code{cf_model="indep"}, for each age-specific rate,
 ##' and for the rate at \code{eqage} in \code{cf_model="increasing"}.
 ##'
 ##' @param rem_prior Vector of two elements giving the Gamma shape and rate parameters of the
-##' prior for the remission rate, used in both \code{rem_model="const"} and \code{rem_model="fixed"}. 
+##' prior for the remission rate, used in both \code{rem_model="const"} and \code{rem_model="indep"}. 
 ##'
 ##' @param method String indicating the inference method, defaulting to
 ##'   \code{"opt"}.
@@ -318,6 +328,10 @@ disbayes <- function(data,
   dbcall <- match.call()
   check_age(data, age)
   nage <- nrow(data)
+  check_rate_prior(inc_prior, missing(inc_prior), inc_model %in% c("const","indep"), "\"const\" or \"indep\"", "inc")
+  check_rate_prior(cf_prior, missing(cf_prior), (cf_model %in% c("const", "indep","increasing")),
+                   "\"const\", \"indep\" or \"increasing\"", "cf")
+  check_rate_prior(rem_prior, missing(rem_prior), rem_model %in% c("const","indep"), "\"const\" or \"indep\"", "rem")
   
   ## Convert all data to numerators and denominators 
   inc_data <- process_data(data, "inc", inc_num, inc_denom, inc, inc_lower, inc_upper, nage)
@@ -353,10 +367,12 @@ disbayes <- function(data,
   }
   prev_zero <- prev_zero || (!is.null(dat$prev_num) && dat$prev_num[1] > 0) 
   
+  check_eqage(eqage, eqagehi, nage)
   mdata <- list(remission=remission, eqage=eqage, const_rem=const_rem,
                 smooth_rem=smooth_rem, prev_zero=prev_zero,
                 inc_prior=inc_prior, cf_prior=cf_prior, rem_prior=rem_prior)
   idata <- list(cf_init=cf_init) 
+  sprior <- check_sprior(sprior)
   
   initrates <- init_rates(dat, mdata, idata, ...)
   
@@ -364,6 +380,7 @@ disbayes <- function(data,
   if (const_cf) increasing_cf <- TRUE
 
   # Handle fixed hyperparameters
+  check_hp_fixed(hp_fixed, .disbayes_hp, inc_model, cf_model, rem_model)
   if (inc_model %in% c("indep") && !is.null(hp_fixed[["sinc"]])) hp_fixed[["sinc"]] <- NULL
   if (cf_model %in% c("indep","const") && !is.null(hp_fixed[["scf"]])) hp_fixed[["scf"]] <- NULL
   if (rem_model %in% c("indep","const") && !is.null(hp_fixed[["srem"]])) hp_fixed[["srem"]] <- NULL
@@ -386,7 +403,8 @@ disbayes <- function(data,
     X <- cf_smooth$X
     if (is.null(X)) X <- if (is.null(inc_smooth$X)) rem_smooth$X else inc_smooth$X
 
-    datstans <- c(dat, list(smooth_cf=as.numeric(smooth_cf),
+
+        datstans <- c(dat, list(smooth_cf=as.numeric(smooth_cf),
                             increasing_cf=as.numeric(increasing_cf),
                             const_cf=as.numeric(const_cf),
                             const_rem=as.numeric(const_rem),
@@ -519,13 +537,13 @@ get_loodf <- function(x, inds){
 
 get_column <- function(data, str){
   col <- if (!is.null(str)) data[[str]] else NULL
-  ## TODO also check for integer, binomial consistency 
   if (!is.null(str) & is.null(col))
     stop(sprintf("No column \"%s\" in data", str))
   col
 }
 
 check_age <- function(data, age="age", model="nonhier", area=NULL, gender=NULL) {
+  if (!is.data.frame(data)) stop("`data` argument should be a data frame")
   if (is.null(data[[age]]))
     stop(sprintf("age variable `%s` not found in data", age))
   nage <- length(unique(data[[age]]))
@@ -556,6 +574,41 @@ check_age <- function(data, age="age", model="nonhier", area=NULL, gender=NULL) 
   }
 }
 
+check_integer <- function(x, nd, prefix){
+  badint <- which(x != floor(x))
+  if (length(badint) > 0) {
+    others <- if (length(badint) > 1) " and others" else ""
+    stop(sprintf("%s_%s[%s]=%s should be integer", 
+                 prefix, nd, badint[1], x[badint[1]]))
+  }
+}
+
+check_binomial <- function(num, denom, prefix){
+    badbinom <- which(num > denom)
+    if (length(badbinom) > 0) {
+        stop(sprintf("%s_num[%s]=%s should be <= %s_denom[%s]=%s", 
+                     prefix, badbinom[1], num[badbinom[1]], prefix, badbinom[1], denom[badbinom[1]]))
+    }
+}
+
+check_proportion <- function(x, prefix){
+    badprop <- which(x < 0 | x > 1)
+    if (length(badprop) > 0) {
+        stop(sprintf("%s_est[%s]=%s should be in [0,1]", 
+                     prefix, badprop[1], x[badprop[1]]))
+    }
+}
+
+check_interval <- function(x, lower, upper, prefix){
+    badint <- which(x < lower | x > upper)
+    if (length(badint) > 0) {
+        stop(sprintf("%s[%s]=%s should be inside the credible interval of (%s_lower[%s]=%s, %s_upper[%s]=%s)",
+                     prefix, badint[1], x[badint[1]], 
+                     prefix, badint[1], lower[badint[1]], 
+                     prefix, badint[1], upper[badint[1]]))
+    }
+}
+
 ## Return either constant, num+denom, or error
 
 ## (a) If num and denom supplied then OK
@@ -573,14 +626,20 @@ process_data <- function(data, prefix, num_str, denom_str, est_str, lower_str, u
   supplied <- FALSE
   if (!is.null(num) && !is.null(denom)){
     res <- list(num=num, denom=denom)
+    check_integer(num, "num", prefix)
+    check_integer(denom, "denom", prefix)
+    check_binomial(num, denom, prefix)
     supplied <- TRUE
   }
   else if (!is.null(est) && !is.null(denom)) {
+    check_proportion(est, prefix)
+    check_integer(denom, "denom", prefix)
     num <- round(est*denom)
     res <- list(num=num, denom=denom)
     supplied <- TRUE
   }
   else if (!is.null(est) && !is.null(lower) && !is.null(upper)) {
+    check_interval(est, lower, upper, prefix)
     res <- ci2num(est, lower, upper)
     supplied <- TRUE
   }
@@ -610,6 +669,60 @@ check_trenddata <- function(trend, nage){
   if (nrow(trend) != nage || ncol(trend) != nage) {
     stop(sprintf("trend matrix of dimension (%s,%s), should be (%s,%s) to match the number of ages",nrow(trend),ncol(trend),nage,nage))
   }
+}
+
+check_eqage <- function(eqage, eqagehi, nage) {
+    if (!is.numeric(eqage) || (length(eqage) > 1))
+        stop("`eqage` must be a single number")
+    if ((eqage > nage) || (eqage < 0))
+        stop(sprintf("eqage is %s, should be in [0, nage=%s]", eqage, nage))
+    if (!is.null(eqagehi)){
+        if (!is.numeric(eqagehi) || (length(eqagehi) > 1))
+            stop("`eqagehi` must be a single number")
+        if ((eqagehi > nage) || (eqage < 0))
+            stop(sprintf("eqagehi is %s, should be in [0, nage=%s]", eqagehi, nage))
+        if (eqage > eqagehi)
+            stop(sprintf("eqage is %s, eqagehi is %s, should have eqage<eqagehi", eqage, eqagehi))
+    }
+}
+
+check_rate_prior <- function(prior, ismissing, allowed, allowed_string, prefix) {
+    if (!is.numeric(prior) || (length(prior) != 2))
+        stop(sprintf("`%s_prior` should be a numeric vector of 2 elements", prefix))
+    if (!ismissing && !allowed)
+        warning(sprintf("Ignoring `%s_prior`, which is only relevant if `%s_model` is %s", prefix, prefix, allowed_string))
+}
+
+check_sprior <- function(sprior){
+  snew <- c(inc=1, cf=1, rem=1)
+  if (!is.numeric(sprior)) stop("`sprior` should be numeric")
+  if (is.null(names(sprior))) {
+    if (length(sprior) != 3) stop("If not named, `sprior` should be a vector of 3 elements")
+    names(sprior) <- c("inc", "cf", "rem")
+  } 
+  for (i in names(sprior)) {
+    snew[i] <- sprior[i]
+  }
+  snew
+}
+
+check_hp_fixed <- function(hp_fixed, parlist, inc_model, cf_model, rem_model) {
+    if (!is.null(hp_fixed) && !is.list(hp_fixed)) stop("`hp_fixed` should be a list or NULL")
+    if (!is.null(hp_fixed)) {
+        if (is.null(names(hp_fixed))) stop("`hp_fixed` should be a named list")
+        for (i in seq_along(hp_fixed)){
+            if (!(names(hp_fixed)[i] %in% parlist$pars))
+                warning(sprintf("Ignoring hp_fixed[[\"%s\"]] which is not a parameter in the model", names(hp_fixed)[i]))
+            if (!is.logical(hp_fixed[[i]]) && (!is.numeric(hp_fixed[[i]]) || (length(hp_fixed[[i]]) > 1)))
+                stop(sprintf("hp_fixed[[\"%s\"]] should be TRUE, FALSE or a single number", names(hp_fixed)[i]))
+        }
+        if ((inc_model %in% c("indep")) && is.numeric(hp_fixed[["sinc"]]))
+            warning(sprintf("Ignoring hp_fixed[[\"sinc\"]] since `inc_model=\"%s\"`", inc_model))
+        if ((cf_model %in% c("indep","const")) && is.numeric(hp_fixed[["scf"]]))
+            warning(sprintf("Ignoring hp_fixed[[\"scf\"]] since `cf_model=\"%s\"`", cf_model))
+        if ((rem_model %in% c("indep","const")) && is.numeric(hp_fixed[["srem"]]))
+            warning(sprintf("Ignoring hp_fixed[[\"srem\"]] since `rem_model=\"%s\"`", rem_model))
+    }
 }
 
 ##' Quick and dirty plot of estimates from disbayes models against age

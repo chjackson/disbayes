@@ -158,3 +158,125 @@ test_that("errors in trend data", {
     "trends data should be")
   
 })
+
+
+test_that("errors when data are invalid",{
+  baddat <- ihdbristol
+  baddat$inc_num <- baddat$inc_denom + 1
+  expect_error(
+    disbayes(dat = baddat,
+             inc_num = "inc_num", inc_denom = "inc_denom",
+             prev_num = "prev_num", prev_denom = "prev_denom",
+             mort = "mort_prob", 
+             eqage = 40, loo=FALSE),
+    "should be <="
+  )
+  baddat <- ihdbristol
+  baddat$inc_num[40] <- baddat$inc_denom[40] - 0.001
+  expect_error(
+    disbayes(dat = baddat,
+             inc_num = "inc_num", inc_denom = "inc_denom",
+             prev_num = "prev_num", prev_denom = "prev_denom",
+             mort_num = "mort_num", mort_denom = "mort_denom",
+             eqage = 40, loo=FALSE)
+    ,
+    "should be integer"
+  )
+  baddat <- ihdbristol
+  baddat$mort_lower[40] <- baddat$mort_upper[40] + 0.001
+  expect_error(
+    disbayes(dat = baddat,
+             inc_num = "inc_num", inc_denom = "inc_denom",
+             prev_num = "prev_num", prev_denom = "prev_denom",
+             mort = "mort_prob", mort_lower = "mort_lower", mort_upper = "mort_upper",
+             eqage = 40, loo=FALSE)
+    ,
+    "should be inside the credible interval"
+  )
+})
+
+test_that("sprior",{
+  expect_error(disbayes(dat = ihdbristol,
+           inc_num = "inc_num", inc_denom = "inc_denom",
+           prev_num = "prev_num", prev_denom = "prev_denom",
+           mort_num = "mort_num", mort_denom = "mort_denom",
+           sprior = c(1,1)), "should be a vector of 3")
+ db <- disbayes(dat = ihdbristol,
+           inc_num = "inc_num", inc_denom = "inc_denom",
+           prev_num = "prev_num", prev_denom = "prev_denom",
+           mort_num = "mort_num", mort_denom = "mort_denom",
+           sprior = c(cf=1, inc=1000))
+ tidy(db) %>% filter(grepl("lambda", var))
+ plot(db, var="inc")
+})
+
+
+test_that("errors and warnings in model specification",{
+  expect_warning(
+    disbayes(dat = ihdbristol,
+             inc_num = "inc_num", inc_denom = "inc_denom",
+             prev_num = "prev_num", prev_denom = "prev_denom",
+             mort_num = "mort_num", mort_denom = "mort_denom",
+             inc_prior = c(2,2)), "Ignoring `inc_prior`")
+  expect_warning(
+    disbayes(dat = ihdbristol,
+             inc_num = "inc_num", inc_denom = "inc_denom",
+             prev_num = "prev_num", prev_denom = "prev_denom",
+             mort_num = "mort_num", mort_denom = "mort_denom",
+             cf_model = "smooth",
+             cf_prior = c(2,2)), "Ignoring `cf_prior`")
+  expect_error(
+    disbayes(dat = ihdbristol,
+             inc_num = "inc_num", inc_denom = "inc_denom",
+             prev_num = "prev_num", prev_denom = "prev_denom",
+             mort_num = "mort_num", mort_denom = "mort_denom",
+             inc_model = "indep",
+             inc_prior = c(2,2,3)), "`inc_prior` should be a numeric vector of 2 elements")
+  expect_warning(
+    disbayes(dat = ihdbristol,
+             inc_num = "inc_num", inc_denom = "inc_denom",
+             prev_num = "prev_num", prev_denom = "prev_denom",
+             mort_num = "mort_num", mort_denom = "mort_denom",
+             rem_model = "const",
+             hp_fixed = list(srem = 1)), "Ignoring hp_fixed")
+  expect_error(
+    disbayes(dat = ihdbristol,
+             inc_num = "inc_num", inc_denom = "inc_denom",
+             prev_num = "prev_num", prev_denom = "prev_denom",
+             mort_num = "mort_num", mort_denom = "mort_denom",
+             rem_model = "const",
+             hp_fixed = list(sinc = "one")),
+    'should be TRUE, FALSE or a single number')
+  expect_error(
+    disbayes(dat = ihdbristol,
+             inc_num = "inc_num", inc_denom = "inc_denom",
+             prev_num = "prev_num", prev_denom = "prev_denom",
+             mort_num = "mort_num", mort_denom = "mort_denom",
+             rem_model = "const",
+             hp_fixed = list(sinc = c(1,1))),
+    'should be TRUE, FALSE or a single number')
+  expect_error(
+    disbayes(dat = ihdbristol,
+             inc_num = "inc_num", inc_denom = "inc_denom",
+             prev_num = "prev_num", prev_denom = "prev_denom",
+             mort_num = "mort_num", mort_denom = "mort_denom",
+             rem_model = "const",
+             eqage = 101),
+    'eqage.+ should be')
+  expect_error(
+    disbayes(dat = ihdbristol,
+             inc_num = "inc_num", inc_denom = "inc_denom",
+             prev_num = "prev_num", prev_denom = "prev_denom",
+             mort_num = "mort_num", mort_denom = "mort_denom",
+             rem_model = "const",
+             eqagehi = 101),
+    'eqagehi.+ should be')
+  expect_error(
+    disbayes(dat = ihdbristol,
+             inc_num = "inc_num", inc_denom = "inc_denom",
+             prev_num = "prev_num", prev_denom = "prev_denom",
+             mort_num = "mort_num", mort_denom = "mort_denom",
+             rem_model = "const",
+             eqage = 50 , eqagehi=40),
+    'should have eqage<eqagehi')
+})
