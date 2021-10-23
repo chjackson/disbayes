@@ -328,7 +328,7 @@ disbayes <- function(data,
   dbcall <- match.call()
   check_age(data, age)
   nage <- nrow(data)
-  check_rate_prior(inc_prior, missing(inc_prior), inc_model %in% c("const","indep"), "\"const\" or \"indep\"", "inc")
+  check_rate_prior(inc_prior, missing(inc_prior), inc_model %in% c("indep"), "\"indep\"", "inc")
   check_rate_prior(cf_prior, missing(cf_prior), (cf_model %in% c("const", "indep","increasing")),
                    "\"const\", \"indep\" or \"increasing\"", "cf")
   check_rate_prior(rem_prior, missing(rem_prior), rem_model %in% c("const","indep"), "\"const\" or \"indep\"", "rem")
@@ -380,7 +380,7 @@ disbayes <- function(data,
   if (const_cf) increasing_cf <- TRUE
 
   # Handle fixed hyperparameters
-  check_hp_fixed(hp_fixed, .disbayes_hp, inc_model, cf_model, rem_model)
+  check_hp_fixed(hp_fixed, .disbayes_hp, inc_model, cf_model, rem_model, ng=1)
   if (inc_model %in% c("indep") && !is.null(hp_fixed[["sinc"]])) hp_fixed[["sinc"]] <- NULL
   if (cf_model %in% c("indep","const") && !is.null(hp_fixed[["scf"]])) hp_fixed[["scf"]] <- NULL
   if (rem_model %in% c("indep","const") && !is.null(hp_fixed[["srem"]])) hp_fixed[["srem"]] <- NULL
@@ -706,7 +706,7 @@ check_sprior <- function(sprior){
   snew
 }
 
-check_hp_fixed <- function(hp_fixed, parlist, inc_model, cf_model, rem_model) {
+check_hp_fixed <- function(hp_fixed, parlist, inc_model, cf_model, rem_model, ng) {
     if (!is.null(hp_fixed) && !is.list(hp_fixed)) stop("`hp_fixed` should be a list or NULL")
     if (!is.null(hp_fixed)) {
         if (is.null(names(hp_fixed))) stop("`hp_fixed` should be a named list")
@@ -722,6 +722,10 @@ check_hp_fixed <- function(hp_fixed, parlist, inc_model, cf_model, rem_model) {
             warning(sprintf("Ignoring hp_fixed[[\"scf\"]] since `cf_model=\"%s\"`", cf_model))
         if ((rem_model %in% c("indep","const")) && is.numeric(hp_fixed[["srem"]]))
             warning(sprintf("Ignoring hp_fixed[[\"srem\"]] since `rem_model=\"%s\"`", rem_model))
+        if ((!cf_model %in% c("default")) && is.numeric(hp_fixed[["sd_slope"]]))
+            warning(sprintf("Ignoring hp_fixed[[\"sd_slope\"]] since `cf_model=\"%s\"`", cf_model))
+        if ((ng == 1) && is.numeric(hp_fixed[["scfmale"]]))
+            warning(sprintf("Ignoring hp_fixed[[\"scfmale\"]] since no gender effect in model"))
     }
 }
 

@@ -214,11 +214,21 @@ otherwise.}
 
 \item{loo}{Compute leave-one-out cross validation statistics (for \code{method="mcmc"} only).}
 
-\item{sprior}{Vector of three elements, giving the rates of the exponential prior distributions used to penalise
-the coefficients of the spline model.  The first refers to the spline model for incidence, the second for case fatality, the third for remission.  The default of 1 should adapt
-appropriately to the data, but higher values give stronger smoothing, or
-lower values give weaker smoothing,  if required.  If one of the rates (e.g. remission)
-is not modelled with a spline, any number can be supplied here and it is just ignored.}
+\item{sprior}{Rates of the exponential prior distributions used to penalise
+the coefficients of the spline model.   The default of 1 should adapt
+appropriately to the data, but Higher values give stronger smoothing, or
+lower values give weaker smoothing,  if required.
+
+This can be a named vector with names \code{"inc","cf","rem"} in any
+order, giving the prior smoothness rates for incidence, case fatality and
+remission.  If any of these are not smoothed they can be excluded, e.g.
+\code{sprior = c(cf=10, inc=1)}.
+
+This can also be an unnamed vector of three elements, where the first
+refers to the spline model for incidence, the second for case fatality,
+the third for remission. If one of the rates (e.g. remission) is not being
+modelled with a spline, any number can be supplied here and it is just
+ignored.}
 
 \item{hp_fixed}{A list with one named element for each hyperparameter
 to be fixed.  The value should be either
@@ -279,7 +289,7 @@ of gender on the linear age slope of log case fatality}
 prior for the incidence rate.  Only used if \code{inc_model="indep"}, for each age-specific rate.}
 
 \item{rem_prior}{Vector of two elements giving the Gamma shape and rate parameters of the
-prior for the remission rate, used in both \code{rem_model="const"} and \code{rem_model="fixed"}.}
+prior for the remission rate, used in both \code{rem_model="const"} and \code{rem_model="indep"}.}
 
 \item{method}{String indicating the inference method, defaulting to
 \code{"opt"}.

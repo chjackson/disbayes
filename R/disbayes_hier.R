@@ -201,10 +201,14 @@ disbayes_hier <- function(data,
     dat$supplied <- NULL
     datagg <- hierdata_to_agg(dat, area)
     prev_zero <- prev_zero || (!is.null(dat$prev_num) && any(dat$prev_num[1,,] > 0))
+    check_rate_prior(inc_prior, missing(inc_prior), inc_model %in% c("indep"), "\"indep\"", "inc")
+    check_rate_prior(rem_prior, missing(rem_prior), rem_model %in% c("const","indep"), "\"const\" or \"indep\"", "rem")
+    check_eqage(eqage, eqagehi, nage)
     mdata <- list(remission=remission, eqage=eqage, const_rem=const_rem,
                   smooth_rem=smooth_rem, prev_zero=prev_zero,
                   inc_prior=inc_prior, cf_prior=c(2,0.1), rem_prior=rem_prior)
     idata <- list(cf_init=cf_init) 
+    sprior <- check_sprior(sprior)
     
     initrates <- init_rates(datagg, mdata, idata, ...)
     cf_smooth <- init_smooth(log(initrates$cf), eqage, eqagehi, s_opts=NULL)
@@ -223,6 +227,7 @@ disbayes_hier <- function(data,
     const_cf <- (cf_model %in% c("const", "const_common"))
 
     ## Handle fixed hyperparameters and empirical Bayes estimation
+    check_hp_fixed(hp_fixed, .disbayes_hier_hp, inc_model, cf_model, rem_model, ng=ng)
     if (inc_model %in% c("indep") && !is.null(hp_fixed[["sinc"]])) hp_fixed[["sinc"]] <- NULL
     if (cf_model %in% c("const") && !is.null(hp_fixed[["scf"]])) hp_fixed[["scf"]] <- NULL
     if (rem_model %in% c("const") && !is.null(hp_fixed[["srem"]])) hp_fixed[["srem"]] <- NULL
