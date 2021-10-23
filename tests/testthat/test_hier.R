@@ -82,6 +82,15 @@ test_that("fixed hyperparameters",{
                       iter=10, chains=1, loo=FALSE, algorithm="Fixed_param")
   expect_equivalent(db$hp_fixed["sinc"], 1.234)
   expect_type(db$hp_fixed["scf"], "double")
-
+  
+  expect_warning(
+    disbayes_hier(ihdmale, age="age", group="area", 
+                  inc_num = "inc_num", inc_denom = "inc_denom",
+                  prev_num = "prev_num", prev_denom = "prev_denom",
+                  mort_num = "mort_num", mort_denom = "mort_denom",
+                  cf_model = "interceptonly",
+                  hp_fixed = list(sd_slope = 1), 
+                  chains=1, loo=FALSE, iter=10, algorithm="Fixed_param"),
+    "Ignoring hp_fixed")
+  
 })
-
