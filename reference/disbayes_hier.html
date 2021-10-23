@@ -385,11 +385,19 @@ otherwise.</p></td>
     </tr>
     <tr>
       <th>sprior</th>
-      <td><p>Vector of three elements, giving the rates of the exponential prior distributions used to penalise
-the coefficients of the spline model.  The first refers to the spline model for incidence, the second for case fatality, the third for remission.  The default of 1 should adapt
-appropriately to the data, but higher values give stronger smoothing, or
-lower values give weaker smoothing,  if required.  If one of the rates (e.g. remission)
-is not modelled with a spline, any number can be supplied here and it is just ignored.</p></td>
+      <td><p>Rates of the exponential prior distributions used to penalise
+the coefficients of the spline model.   The default of 1 should adapt
+appropriately to the data, but Higher values give stronger smoothing, or
+lower values give weaker smoothing,  if required.</p>
+<p>This can be a named vector with names <code>"inc","cf","rem"</code> in any
+order, giving the prior smoothness rates for incidence, case fatality and
+remission.  If any of these are not smoothed they can be excluded, e.g.
+<code>sprior = c(cf=10, inc=1)</code>.</p>
+<p>This can also be an unnamed vector of three elements, where the first
+refers to the spline model for incidence, the second for case fatality,
+the third for remission. If one of the rates (e.g. remission) is not being
+modelled with a spline, any number can be supplied here and it is just
+ignored.</p></td>
     </tr>
     <tr>
       <th>hp_fixed</th>
@@ -467,7 +475,7 @@ prior for the incidence rate.  Only used if <code>inc_model="indep"</code>, for 
     <tr>
       <th>rem_prior</th>
       <td><p>Vector of two elements giving the Gamma shape and rate parameters of the
-prior for the remission rate, used in both <code>rem_model="const"</code> and <code>rem_model="fixed"</code>.</p></td>
+prior for the remission rate, used in both <code>rem_model="const"</code> and <code>rem_model="indep"</code>.</p></td>
     </tr>
     <tr>
       <th>method</th>
