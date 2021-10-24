@@ -232,5 +232,6 @@ tidy_stansumm <- function(summ, varlist, stats, levs=NULL){
         else summ[[facs$vars[i]]] <- NULL
       }
     }
+    summ$age <- summ$age - 1
     summ
 }
