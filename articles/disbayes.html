@@ -105,7 +105,7 @@
 <li><p>disease incidence <span class="math inline">\(i(a)\)</span>, and the</p></li>
 <li><p>case fatality rate <span class="math inline">\(f(a)\)</span>,</p></li>
 </ul>
-<p>which are both assumed to depend on age <span class="math inline">\(a\)</span>. Remission is also possible for some diseases, with rate <span class="math inline">\(r(a)\)</span>, though for clarity it is not illustrated the examples here. Assume further that the rates are constant within integer years of age <span class="math inline">\(a\)</span>, so they can be written <span class="math inline">\(i_a\)</span>, <span class="math inline">\(f_a\)</span>.</p>
+<p>which are both assumed to depend on age <span class="math inline">\(a\)</span>. Remission is also possible for some diseases, with rate <span class="math inline">\(r(a)\)</span>. Assume further that the rates are constant within integer years of age <span class="math inline">\(a\)</span>, so they can be written <span class="math inline">\(i_a\)</span>, <span class="math inline">\(f_a\)</span>.</p>
 <p>From these, we can determine the <em>transition probability matrix</em> <span class="math inline">\(P_a\)</span>, whose <span class="math inline">\(r,s\)</span> entry <span class="math inline">\(P_{ars}\)</span> is the probability that a person is in state <span class="math inline">\(s\)</span> at age <span class="math inline">\(a+1\)</span> given they are in state <span class="math inline">\(r\)</span> at age <span class="math inline">\(a\)</span>. The matrix <span class="math inline">\(P_a\)</span> is defined as a function of <span class="math inline">\(i_a\)</span> and <span class="math inline">\(f_a\)</span>, which is the solution to a differential equation, and is written out explicitly in the DisMod II paper (<span class="citation">Barendregt et al. (2003)</span>).</p>
 <p>Further, let <span class="math inline">\(S_a\)</span> be the “state occupancy probabilities”, or the proportion of individuals in a hypothetical birth cohort (of infinite size) who are in each state at age <span class="math inline">\(a\)</span>. This is a row vector with three elements <span class="math inline">\(S_{ar}\)</span>, one for each state <span class="math inline">\(r\)</span>. Assume everyone is disease-free at age 0. The state occupancy probabilities at each subsequent age <span class="math inline">\(a+1\)</span> are then determined by mutiplying by the transition probability matrix:</p>
 <p><span class="math display">\[ S_{a+1} = S_a P_a \]</span></p>
@@ -124,7 +124,8 @@
 <ul>
 <li><p>(incidence): given a population of size <span class="math inline">\(n_a^{(mort)}\)</span>, <span class="math inline">\(r_a^{(inc)}\)</span> of these are observed to get the disease within the next year</p></li>
 <li><p>(mortality): given a population of size <span class="math inline">\(n_a^{(mort)}\)</span> (with or without the disease), <span class="math inline">\(r_a^{(mort)}\)</span> of these are observed to die from the disease within the next year</p></li>
-<li><p>(prevalence): from a sample of <span class="math inline">\(n_a^{(prev)}\)</span> individuals, <span class="math inline">\(r_a^{(prev)}\)</span> are known to have the disease at age <span class="math inline">\(a\)</span> (and <span class="math inline">\(n_a^{(prev)} - r_a^{(prev)}\)</span> are known to not have the disease.</p></li>
+<li><p>(prevalence): from a sample of <span class="math inline">\(n_a^{(prev)}\)</span> individuals, <span class="math inline">\(r_a^{(prev)}\)</span> are known to have the disease at age <span class="math inline">\(a\)</span> (and <span class="math inline">\(n_a^{(prev)} - r_a^{(prev)}\)</span> are known to not have the disease</p></li>
+<li><p>(remission): from a sample of <span class="math inline">\(n_a^{(rem)}\)</span> individuals, <span class="math inline">\(r_a^{(rem)}\)</span> are known to recover from the disease in the following year.</p></li>
 </ul>
 <p>The next section discusses how these data can be derived, given the typical forms of data available from burden of disease studies. The data are expressed as numerators and denominators, rather than simply point estimates of rates, so that formal statistical methods (likelihood and Bayesian inference) can be used. The denominator is related to the uncertainty around the estimate, e.g. lower denominators imply that the estimate was obtained from observing the disease outcome of a smaller sample of people, hence there is more uncertainty.</p>
 <ol start="3" style="list-style-type: decimal">
@@ -150,7 +151,7 @@
 <li><p><code>mort_num</code>,<code>mort_denom</code>: estimates of IHD-specific mortality by age</p></li>
 <li><p><code>prev_num</code>,<code>prev_denom</code>: estimates of prevalence by age</p></li>
 </ul>
-<p>and we wish to estimate case fatality by age, given these inputs. A selection of rows from the full data frame are shown here. We select only the data from one area and gender (Bristol, male) for this illustration.</p>
+<p>and we wish to estimate case fatality by age, given these inputs. A selection of rows from the full data frame are shown here. We select only the data from one area and gender (Bristol, male) for this illustration. Remission rates are assumed to be zero, hence remission data are not included.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/chjackson/disbayes">disbayes</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span>,quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
@@ -237,6 +238,7 @@
 <li><p>(incidence) <span class="math inline">\(r_a^{(inc)} \sim ~ Binomial(n_a, 1 - P_{a11})\)</span>, where <span class="math inline">\(P_{a11}\)</span> is the annual probability of remaining free of the disease.</p></li>
 <li><p>(mortality) <span class="math inline">\(r_a^{(mort)} \sim ~ Binomial(n_a, dm_a)\)</span>, where the disease-specific mortality <span class="math inline">\(dm_a\)</span> is a deterministic function of the incidences and case fatalities <span class="math inline">\(\{i_j,f_j\}\)</span> for ages <span class="math inline">\(j\)</span> up to <span class="math inline">\(a\)</span>, as described in the theoretical disease model.</p></li>
 <li><p>(prevalence) <span class="math inline">\(r_a^{(prev)} \sim ~ Binomial(n_a^{(prev)}, pr_a)\)</span>, where <span class="math inline">\(pr_a\)</span> is the true prevalence, defined as a deterministic function of the incidences and case fatalities.</p></li>
+<li><p>(remission, if assumed possible) <span class="math inline">\(r_a^{(rem)} \sim ~ Binomial(n_a^{(rem)}, P_{a21})\)</span>, where <span class="math inline">\(P_{a21}\)</span> is the probability that someone with the disease will have recovered from the disease one year from now, defined as a deterministic function of the remission rates, case fatalities and incidences.</p></li>
 </ul>
 </li>
 <li><p>define prior distributions for the unknown parameters, as explained in the next section.</p></li>
@@ -337,12 +339,12 @@
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">var</span><span class="op">==</span><span class="st">"cf"</span>, <span class="fu"><a href="https://dplyr.tidyverse.org/reference/between.html">between</a></span><span class="op">(</span><span class="va">age</span>,<span class="fl">60</span>,<span class="fl">65</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">age</span>, <span class="va">`25%`</span>, <span class="va">`50%`</span>, <span class="va">`75%`</span><span class="op">)</span></code></pre></div>
 <pre><code>##   age        25%        50%        75%
-## 1  60 0.01603970 0.01722645 0.01864179
-## 2  61 0.01629284 0.01745135 0.01867906
-## 3  62 0.01644033 0.01764059 0.01873804
-## 4  63 0.01667072 0.01774236 0.01885436
-## 5  64 0.01687380 0.01794982 0.01898580
-## 6  65 0.01705543 0.01814733 0.01914270</code></pre>
+## 1  60 0.01599383 0.01727211 0.01870761
+## 2  61 0.01618446 0.01746945 0.01878844
+## 3  62 0.01640314 0.01759814 0.01890431
+## 4  63 0.01661800 0.01769531 0.01902538
+## 5  64 0.01682583 0.01789488 0.01913351
+## 6  65 0.01703279 0.01814198 0.01923044</code></pre>
 <p>The default <code>plot</code> method for objects returned by <code>disbayes</code> plots the posterior summaries for case fatality, allowing a quick check of the model results. Or do <code><a href="https://rdrr.io/r/graphics/plot.default.html">plot(..., variable="inc")</a></code> for incidence. The function returns a <code>ggplot2</code> object that can be modified with <code>ggplot2</code> functions, e.g. to add axis labels.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span>
