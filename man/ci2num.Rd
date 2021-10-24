@@ -15,7 +15,8 @@ ci2num(est, lower, upper, epsilon = 0.5, denom0 = 1000)
 
 \item{epsilon}{If any of \code{lower} are zero, then they are replaced by the minimum of \code{epsilon} and \code{est/2}.  Similarly values of 1 for \code{upper} are replaced by the maximum of \code{1-epsilon} and \code{(1+est)/2}.}
 
-\item{denom0}{Denominator to use as a default when the point estimate is exactly 0 or 1 (which is not compatible with the beta distribution).  Should correspond to a guess of the population size used to produce the estimate.  Should be either a scalar, or a vector of the same length as \code{est} (though note if it is a vector, then only the elements where \code{est} is 1 or 0 get used).}
+\item{denom0}{Denominator to use as a default when the point estimate is exactly 0 or 1 (which is not compatible with the beta distribution).  Should correspond to a guess of the population size used to produce the estimate,
+which should be no greater than the actual population of the area, and usually less.  Should be either a scalar, or a vector of the same length as \code{est} (though note if it is a vector, then only the elements where \code{est} is 1 or 0 get used).}
 }
 \value{
 A data frame with elements \code{num} and \code{denom} corresponding to the supplied estimate and limits.
@@ -26,7 +27,7 @@ Estimate the number of events and denominator that contain roughly equivalent in
 \details{
 Based on fitting a Beta distribution by least squares, using the method provided by the \pkg{SHELF} package.
 
-Requires that the estimate and upper and lower limits are all distinct.  Vectors of estimates and limits may be supplied.
+Requires that the estimate and upper and lower limits are all distinct (except that \code{est=0} is allowed and handled specially for convenience, see \code{denom0}).  Vectors of estimates and limits may be supplied.
 }
 \examples{
 est <- 3.00 / 100 

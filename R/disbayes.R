@@ -600,6 +600,11 @@ check_proportion <- function(x, prefix){
 }
 
 check_interval <- function(x, lower, upper, prefix){
+    badint <- which(lower > upper)
+    if (length(badint) > 0) {
+        stop(sprintf("%s_lower[%s]=%s, should be < %s_upper[%s]=%s",
+                     prefix, badint[1], lower[badint[1]], prefix, badint[1], upper[badint[1]]))
+    }    
     badint <- which(x < lower | x > upper)
     if (length(badint) > 0) {
         stop(sprintf("%s[%s]=%s should be inside the credible interval of (%s_lower[%s]=%s, %s_upper[%s]=%s)",

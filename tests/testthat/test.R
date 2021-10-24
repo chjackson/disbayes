@@ -168,7 +168,7 @@ test_that("errors when data are invalid",{
              inc_num = "inc_num", inc_denom = "inc_denom",
              prev_num = "prev_num", prev_denom = "prev_denom",
              mort = "mort_prob", 
-             eqage = 40, loo=FALSE),
+             eqage = 40),
     "should be <="
   )
   baddat <- ihdbristol
@@ -178,20 +178,33 @@ test_that("errors when data are invalid",{
              inc_num = "inc_num", inc_denom = "inc_denom",
              prev_num = "prev_num", prev_denom = "prev_denom",
              mort_num = "mort_num", mort_denom = "mort_denom",
-             eqage = 40, loo=FALSE)
+             eqage = 40)
     ,
     "should be integer"
   )
   baddat <- ihdbristol
-  baddat$mort_lower[40] <- baddat$mort_upper[40] + 0.001
+  baddat$mort_lower[80] <- 0.01
+  baddat$mort_prob[80] <- 0.001
   expect_error(
     disbayes(dat = baddat,
              inc_num = "inc_num", inc_denom = "inc_denom",
              prev_num = "prev_num", prev_denom = "prev_denom",
              mort = "mort_prob", mort_lower = "mort_lower", mort_upper = "mort_upper",
-             eqage = 40, loo=FALSE)
+             eqage = 40)
     ,
     "should be inside the credible interval"
+  )
+  baddat <- ihdbristol
+  baddat$mort_lower[40] <- 0.1
+  baddat$mort_upper[40] <- 0.001
+  expect_error(
+    disbayes(dat = baddat,
+             inc_num = "inc_num", inc_denom = "inc_denom",
+             prev_num = "prev_num", prev_denom = "prev_denom",
+             mort = "mort_prob", mort_lower = "mort_lower", mort_upper = "mort_upper",
+             eqage = 40)
+    ,
+    "should be < mort_upper"
   )
 })
 
