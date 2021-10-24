@@ -43,9 +43,11 @@ The data were processed to
 
 * obtain estimated numerators and denominators from the published point estimates and uncertainty intervals.
 A point estimate of the risk is equivalent to the numerator divided by the denominator. The denominator is
-related to the extent of uncertainty around this estimate. 
+related to the extent of uncertainty around this estimate, and obtained using the Bayesian method
+implemented in \code{\link{ci2num}}. 
 
-The script used to do this is available from REF GITHUB TODO
+The script given in \url{https://github.com/chjackson/disbayes/blob/master/data-raw/gbd_process.Rmd} shows
+these steps.
 }
 \references{
 TODO our paper when available

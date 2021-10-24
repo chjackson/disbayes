@@ -58,9 +58,11 @@ generics::tidy
 ##'
 ##' * obtain estimated numerators and denominators from the published point estimates and uncertainty intervals.
 ##' A point estimate of the risk is equivalent to the numerator divided by the denominator. The denominator is
-##' related to the extent of uncertainty around this estimate. 
+##' related to the extent of uncertainty around this estimate, and obtained using the Bayesian method
+##' implemented in \code{\link{ci2num}}. 
 ##'
-##' The script used to do this is available from REF GITHUB TODO
+##' The script given in \url{https://github.com/chjackson/disbayes/blob/master/data-raw/gbd_process.Rmd} shows
+##' these steps.
 ##'
 ##' @references TODO our paper when available
 ##' 
@@ -84,13 +86,14 @@ generics::tidy
 ##'
 ##' \code{outcome}: Outcome referred to (incidence or case fatality). 
 ##'
-##' @source TODO
+##' @source Scarborough, P., Wickramasinghe, K., Bhatnagar, P. and Rayner, M. (2011) Trends in coronary heart disease, 1961-2001. British Heart Foundation.
 ##'
-##' @details The data were processed to
+##' Smolina, K., Wright, F. L., Rayner, M. and Goldacre, M. J. (2012) Determinants of the decline in mortality from acute myocardial infarction in England between 2002 and 2010: linked national database study. BMJ, 344.
 ##'
-##' The script used to do this is available from REF GITHUB TODO
+##' British Heart Foundation (2020) Heart and Circulatory Disease Statistics 2020. British Heart Foundation.
 ##'
-##' @references TODO our paper when available
-##' 
+##' @details The data were interpolated and smoothed to produce a matrix by year of age and
+##' calendar year, using the script at \url{https://github.com/chjackson/disbayes/blob/master/data-raw/trends.r}.
+##'
 ##' @keywords datasets
 "ihdtrends"

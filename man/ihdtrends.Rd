@@ -19,7 +19,11 @@ year and the outcome in 2017.
 \code{outcome}: Outcome referred to (incidence or case fatality).
 }
 \source{
-TODO
+Scarborough, P., Wickramasinghe, K., Bhatnagar, P. and Rayner, M. (2011) Trends in coronary heart disease, 1961-2001. British Heart Foundation.
+
+Smolina, K., Wright, F. L., Rayner, M. and Goldacre, M. J. (2012) Determinants of the decline in mortality from acute myocardial infarction in England between 2002 and 2010: linked national database study. BMJ, 344.
+
+British Heart Foundation (2020) Heart and Circulatory Disease Statistics 2020. British Heart Foundation.
 }
 \usage{
 ihdtrends
@@ -28,11 +32,7 @@ ihdtrends
 Trends in ischemic heart disease in England
 }
 \details{
-The data were processed to
-
-The script used to do this is available from REF GITHUB TODO
-}
-\references{
-TODO our paper when available
+The data were interpolated and smoothed to produce a matrix by year of age and
+calendar year, using the script at \url{https://github.com/chjackson/disbayes/blob/master/data-raw/trends.r}.
 }
 \keyword{datasets}
