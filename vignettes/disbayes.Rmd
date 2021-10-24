@@ -45,7 +45,7 @@ The disease process is then fully defined by the
 
 * case fatality rate $f(a)$,
 
-which are both assumed to depend on age $a$.  Remission is also possible for some diseases, with rate $r(a)$, though for clarity it is not illustrated the examples here.  Assume further that the rates are constant within integer years of age $a$, so they can be written $i_a$, $f_a$.
+which are both assumed to depend on age $a$.  Remission is also possible for some diseases, with rate $r(a)$.  Assume further that the rates are constant within integer years of age $a$, so they can be written $i_a$, $f_a$.
 
 From these, we can determine the _transition probability matrix_ $P_a$, whose $r,s$ entry $P_{ars}$ is the probability that a person is in state $s$ at age $a+1$ given they are in state $r$ at age $a$. The matrix $P_a$ is defined as a function of $i_a$ and $f_a$, which is the solution to a differential equation, and is written out explicitly in the DisMod II paper (@dismod2). 
 
@@ -72,7 +72,9 @@ Data are observed which give information about some, but not all, of the paramet
    
   * (mortality): given a population of size $n_a^{(mort)}$ (with or without the disease), $r_a^{(mort)}$ of these are observed to die from the disease within the next year 
   
-  * (prevalence): from a sample of $n_a^{(prev)}$ individuals, $r_a^{(prev)}$ are known to have the disease at age $a$ (and $n_a^{(prev)} - r_a^{(prev)}$ are known to not have the disease. 
+  * (prevalence): from a sample of $n_a^{(prev)}$ individuals, $r_a^{(prev)}$ are known to have the disease at age $a$ (and $n_a^{(prev)} - r_a^{(prev)}$ are known to not have the disease 
+  
+  * (remission): from a sample of $n_a^{(rem)}$ individuals, $r_a^{(rem)}$ are known to recover from the disease in the following year. 
   
 The next section discusses how these data can be derived, given the typical forms of data available from burden of disease studies.   The data are expressed as numerators and denominators, rather than simply point estimates of rates, so that formal statistical methods (likelihood and Bayesian inference) can be used.  The denominator is related to the uncertainty around the estimate, e.g. lower denominators imply that the estimate was obtained from observing the disease outcome of a smaller sample of people, hence there is more uncertainty. 
 
@@ -100,7 +102,7 @@ The following data are given in the R data frame `ihdengland` supplied in the pa
 
 * `prev_num`,`prev_denom`: estimates of prevalence by age
 
-and we wish to estimate case fatality by age, given these inputs.  A selection of rows from the full data frame are shown here.  We select only the data from one area and gender (Bristol, male) for this illustration. 
+and we wish to estimate case fatality by age, given these inputs.  A selection of rows from the full data frame are shown here.  We select only the data from one area and gender (Bristol, male) for this illustration.  Remission rates are assumed to be zero, hence remission data are not included.
 
 ```{r,show=FALSE,message=FALSE}
 library(disbayes)
@@ -177,6 +179,8 @@ The four steps of the Bayesian modelling process are then implemented as follows
 	* (mortality)  $r_a^{(mort)} \sim ~ Binomial(n_a, dm_a)$, where the disease-specific mortality $dm_a$ is a deterministic function of the incidences and case fatalities $\{i_j,f_j\}$ for ages $j$ up to $a$, as described in the theoretical disease model. 
 
 	* (prevalence)  $r_a^{(prev)} \sim ~ Binomial(n_a^{(prev)}, pr_a)$, where $pr_a$ is the true prevalence, defined as a deterministic function of the incidences and case fatalities.
+
+	* (remission, if assumed possible)  $r_a^{(rem)} \sim ~ Binomial(n_a^{(rem)}, P_{a21})$, where $P_{a21}$ is the probability that someone with the disease will have recovered from the disease one year from now, defined as a deterministic function of the remission rates, case fatalities and incidences.
 
 3. define prior distributions for the unknown parameters, as explained in the next section. 
 
