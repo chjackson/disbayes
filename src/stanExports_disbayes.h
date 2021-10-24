@@ -37,7 +37,7 @@ stan::io::program_reader prog_reader__() {
     reader.add_event(0, 0, "start", "/include/trans_probs.stan");
     reader.add_event(90, 90, "end", "/include/trans_probs.stan");
     reader.add_event(90, 1, "restart", "model_disbayes");
-    reader.add_event(385, 294, "end", "model_disbayes");
+    reader.add_event(386, 295, "end", "model_disbayes");
     return reader;
 }
 template <typename T0__, typename T1__, typename T2__>
@@ -1267,8 +1267,8 @@ public:
             stan::math::initialize(rem, DUMMY_VAR__);
             stan::math::fill(rem, DUMMY_VAR__);
             current_statement_begin__ = 169;
-            validate_non_negative_index("rem_prob", "nage", nage);
-            Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> rem_prob(nage);
+            validate_non_negative_index("rem_prob", "(nage * remission)", (nage * remission));
+            Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> rem_prob((nage * remission));
             stan::math::initialize(rem_prob, DUMMY_VAR__);
             stan::math::fill(rem_prob, DUMMY_VAR__);
             current_statement_begin__ = 171;
@@ -1614,24 +1614,27 @@ public:
                                         ((get_base1(P, 1, 3, "P", 1) * (1 - get_base1(prev, a, 1, "prev", 1))) + (get_base1(P, 2, 3, "P", 1) * get_base1(prev, a, 1, "prev", 1))), 
                                         "assigning variable mort");
                             current_statement_begin__ = 287;
-                            stan::model::assign(rem_prob, 
-                                        stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
-                                        get_base1(P, 2, 1, "P", 1), 
-                                        "assigning variable rem_prob");
+                            if (as_bool(remission)) {
+                                current_statement_begin__ = 288;
+                                stan::model::assign(rem_prob, 
+                                            stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
+                                            get_base1(P, 2, 1, "P", 1), 
+                                            "assigning variable rem_prob");
+                            }
                         }
                     }
                 }
-                current_statement_begin__ = 293;
+                current_statement_begin__ = 294;
                 if (as_bool(logical_lt(get_base1(mort, a, "mort", 1), 0))) {
-                    current_statement_begin__ = 293;
+                    current_statement_begin__ = 294;
                     stan::model::assign(mort, 
                                 stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
                                 0, 
                                 "assigning variable mort");
                 }
-                current_statement_begin__ = 294;
+                current_statement_begin__ = 295;
                 if (as_bool(logical_gt(get_base1(mort, a, "mort", 1), 1))) {
-                    current_statement_begin__ = 294;
+                    current_statement_begin__ = 295;
                     stan::model::assign(mort, 
                                 stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
                                 1, 
@@ -1699,7 +1702,7 @@ public:
             }
             check_greater_or_equal(function__, "rem", rem, 0);
             current_statement_begin__ = 169;
-            size_t rem_prob_j_1_max__ = nage;
+            size_t rem_prob_j_1_max__ = (nage * remission);
             for (size_t j_1__ = 0; j_1__ < rem_prob_j_1_max__; ++j_1__) {
                 if (stan::math::is_uninitialized(rem_prob(j_1__))) {
                     std::stringstream msg__;
@@ -1851,111 +1854,111 @@ public:
             }
             check_greater_or_equal(function__, "lambda_rem_use", lambda_rem_use, 0);
             // model body
-            current_statement_begin__ = 299;
-            lp_accum__.add(binomial_log<propto__>(mort_num, mort_denom, mort));
             current_statement_begin__ = 300;
-            lp_accum__.add(binomial_log<propto__>(inc_num, inc_denom, stan::model::rvalue(inc_prob, stan::model::cons_list(stan::model::index_min_max(1, nage), stan::model::cons_list(stan::model::index_uni(incdata_ind), stan::model::nil_index_list())), "inc_prob")));
+            lp_accum__.add(binomial_log<propto__>(mort_num, mort_denom, mort));
             current_statement_begin__ = 301;
-            lp_accum__.add(binomial_log<propto__>(prev_num, prev_denom, stan::model::rvalue(prev, stan::model::cons_list(stan::model::index_min_max(1, nage), stan::model::cons_list(stan::model::index_uni(prevdata_ind), stan::model::nil_index_list())), "prev")));
+            lp_accum__.add(binomial_log<propto__>(inc_num, inc_denom, stan::model::rvalue(inc_prob, stan::model::cons_list(stan::model::index_min_max(1, nage), stan::model::cons_list(stan::model::index_uni(incdata_ind), stan::model::nil_index_list())), "inc_prob")));
             current_statement_begin__ = 302;
+            lp_accum__.add(binomial_log<propto__>(prev_num, prev_denom, stan::model::rvalue(prev, stan::model::cons_list(stan::model::index_min_max(1, nage), stan::model::cons_list(stan::model::index_uni(prevdata_ind), stan::model::nil_index_list())), "prev")));
+            current_statement_begin__ = 303;
             if (as_bool(remission)) {
-                current_statement_begin__ = 303;
+                current_statement_begin__ = 304;
                 lp_accum__.add(binomial_log<propto__>(rem_num, rem_denom, rem_prob));
             }
-            current_statement_begin__ = 306;
+            current_statement_begin__ = 307;
             if (as_bool(smooth_cf)) {
-                current_statement_begin__ = 307;
+                current_statement_begin__ = 308;
                 if (as_bool(logical_negation(const_cf))) {
-                    current_statement_begin__ = 308;
+                    current_statement_begin__ = 309;
                     for (int i = 1; i <= (K - 2); ++i) {
-                        current_statement_begin__ = 309;
+                        current_statement_begin__ = 310;
                         lp_accum__.add(normal_log<propto__>(get_base1(beta, i, "beta", 1), 0, lambda_cf_use));
                     }
-                    current_statement_begin__ = 311;
+                    current_statement_begin__ = 312;
                     for (int i = (K - 1); i <= K; ++i) {
-                        current_statement_begin__ = 312;
+                        current_statement_begin__ = 313;
                         lp_accum__.add(normal_log<propto__>(get_base1(beta, i, "beta", 1), 0, 100));
                     }
                 }
-                current_statement_begin__ = 315;
+                current_statement_begin__ = 316;
                 if (as_bool(logical_negation(scf_isfixed))) {
-                    current_statement_begin__ = 316;
+                    current_statement_begin__ = 317;
                     lp_accum__.add(gamma_log<propto__>(get_base1(lambda_cf, 1, "lambda_cf", 1), 2, get_base1(sprior, 2, "sprior", 1)));
                 }
             } else {
-                current_statement_begin__ = 319;
+                current_statement_begin__ = 320;
                 for (int a = 1; a <= nage; ++a) {
-                    current_statement_begin__ = 320;
+                    current_statement_begin__ = 321;
                     lp_accum__.add(gamma_log<propto__>(get_base1(cf_par, a, "cf_par", 1), get_base1(cf_prior, 1, "cf_prior", 1), get_base1(cf_prior, 2, "cf_prior", 1)));
                 }
             }
-            current_statement_begin__ = 323;
+            current_statement_begin__ = 324;
             if (as_bool(increasing_cf)) {
-                current_statement_begin__ = 324;
+                current_statement_begin__ = 325;
                 lp_accum__.add(gamma_log<propto__>(get_base1(cfbase, 1, "cfbase", 1), get_base1(cf_prior, 1, "cf_prior", 1), get_base1(cf_prior, 2, "cf_prior", 1)));
             }
-            current_statement_begin__ = 327;
+            current_statement_begin__ = 328;
             if (as_bool(smooth_inc)) {
-                current_statement_begin__ = 328;
+                current_statement_begin__ = 329;
                 for (int i = 1; i <= (K - 2); ++i) {
-                    current_statement_begin__ = 329;
+                    current_statement_begin__ = 330;
                     lp_accum__.add(normal_log<propto__>(get_base1(beta_inc, i, "beta_inc", 1), 0, lambda_inc_use));
                 }
-                current_statement_begin__ = 331;
+                current_statement_begin__ = 332;
                 for (int i = (K - 1); i <= K; ++i) {
-                    current_statement_begin__ = 332;
+                    current_statement_begin__ = 333;
                     lp_accum__.add(normal_log<propto__>(get_base1(beta_inc, i, "beta_inc", 1), 0, 100));
                 }
-                current_statement_begin__ = 334;
+                current_statement_begin__ = 335;
                 if (as_bool(logical_negation(sinc_isfixed))) {
-                    current_statement_begin__ = 335;
+                    current_statement_begin__ = 336;
                     lp_accum__.add(gamma_log<propto__>(get_base1(lambda_inc, 1, "lambda_inc", 1), 2, get_base1(sprior, 1, "sprior", 1)));
                 }
             } else {
-                current_statement_begin__ = 338;
+                current_statement_begin__ = 339;
                 for (int a = 1; a <= nage; ++a) {
-                    current_statement_begin__ = 339;
+                    current_statement_begin__ = 340;
                     lp_accum__.add(gamma_log<propto__>(get_base1(inc_par, a, "inc_par", 1), get_base1(inc_prior, 1, "inc_prior", 1), get_base1(inc_prior, 2, "inc_prior", 1)));
                 }
             }
-            current_statement_begin__ = 343;
+            current_statement_begin__ = 344;
             if (as_bool(remission)) {
-                current_statement_begin__ = 344;
+                current_statement_begin__ = 345;
                 if (as_bool(smooth_rem)) {
-                    current_statement_begin__ = 345;
+                    current_statement_begin__ = 346;
                     for (int i = 1; i <= (K - 2); ++i) {
-                        current_statement_begin__ = 346;
+                        current_statement_begin__ = 347;
                         lp_accum__.add(normal_log<propto__>(get_base1(beta_rem, i, "beta_rem", 1), 0, lambda_rem_use));
                     }
-                    current_statement_begin__ = 348;
+                    current_statement_begin__ = 349;
                     for (int i = (K - 1); i <= K; ++i) {
-                        current_statement_begin__ = 349;
+                        current_statement_begin__ = 350;
                         lp_accum__.add(normal_log<propto__>(get_base1(beta_rem, i, "beta_rem", 1), 0, 100));
                     }
-                    current_statement_begin__ = 351;
+                    current_statement_begin__ = 352;
                     if (as_bool(logical_negation(srem_isfixed))) {
-                        current_statement_begin__ = 352;
+                        current_statement_begin__ = 353;
                         lp_accum__.add(gamma_log<propto__>(get_base1(lambda_rem, 1, "lambda_rem", 1), 2, get_base1(sprior, 3, "sprior", 1)));
                     }
                 } else if (as_bool(const_rem)) {
-                    current_statement_begin__ = 353;
+                    current_statement_begin__ = 354;
                     lp_accum__.add(gamma_log<propto__>(get_base1(rem_par, 1, "rem_par", 1), get_base1(rem_prior, 1, "rem_prior", 1), get_base1(rem_prior, 2, "rem_prior", 1)));
                 } else {
-                    current_statement_begin__ = 355;
+                    current_statement_begin__ = 356;
                     for (int a = 1; a <= nage; ++a) {
-                        current_statement_begin__ = 356;
+                        current_statement_begin__ = 357;
                         lp_accum__.add(gamma_log<propto__>(get_base1(rem_par, a, "rem_par", 1), get_base1(rem_prior, 1, "rem_prior", 1), get_base1(rem_prior, 2, "rem_prior", 1)));
                     }
                 }
             }
-            current_statement_begin__ = 361;
+            current_statement_begin__ = 362;
             if (as_bool(logical_eq(nbias, 2))) {
-                current_statement_begin__ = 362;
+                current_statement_begin__ = 363;
                 lp_accum__.add(normal_log<propto__>(bias_loghr, 0, 1));
             }
-            current_statement_begin__ = 365;
+            current_statement_begin__ = 366;
             if (as_bool(prev_zero)) {
-                current_statement_begin__ = 366;
+                current_statement_begin__ = 367;
                 lp_accum__.add(beta_log<propto__>(get_base1(prevzero, 1, "prevzero", 1), 2, 2));
             }
         } catch (const std::exception& e) {
@@ -2069,7 +2072,7 @@ public:
         dims__.push_back(nage);
         dimss__.push_back(dims__);
         dims__.resize(0);
-        dims__.push_back(nage);
+        dims__.push_back((nage * remission));
         dimss__.push_back(dims__);
         dims__.resize(0);
         dims__.push_back(((nage + 1) * (1 - trend)));
@@ -2234,8 +2237,8 @@ public:
             stan::math::initialize(rem, DUMMY_VAR__);
             stan::math::fill(rem, DUMMY_VAR__);
             current_statement_begin__ = 169;
-            validate_non_negative_index("rem_prob", "nage", nage);
-            Eigen::Matrix<double, Eigen::Dynamic, 1> rem_prob(nage);
+            validate_non_negative_index("rem_prob", "(nage * remission)", (nage * remission));
+            Eigen::Matrix<double, Eigen::Dynamic, 1> rem_prob((nage * remission));
             stan::math::initialize(rem_prob, DUMMY_VAR__);
             stan::math::fill(rem_prob, DUMMY_VAR__);
             current_statement_begin__ = 171;
@@ -2581,24 +2584,27 @@ public:
                                         ((get_base1(P, 1, 3, "P", 1) * (1 - get_base1(prev, a, 1, "prev", 1))) + (get_base1(P, 2, 3, "P", 1) * get_base1(prev, a, 1, "prev", 1))), 
                                         "assigning variable mort");
                             current_statement_begin__ = 287;
-                            stan::model::assign(rem_prob, 
-                                        stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
-                                        get_base1(P, 2, 1, "P", 1), 
-                                        "assigning variable rem_prob");
+                            if (as_bool(remission)) {
+                                current_statement_begin__ = 288;
+                                stan::model::assign(rem_prob, 
+                                            stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
+                                            get_base1(P, 2, 1, "P", 1), 
+                                            "assigning variable rem_prob");
+                            }
                         }
                     }
                 }
-                current_statement_begin__ = 293;
+                current_statement_begin__ = 294;
                 if (as_bool(logical_lt(get_base1(mort, a, "mort", 1), 0))) {
-                    current_statement_begin__ = 293;
+                    current_statement_begin__ = 294;
                     stan::model::assign(mort, 
                                 stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
                                 0, 
                                 "assigning variable mort");
                 }
-                current_statement_begin__ = 294;
+                current_statement_begin__ = 295;
                 if (as_bool(logical_gt(get_base1(mort, a, "mort", 1), 1))) {
-                    current_statement_begin__ = 294;
+                    current_statement_begin__ = 295;
                     stan::model::assign(mort, 
                                 stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
                                 1, 
@@ -2680,7 +2686,7 @@ public:
                 for (size_t j_1__ = 0; j_1__ < rem_j_1_max__; ++j_1__) {
                     vars__.push_back(rem(j_1__));
                 }
-                size_t rem_prob_j_1_max__ = nage;
+                size_t rem_prob_j_1_max__ = (nage * remission);
                 for (size_t j_1__ = 0; j_1__ < rem_prob_j_1_max__; ++j_1__) {
                     vars__.push_back(rem_prob(j_1__));
                 }
@@ -2752,47 +2758,47 @@ public:
             }
             if (!include_gqs__) return;
             // declare and define generated quantities
-            current_statement_begin__ = 372;
+            current_statement_begin__ = 373;
             validate_non_negative_index("ll_mort", "nage", nage);
             Eigen::Matrix<double, Eigen::Dynamic, 1> ll_mort(nage);
             stan::math::initialize(ll_mort, DUMMY_VAR__);
             stan::math::fill(ll_mort, DUMMY_VAR__);
-            current_statement_begin__ = 373;
+            current_statement_begin__ = 374;
             validate_non_negative_index("ll_inc", "nage", nage);
             Eigen::Matrix<double, Eigen::Dynamic, 1> ll_inc(nage);
             stan::math::initialize(ll_inc, DUMMY_VAR__);
             stan::math::fill(ll_inc, DUMMY_VAR__);
-            current_statement_begin__ = 374;
+            current_statement_begin__ = 375;
             validate_non_negative_index("ll_prev", "nage", nage);
             Eigen::Matrix<double, Eigen::Dynamic, 1> ll_prev(nage);
             stan::math::initialize(ll_prev, DUMMY_VAR__);
             stan::math::fill(ll_prev, DUMMY_VAR__);
-            current_statement_begin__ = 375;
+            current_statement_begin__ = 376;
             validate_non_negative_index("ll_rem", "(nage * remission)", (nage * remission));
             Eigen::Matrix<double, Eigen::Dynamic, 1> ll_rem((nage * remission));
             stan::math::initialize(ll_rem, DUMMY_VAR__);
             stan::math::fill(ll_rem, DUMMY_VAR__);
             // generated quantities statements
-            current_statement_begin__ = 376;
+            current_statement_begin__ = 377;
             for (int a = 1; a <= nage; ++a) {
-                current_statement_begin__ = 377;
+                current_statement_begin__ = 378;
                 stan::model::assign(ll_mort, 
                             stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
                             binomial_log(get_base1(mort_num, a, "mort_num", 1), get_base1(mort_denom, a, "mort_denom", 1), get_base1(mort, a, "mort", 1)), 
                             "assigning variable ll_mort");
-                current_statement_begin__ = 378;
+                current_statement_begin__ = 379;
                 stan::model::assign(ll_inc, 
                             stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
                             binomial_log(get_base1(inc_num, a, "inc_num", 1), get_base1(inc_denom, a, "inc_denom", 1), get_base1(inc_prob, a, "inc_prob", 1)), 
                             "assigning variable ll_inc");
-                current_statement_begin__ = 379;
+                current_statement_begin__ = 380;
                 stan::model::assign(ll_prev, 
                             stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
                             binomial_log(get_base1(prev_num, a, "prev_num", 1), get_base1(prev_denom, a, "prev_denom", 1), get_base1(prev, a, "prev", 1)), 
                             "assigning variable ll_prev");
-                current_statement_begin__ = 380;
+                current_statement_begin__ = 381;
                 if (as_bool(remission)) {
-                    current_statement_begin__ = 381;
+                    current_statement_begin__ = 382;
                     stan::model::assign(ll_rem, 
                                 stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
                                 binomial_log(get_base1(rem_num, a, "rem_num", 1), get_base1(rem_denom, a, "rem_denom", 1), get_base1(rem_prob, a, "rem_prob", 1)), 
@@ -2800,22 +2806,22 @@ public:
                 }
             }
             // validate, write generated quantities
-            current_statement_begin__ = 372;
+            current_statement_begin__ = 373;
             size_t ll_mort_j_1_max__ = nage;
             for (size_t j_1__ = 0; j_1__ < ll_mort_j_1_max__; ++j_1__) {
                 vars__.push_back(ll_mort(j_1__));
             }
-            current_statement_begin__ = 373;
+            current_statement_begin__ = 374;
             size_t ll_inc_j_1_max__ = nage;
             for (size_t j_1__ = 0; j_1__ < ll_inc_j_1_max__; ++j_1__) {
                 vars__.push_back(ll_inc(j_1__));
             }
-            current_statement_begin__ = 374;
+            current_statement_begin__ = 375;
             size_t ll_prev_j_1_max__ = nage;
             for (size_t j_1__ = 0; j_1__ < ll_prev_j_1_max__; ++j_1__) {
                 vars__.push_back(ll_prev(j_1__));
             }
-            current_statement_begin__ = 375;
+            current_statement_begin__ = 376;
             size_t ll_rem_j_1_max__ = (nage * remission);
             for (size_t j_1__ = 0; j_1__ < ll_rem_j_1_max__; ++j_1__) {
                 vars__.push_back(ll_rem(j_1__));
@@ -2960,7 +2966,7 @@ public:
                 param_name_stream__ << "rem" << '.' << j_1__ + 1;
                 param_names__.push_back(param_name_stream__.str());
             }
-            size_t rem_prob_j_1_max__ = nage;
+            size_t rem_prob_j_1_max__ = (nage * remission);
             for (size_t j_1__ = 0; j_1__ < rem_prob_j_1_max__; ++j_1__) {
                 param_name_stream__.str(std::string());
                 param_name_stream__ << "rem_prob" << '.' << j_1__ + 1;
@@ -3194,7 +3200,7 @@ public:
                 param_name_stream__ << "rem" << '.' << j_1__ + 1;
                 param_names__.push_back(param_name_stream__.str());
             }
-            size_t rem_prob_j_1_max__ = nage;
+            size_t rem_prob_j_1_max__ = (nage * remission);
             for (size_t j_1__ = 0; j_1__ < rem_prob_j_1_max__; ++j_1__) {
                 param_name_stream__.str(std::string());
                 param_name_stream__ << "rem_prob" << '.' << j_1__ + 1;

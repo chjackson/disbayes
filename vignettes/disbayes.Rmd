@@ -18,11 +18,15 @@ knitr::opts_chunk$set(fig.width=7)
 ```
 
 
-This document illustrates how case fatality can be estimated given incidence and mortality, using Bayesian modelling. 
+This document gives an introduction to the `disbayes` package for estimating rates of disease given indirect data.  For example, we might want to
 
-This also serves to illustrate a general approach for estimating quantities describing disease epidemiology, based on indirect / incomplete data or multiple data sources.
+* estimate case fatality rates, given mortality and prevalence and/or incidence data
 
-The method is implemented in the R package `disbayes`, and could easily be adapted to novel situations.
+* estimate incidence rates, given prevalence and mortality data. 
+
+We might want to know these rates in order to build simulation models for estimating health impacts of interventions.
+
+The document also serves to illustrate the general principles of likelihood and Bayesian inference for estimating disease rates given indirect data. 
 
 
 # Theoretical disease model 
@@ -41,7 +45,7 @@ The disease process is then fully defined by the
 
 * case fatality rate $f(a)$,
 
-which are both assumed to depend on age $a$.  Remission is also possible for some diseases, with rate $r(a)$, though for simplicity of illustration is ignored here.  Assume further that the rates are constant within integer years of age $a$, so they can be written $i_a$, $f_a$.
+which are both assumed to depend on age $a$.  Remission is also possible for some diseases, with rate $r(a)$, though for clarity it is not illustrated the examples here.  Assume further that the rates are constant within integer years of age $a$, so they can be written $i_a$, $f_a$.
 
 From these, we can determine the _transition probability matrix_ $P_a$, whose $r,s$ entry $P_{ars}$ is the probability that a person is in state $s$ at age $a+1$ given they are in state $r$ at age $a$. The matrix $P_a$ is defined as a function of $i_a$ and $f_a$, which is the solution to a differential equation, and is written out explicitly in the DisMod II paper (@dismod2). 
 
@@ -70,15 +74,15 @@ Data are observed which give information about some, but not all, of the paramet
   
   * (prevalence): from a sample of $n_a^{(prev)}$ individuals, $r_a^{(prev)}$ are known to have the disease at age $a$ (and $n_a^{(prev)} - r_a^{(prev)}$ are known to not have the disease. 
   
-The next section discusses how these data can be derived, given the typical forms of data available from burden of disease studies.   A denominator is required, because it enables uncertainty associated with each estimate to be quantified, as we will discuss later. 
+The next section discusses how these data can be derived, given the typical forms of data available from burden of disease studies.   The data are expressed as numerators and denominators, rather than simply point estimates of rates, so that formal statistical methods (likelihood and Bayesian inference) can be used.  The denominator is related to the uncertainty around the estimate, e.g. lower denominators imply that the estimate was obtained from observing the disease outcome of a smaller sample of people, hence there is more uncertainty. 
 
 3. write down prior distributions for the unknowns.  These may express prior ignorance, as in the example below.
 
 4. compute the (unique) posterior distribution of the unknown parameters in the joint model, given the observed data.
 
-This approach is used in the DisMod-MR package, as explained by @flaxman2015, however the software itself is not fully documented.  The older (published) DisMod II (@dismod2) used an ad-hoc optimisation approach to estimate parameters. 
+This approach is used in the DisMod-MR package, as explained by @flaxman2015, however the software itself is not fully documented.  The older (published) DisMod II (@dismod2) used an ad-hoc optimisation approach to estimate parameters.
 
-Advantages of the Bayesian method, implemented in `disbayes`, include 
+Advantages of the Bayesian method, as implemented in `disbayes`, include 
 
 * uncertainty about any quantity is quantified automatically through the posterior distribution, given the data, model assumptions and prior distributions supplied.
 
@@ -105,7 +109,9 @@ ihdbristol <- ihdengland %>% filter(area=="Bristol", gender=="Male")
 ihdbristol %>% filter(between(age, 50, 55))
 ```
 
-These data were obtained from the Global Burden of Disease, 2017, and transformed in three ways to obtain the data seen here.   Firstly, the published point estimates and confidence intervals for each annual risk probability was converted to an implicit numerator and denominator.  This is done by assuming that 
+These data were obtained from the Global Burden of Disease, 2017, and transformed in three ways to obtain the data seen here.
+
+Firstly, the published point estimates and confidence intervals for each annual risk probability were converted to an implicit numerator and denominator.  This is done by assuming that 
 
 * the incidence has been estimated as $r_a^{(inc)}/n_a^{(inc)}$, where out of $n_a^{(inc)}$ people who are alive at age $a$, $r_a^{(inc)}$ of these get IHD before age $a+1$.
 
@@ -115,7 +121,9 @@ These data were obtained from the Global Burden of Disease, 2017, and transforme
 
 The published estimates and uncertainty interval are then used to derive the implicit denominator and numerator, using the method described in the next subsection. 
 
-Then secondly, estimates for five-year age groups were converted to one-year groups.  Most simply this could be done by assuming the counts are equal for each year of age, but a more sophisticated method was used based on "temporal disaggregation" using one of the methods implemented by Sax and Steiner in the `tempdisagg` R package (@RJ-2013-028).  This ensures that the disaggregated counts vary smoothly with age, while preserving the aggregate totals.   Thirdly, counts from smaller geographical areas were simply added up to obtain the corresponding counts for the larger areas (English city regions) required in this analysis. 
+Secondly, estimates for five-year age groups were converted to one-year groups.  Most simply this could be done by assuming the counts are equal for each year of age, but a more sophisticated method was used based on "temporal disaggregation" using one of the methods implemented by Sax and Steiner in the `tempdisagg` R package (@RJ-2013-028).  This ensures that the disaggregated counts vary smoothly with age, while preserving the aggregate totals.
+
+Thirdly, counts from smaller geographical areas were simply added up to obtain the corresponding counts for the larger areas (English city regions) required in this analysis. 
 
 ```{r,eval=TRUE}
 ihdbristol[ihdbristol$age %in% 50:55, ]
@@ -144,12 +152,12 @@ if (requireNamespace("tempdisagg")) {
    tapply(disagg_smooth, agegroup, sum)
 }
 ```
-See the documentation for the [tempdisagg](https://cran.r-project.org/web/packages/tempdisagg/index.html) package, including the vignettes and the help page for the `td` function in this package, for more information about smooth temporal disaggregation.  Uneven intervals are also supported, and disaggreggation problems where the mean (rather than the sum) of the high-frequency data is consistent with the low-frequency data. 
+See the documentation for the [tempdisagg](https://cran.r-project.org/web/packages/tempdisagg/index.html) package, including the vignettes and the help page for the `td` function in this package, for more information about smooth temporal disaggregation.  It is unclear how far the method generalises, e.g. to intervals of varying lengths.
 
 
 ## Determining numerators and denominators from point and/or interval estimates
 
-Sometimes a point estimate $\hat{p}$ for a quantity such as incidence is published alongside an (e.g. 95%) interval estimate $(\hat{p}^{(lower)},\hat{p}^{(upper)})$.   The interval estimate can be assumed to express the uncertainty associated with the estimate.   Such information can be converted to an implicit numerator $r$ and denominator $n$  as follows.   We assume the point and interval estimate are summaries of a Beta posterior distribution which has been obtained by combining a vague prior with an observation of $r$ events occurring out of a sample of $n$ individuals.   If a Beta(0,0) prior is used, then the posterior is known to be Beta(r, n-r).  We can then search for the best-fitting Beta(r,n-r)$ distribution which has median $\hat{p}$ and (2.5,97.5) quantiles $(\hat{p}^{(lower)},\hat{p}^{(upper)})$, and set $r=a, n=a+b$.   A utility to perform this search is provided in the SHELF package for expert elicitation (@ohagan:elic). 
+Sometimes a point estimate $\hat{p}$ for a quantity such as incidence is published alongside an (e.g. 95%) interval estimate $(\hat{p}^{(lower)},\hat{p}^{(upper)})$.   The interval estimate can be assumed to express the uncertainty associated with the estimate.   Such information can be converted to an implicit numerator $r$ and denominator $n$  as follows.   We assume the point and interval estimate are summaries of a Beta posterior distribution which has been obtained by combining a vague prior with an observation of $r$ events occurring out of a sample of $n$ individuals.   If a Beta(0,0) prior is used, then the posterior is known to be Beta(r, n-r).  We can then search for the best-fitting Beta(r,n-r)$ distribution which has median $\hat{p}$ and (2.5,97.5) quantiles $(\hat{p}^{(lower)},\hat{p}^{(upper)})$, and set $r=a, n=a+b$.   A utility to perform this search is provided in the [SHELF](https://cran.r-project.org/web/packages/SHELF/index.html) package for expert elicitation (@ohagan:elic). 
 
 In other applications, the denominators might be directly available, e.g. we might know that the prevalence was estimated from a survey of $r_a^{(prev)}$ people, or we might assume that the incidence and mortality were obtained from a comprehensive registry of the population, in which case the denominator would equal the population size (within the specific stratum, e.g. as defined by age and gender, that the estimate refers to). 
 
@@ -178,82 +186,96 @@ The four steps of the Bayesian modelling process are then implemented as follows
 
 ## Alternative models / prior assumptions 
 
-In example such as this one, where quantities are estimated from indirect data, it is important to consider what substantive prior information is available about the unknown quantities, and what influence the assumed prior has on the resulting estimates. 
+In example such as this one, where latent quantities are estimated from indirect data, it is important to consider what substantive prior information is available about the unknown quantities, and what influence the assumed prior has on the resulting estimates. 
 
-In these examples, the case fatality is only informed indirectly.  The `disbayes` package implements two alternative models for how case fatality depends on age.  The same methods can be used for how incidence depends on age. 
+In these examples, the case fatality is only informed indirectly.  The `disbayes` package implements alternative models for how case fatality depends on age.  The same methods can be used for how incidence depends on age. 
 
-1. the case fatality rate $f_a$ for each year of age $a$ is assumed to have an independent vague prior distribution, taken to be exponential(1).   
+1. the case fatality rate $f_a$ for each year of age $a$ is assumed to have an independent vague prior distribution. 
 
 2. the case fatality rate is assumed to be a smooth function $g()$ of age, $f_a = g(a)$.   This smooth function is defined by a spline basis $log(f_a) = \sum_k \beta_k g_k(a)$, where $g_k()$ are basis functions.  A "thin plate" spline is used, following the default in the `mgcv` R package (Wood), and the amount of smoothness is determined automatically through a hierarchical prior on the coefficients. 
 
+3. the case fatality rate is a smoothly increasing function of age.
+
+4. the case fatality rate is constant with age. 
+
 In addition, for all ages below a given cut-off age $a_{base}$, case fatalities are assumed to be equal to a constant $f_{base}$.   This cut-off age $a_{base}$ needs to be supplied when calling the `disbayes` function.  $f_{base}$ does not need to be supplied however, and is estimated from the data under the assumption that the dependence on age is a smooth function. 
 
-Model (2) is more realistic.  However it may not give sensible estimates if the information provided by the data is too weak. The results of fitting Model (1) can help to diagnose where the indirect information on case fatality provided by the rest of the data is weaker or stronger.   If the information on $f_a$ for a particular age is too weak, then the posterior distribution will be identical to the prior.   In those cases, substantive prior information about case fatality at that age is necessary for the estimates to be meaningful.
+Model (2) is more realistic.  However it may not give sensible estimates if the information provided by the data is too weak. The results of fitting Model (1) can help to diagnose where the indirect information on case fatality provided by the rest of the data is weaker or stronger.   If the information on $f_a$ for a particular age is too weak, then the posterior distribution will be identical to the prior.   In those cases, substantive prior information about case fatality at that age is necessary for the estimates to be meaningful.  
 
 This information might come from nearby ages that are better-informed, through extrapolation from the smoothing model.  However extrapolating in this way is only feasible for a limited time span (perhaps around 10-20 years) before stronger assumptions are necessary, e.g. that case fatality is constant below a certain age.
 
+The increasing model (3) may be required in cases where the data alone are not sufficient to identify an increasing shape with age.  A constant model (4) may be necessary if the data on age variations are very weak, or simply if this model is thought to be plausible. 
+
+Alternative models of how the rates depend on age are also supported for incidence and remission
+rates. 
 
 
 # Fitting Bayesian models with the Stan software via disbayes
 
-The Stan software ([mc-stan.org](http://mc-stan.org)) allows any Bayesian model to be written down in the Stan language.  The software then enables the unknown parameters to be estimated through two alternative methods: 
+The `disbayes` software works by calling the Stan software ([mc-stan.org](http://mc-stan.org)) that allows any Bayesian model to be written down in the Stan language, and enables the unknown parameters to be estimated through two alternative methods: 
 
 1. `method="opt"` (the default). Optimisation is used to find the mode of the posterior distribution, which gives a point estimate for the parameters.  An approximate sample from the posterior is then drawn using a normal approximation around the posterior mode.   This sample is summarised to give credible intervals. 
 
 2. `method="mcmc"`.  A sample from the posterior is drawn using Markov Chain Monte Carlo sampling, which is summarised to give a point estimate (median) and credible intervals. This is slower (typically taking a few minutes) but gives a more accurate characterisation of uncertainty. 
 
-The `disbayes` package uses Stan to fit the Bayesian disease model given here to the data $\mathbf{y} = \{i_a, r_a, n_a\}$ supplied in the `ihdbristol` data frame.   The function `disbayes` does the work of converting the data to the required format for Stan, and calling the Stan software to run the simulations.
+The `disbayes` package uses Stan to fit the Bayesian disease model given here to the data $\mathbf{y} = \{i_a, r_a, n_a\}$ supplied in the `ihdbristol` data frame.   The R function `disbayes` does the work of converting the data to the required format for Stan, and calling the Stan software to run the simulations.
 
-The `disbayes` function requires the following arguments
+An overview of using the `disbayes` function is given here, but see the [help page](https://chjackson.github.io/disbayes/reference/disbayes.html) for `disbayes` for full information about the options of the function.   
 
- * `dat`: a data frame where all the variables are stored 
+The `disbayes` function requires at least the following arguments
+
+ * `data`: a data frame where all the variables are stored 
 
  * additional arguments indicating which columns of the data contain which variables.
 
-The required variables include at least information about incidence and mortality, optionally information about prevalence, and some indication of uncertainty around this information.   This information can be supplied in three alternative ways.  For example, for incidence, 
+The required variables include at least information about incidence and mortality, optionally information about prevalence, and some indication of uncertainty around this information.   This information can be supplied in three alternative ways.  For example (using incidence as an example):
 
-1. risk probability estimate with denominator: through arguments `inc` and `inc_denom`.  The numerator is computed automatically, by multiplying the denominator by the risk estimate. 
+1. _numerator and denominator_, through arguments `inc_num` and `inc_denom`.  This is what is done in the example here. 
 
-2. numerator and denominator, through arguments `inc_num` and `inc_denom`.  This is what is done in the example here. 
+2. _risk probability estimate with denominator_: through arguments `inc` and `inc_denom`.  The numerator is computed automatically, by multiplying the denominator by the risk estimate. 
 
-3. estimate with lower and upper 95% credible limits, through arguments `inc`, `inc_lower` and `inc_upper`. The numerator and denominator are comptue computed automatically, as described above. 
+3. _estimate with lower and upper 95% credible limits_, through arguments `inc`, `inc_lower` and `inc_upper`. The numerator and denominator are computed automatically, as described above. 
 
-The value given for the argument is a character string identifying the corresponding variable in the data.  For mortality and prevalence, arguments with names beginning `mort` and `prev` are supplied in the same manner. 
+The value given for the argument is a character string identifying the corresponding variable in the data.  For mortality, prevalence and remission, arguments with names beginning `mort`, `prev` and `rem` are supplied in the same manner.
+
+If remission data are omitted, it is assumed that there is no remission from the disease.   If remission data are included, it is assumed that remission is possible and remission rates are estimated from the data. 
 
 ## Running `disbayes`: optimisation method 
 
 The following call to the `disbayes` function is then made to fit the model to the `ihdbristol` data.   The argument `eqage=40` defines an assumption that case fatality is constant for all ages below 40. 
 
 ```{r, eval=TRUE, cache=TRUE, warning=FALSE, message=FALSE}
-dbres <- disbayes(dat = ihdbristol, age = "age",
+dbres <- disbayes(data = ihdbristol, age = "age",
                  inc_num = "inc_num", inc_denom = "inc_denom", 
                  prev_num = "prev_num", prev_denom = "prev_denom",
                  mort_num = "mort_num", mort_denom = "mort_denom",
-                 inc_model="indep",
                  eqage = 40)
 ```
 
 For comparison, we also fit an "unsmoothed" version of this model where the age-specific
-case fatality rates have independent priors, rather than being related through a spline function.  
+case fatality rates have independent priors, rather than being related through a spline function. This is specified with `cf_model="indep"`.  
 
 ```{r, eval=TRUE, cache=TRUE, warning=FALSE, message=FALSE}
-dbresu <- disbayes(dat = ihdbristol, age = "age",
+dbresu <- disbayes(data = ihdbristol, age = "age",
                  inc_num = "inc_num", inc_denom = "inc_denom", 
                  prev_num = "prev_num", prev_denom = "prev_denom",
                  mort_num = "mort_num", mort_denom = "mort_denom",
                  cf_model = "indep", 
-                 eqage = 40) # chains = 2, iter = 1000)
+                 eqage = 40)
 ```
 
-These produce accurate point estimates (defined by the posterior mode), and approximate credible intervals.  
+The optimisation method produces accurate point estimates (defined by the posterior mode), and approximate credible intervals.  
+
+Occasionally the optimisation may produce an error message that mentions `chol(H)`, but still produce a point estimate.  This indicates that the level of uncertainty cannot be determined, and casts doubt on the validity of the point estimate.  In these cases it may work if the model is 
+simplified, e.g. by fixing the level of smoothness for the age-dependence of the rates by using the [`hp_fixed`](https://chjackson.github.io/disbayes/reference/disbayes.html) option to `disbayes`
 
 ## Running `disbayes`: MCMC method 
 
-If more accurate credible intervals are desired, then MCMC sampling can be used instead by setting `method="mcmc"`, as follows.  This is more computationally intensive, typically taking a few minutes per fit.   
+If more accurate credible intervals are desired, then MCMC sampling can be used instead by setting `method="mcmc"`, as follows.  This is more computationally intensive, typically taking a few minutes per fit for the standard `disbayes` model.   
 
 ```{r,eval=FALSE}
 options(mc.cores = parallel::detectCores())
-dbresm <- disbayes(dat = ihdbristol, age = "age",
+dbresm <- disbayes(data = ihdbristol, age = "age",
                  inc_num = "inc_num", inc_denom = "inc_denom", 
                  prev_num = "prev_num", prev_denom = "prev_denom",
                  mort_num = "mort_num", mort_denom = "mort_denom",
@@ -261,9 +283,9 @@ dbresm <- disbayes(dat = ihdbristol, age = "age",
                  eqage = 40)
 ```
 
-The sampling by `rstan` can be controlled, e.g. by setting the number of chains to run (perhaps on parallel cores) and the number of iterations - see `help(disbayes)` and the Stan documentation for full details. The number of iterations `iter` should be high enough that the results are not affected by Monte Carlo error.   
+The sampling by `rstan` can be controlled, e.g. by setting the number of chains to run (perhaps on parallel cores) and the number of iterations - see [`help(disbayes)`](https://chjackson.github.io/disbayes/reference/disbayes.html) and the Stan documentation for full details. The number of iterations `iter` should be high enough that the results are not affected by Monte Carlo error.   
 
-After using MCMC, we should check that the sampler has converged, by examining the "trace plot" of the simulation progress for selected parameters. The simulated chains should mix together and look like white noise.   Also if the `disbayes` call resulted in many reports of "divergent transitions", then the chains are unlikely to have converged to a valid posterior.  If convergence hasn't occurred, then the model probably needs to be simplified (e.g. by increasing `eqage`), or the data are insufficient. 
+After using MCMC, we should check that the sampler has converged, by examining the "trace plot" of the simulation progress for selected parameters. The simulated chains should mix together and look like white noise.   Also if the `disbayes` call resulted in many reports of "divergent transitions", then the chains are unlikely to have converged to a valid posterior.  If convergence hasn't occurred, then the model probably needs to be simplified (e.g. by increasing `eqage`, or fixing the degree of smoothness using [`hp_fixed`](https://chjackson.github.io/disbayes/reference/disbayes.html)), or the data are insufficient. 
 
 ```{r,eval=FALSE}
 rstan::traceplot(dbres$fit, pars=paste0("cf[", 60:65, "]"))
@@ -272,16 +294,15 @@ rstan::traceplot(dbres$fit, pars=paste0("cf[", 60:65, "]"))
 
 # IHD example: Results 
 
-The `disbayes` function returns a list, with components that depend on what estimation method was used.   For `method="opt"` this list has a component `fit` containing the estimates and draws from the posterior approximation, as returned by the function `optimizing` in the `rstan` package.
-For `method="mcmc"`, this list has a component `fit` which is an object in the `stanfit` format defined by the `rstan` R interface to Stan.  See `help(disbayes)` for further details of the returned object. 
+The `disbayes` function returns a list, with components that depend on what estimation method was used.   For `method="opt"` this list has a component `fit` containing the estimates and draws from the posterior approximation, as returned by the function `optimizing` in the `rstan` package.  For `method="mcmc"`, this list has a component `fit` which is an object in the `stanfit` format defined by the `rstan` R interface to Stan.  See `help(disbayes)` for further details of the returned object.    Usually you will not need to deal with this list.
 
-Whatever estimation method was used, the parameter estimates can be extracted from a disbayes object using the `tidy` method.   The point estimates (modes or posterior medians) 95% credible intervals and other quantiles for all parameters of interest are arranged in a data frame, with the variables indicated in the variable called `var`.  Variables include `inc` (incidence), `cf` (case fatality), `mort` (mortality), `prev` (prevalence), each indexed by year of age given in the `age` variable.
+Instead, the parameter estimates can be easily extracted from a disbayes object using the `tidy` method.  This works whatever optimisation method is used.  The point estimates (modes or posterior medians) 95% credible intervals and other quantiles for all parameters of interest are arranged in a data frame, with the variables indicated in the variable called `var`.  Variables include `inc` (incidence), `cf` (case fatality), `mort` (mortality), `prev` (prevalence), each indexed by year of age given in the `age` variable.
 
 ```{r, eval=TRUE}
 summ <- tidy(dbres) 
 ```
 
-To extract results for a specific variable and model, it is convenient to use standard tidyverse functions, e.g. to get the median and interquartile range of case fatality for people aged between 60 and 65: 
+To extract results for a specific variable and model, it is convenient to use standard [tidyverse](https://www.tidyverse.org/) functions, e.g. to get the median and interquartile range of case fatality for people aged between 60 and 65: 
 
 ```{r,eval=TRUE}
 library(dplyr,quietly=TRUE)
@@ -308,41 +329,41 @@ ggplot(summu, aes(x=age)) +
                   data=summ, col="black", alpha=0.5)
 ```
 
-Under the unsmoothed model, there is no information about case fatality in the youngest ages, hence the estimates are being drawn from the vague prior distribution that take values between about 0 and 60.    The smoothed model gives more useful estimates, aided by the assumption that case fatalities are similar between similar ages, and that case fatality is constant under the age of 40.  
+Under the unsmoothed model, there is no information about case fatality in the youngest ages, hence the estimates are being drawn from the vague prior distribution that take values between about 0 and 60.    The smoothed model gives more useful estimates, aided by the assumption that case fatalities are similar between similar ages, and that case fatality is constant under the age of 40, though the wide y-axis limits in this particular plot obscure the estimates of between-age variability from the smoothed model. 
 
 
 ## Other options to `disbayes`
 
-Full documentation is given in `help(disbayes)`.  Some more useful options include 
+Full documentation is given in [`help(disbayes)`](https://chjackson.github.io/disbayes/reference/disbayes.html).  Some more useful options include 
 
 * `cf_model`.  Model for how case fatality varies with age.  As well as the default spline smooth model and unsmoothed models illustrated above, `cf_model="increasing"` fits a model where case fatality is restricted to increase with age, and `cf_model="const"` specifies a constant case fatality with age. 
 
 * `inc_model`. By default, incidence rates are smoothed as a function of age using a spline, as with case fatality rates.   `inc_model="indep"` estimates independent incidence rates for each age. 
 
-* `rem_model`.  If no remission data are supplied, then the disease is assumed to have zero remission rate.   If remission data are supplied, then remission rates are estimate.   By default, these are assumed to be a constant function of age (`rem_model="const"`).  To estimate independent remission rates for each age, supply `rem_model="indep"`.  To model remission rates as a smooth spline function of age, use `rem_model="smooth"`.
+* `rem_model`.  If no remission data are supplied, then the disease is assumed to have zero remission rate.   If remission data are supplied, then remission rates are estimated.   By default, these are assumed to be a constant function of age (`rem_model="const"`).  To estimate independent remission rates for each age, supply `rem_model="indep"`.  To model remission rates as a smooth spline function of age, use `rem_model="smooth"`.
 
-* `hp_fixed`.  A list of "hyperparameters" to fix at constant values.  If using smooth spline functions, this option may be required if the appropriate level of smoothness for the spline cannot be determined from the data.  When using the default optimisation method, this can lead to an error message mentioning `Error in chol.default(-H)`.  In these cases, the smoothness can be fixed in advance, e.g. `hp_fixed = list(scf=1)` to fix the case fatality smoothness parameter to a typical value of 1.  Lower values give more smoothness, higher values give wigglier curves.
+* `hp_fixed`.  A list of "hyperparameters" to fix at constant values.  If using smooth spline functions, this option may be required if the appropriate level of smoothness for the spline cannot be determined from the data.  When using the default optimisation method, this can lead to an error message mentioning `"Error in chol.default(-H)"`.  In these cases, the smoothness can be fixed in advance, e.g. `hp_fixed = list(scf=1)` to fix the case fatality smoothness parameter to a typical value of 1.  Lower values give more smoothness, higher values give wigglier curves.  You may need to experiment with different values to determine what gives a plausible degree of smoothness. 
 
 
 # Advanced models 
 
-`disbayes` provides a selection of more advanced models for more complex data structures.   These are substantially more computationally intensive than the basic model shown in this vignette, typically taking over an hour for applications similar to the one shown here.  Further information about how they are defined mathematically will be given in a forthcoming paper. See the R help pages for further information on how to invoke the functions.
+The `disbayes` package provides a selection of more advanced models for more complex data structures.   These are substantially more computationally intensive than the basic model shown in this vignette.  For applications similar to the one shown here, using MCMC will typically take over an hour, while using optimisation will take a minute or less.  Further information about how they are defined mathematically will be given in a forthcoming paper. See the [R help pages](https://chjackson.github.io/disbayes/reference/index.html) for further information on how to invoke the functions.
 
 
 ## Hierarchical models 
 
-`disbayes_hier` is used to fit a joint model for data from multiple areas.  
+[`disbayes_hier`](https://chjackson.github.io/disbayes/reference/disbayes_hier.html) is used to fit a joint model for data from multiple areas.  
 
 
 
 ## Hierarchical models with additive area and gender effects 
 
-`disbayes_hier` can also be used to fit a joint model for data from multiple areas and different genders.  It is assumed that the relative case fatality between women and men is the same for each area.   While this is labelled `gender` it can be used for any single binary predictor, though usually we will want to consider gender. 
+[`disbayes_hier`](https://chjackson.github.io/disbayes/reference/disbayes_hier.html) can also be used to fit a joint model for data from multiple areas and different genders.  It is assumed that the relative case fatality between women and men is the same for each area.   While this is labelled `gender` it can be used for any single binary predictor, though for chronic diseases, we will usually want to consider the effect of gender. 
 
 
 ## Trends through time (non-hierarchical models only)
 
-`disbayes` can include information about trends through calendar time, which can be age dependent.  The ratio of incidence between previous years and the current year (the one represented by the data) can be supplied as a matrix, with one row per year of age and one column per calendar year.   See the help page, arguments `inc_trend` and `cf_trend`. 
+[`disbayes`](https://chjackson.github.io/disbayes/reference/disbayes.html) can include information about trends through calendar time, which can be age dependent.  The ratio of incidence between previous years and the current year (the one represented by the data) can be supplied as a matrix, with one row per year of age and one column per calendar year.   See the [`disbayes`](https://chjackson.github.io/disbayes/reference/disbayes.html), arguments `inc_trend` and `cf_trend`. 
 
 
 

@@ -15,3 +15,4 @@ vignettes/dbh.rds
 vignettes/disbayes_cache
 vignettes/disbayes_files
 vignettes/disbayes.html
+data/ihdtrends2019.rda
