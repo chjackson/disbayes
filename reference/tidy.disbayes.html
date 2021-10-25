@@ -156,13 +156,9 @@ for the posterior distribution for that parameter.   For array parameters, e.g. 
 that depend on age or area, then the age and area are returned in separate columns,
 to make it easier to summarise and plot the results, e.g. using <span class="pkg">ggplot2</span>.</p>
 <p>Model parameters might include, depending on the model specification,</p><ul>
-<li><p><code>cf</code> Case fatality rates</p></li>
-<li><p><code>inc</code> Incidence rates</p></li>
-<li><p><code>rem</code> Remission rates</p></li>
-<li><p><code>inc_par</code>, <code>cf_par</code>, <code>rem_par</code>.  Same as the above - should</p></li>
-<li><p><code>inc_prob</code>, <code>rem_prob</code>.  Annual incidence and remission probabilities.</p></li>
-<li><p><code>mort</code> Annual mortality probability.</p></li>
-<li><p><code>prev</code> Prevalence probability.</p></li>
+<li><p><code>cf</code>, <code>inc</code>, <code>rem</code>: Case fatality, incidence, remission rates</p></li>
+<li><p><code>inc_prob</code>, <code>rem_prob</code>, <code>mort_prob</code>:  Annual incidence, remission and mortality probabilities.</p></li>
+<li><p><code>prev_prob</code> Prevalence probability.</p></li>
 <li><p><code>state_probs</code> State occupancy probabilities.</p></li>
 <li><p><code>beta</code>, <code>beta_inc</code> Coefficients of the spline basis for case fatality and incidence respectively.</p></li>
 <li><p><code>lambda_cf</code>, <code>lambda_inc</code> Smoothness parameters of the spline functions.</p></li>

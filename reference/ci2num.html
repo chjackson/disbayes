@@ -143,7 +143,8 @@
     </tr>
     <tr>
       <th>denom0</th>
-      <td><p>Denominator to use as a default when the point estimate is exactly 0 or 1 (which is not compatible with the beta distribution).  Should correspond to a guess of the population size used to produce the estimate.  Should be either a scalar, or a vector of the same length as <code>est</code> (though note if it is a vector, then only the elements where <code>est</code> is 1 or 0 get used).</p></td>
+      <td><p>Denominator to use as a default when the point estimate is exactly 0 or 1 (which is not compatible with the beta distribution).  Should correspond to a guess of the population size used to produce the estimate,
+which should be no greater than the actual population of the area, and usually less.  Should be either a scalar, or a vector of the same length as <code>est</code> (though note if it is a vector, then only the elements where <code>est</code> is 1 or 0 get used).</p></td>
     </tr>
     </table>
 
@@ -153,7 +154,7 @@
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>Based on fitting a Beta distribution by least squares, using the method provided by the <span class="pkg">SHELF</span> package.</p>
-<p>Requires that the estimate and upper and lower limits are all distinct.  Vectors of estimates and limits may be supplied.</p>
+<p>Requires that the estimate and upper and lower limits are all distinct (except that <code>est=0</code> is allowed and handled specially for convenience, see <code>denom0</code>).  Vectors of estimates and limits may be supplied.</p>
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
     <p>Oakley (2020). SHELF: Tools to Support the Sheffield Elicitation Framework. R package version 1.7.0. <a href='https://CRAN.R-project.org/package=SHELF'>https://CRAN.R-project.org/package=SHELF</a></p>

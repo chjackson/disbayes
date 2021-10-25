@@ -130,22 +130,22 @@ Remission may also be included in the data and modelled.</p>
   <span class='va'>data</span>,
   inc_num <span class='op'>=</span> <span class='cn'>NULL</span>,
   inc_denom <span class='op'>=</span> <span class='cn'>NULL</span>,
-  inc <span class='op'>=</span> <span class='cn'>NULL</span>,
+  inc_prob <span class='op'>=</span> <span class='cn'>NULL</span>,
   inc_lower <span class='op'>=</span> <span class='cn'>NULL</span>,
   inc_upper <span class='op'>=</span> <span class='cn'>NULL</span>,
   prev_num <span class='op'>=</span> <span class='cn'>NULL</span>,
   prev_denom <span class='op'>=</span> <span class='cn'>NULL</span>,
-  prev <span class='op'>=</span> <span class='cn'>NULL</span>,
+  prev_prob <span class='op'>=</span> <span class='cn'>NULL</span>,
   prev_lower <span class='op'>=</span> <span class='cn'>NULL</span>,
   prev_upper <span class='op'>=</span> <span class='cn'>NULL</span>,
   mort_num <span class='op'>=</span> <span class='cn'>NULL</span>,
   mort_denom <span class='op'>=</span> <span class='cn'>NULL</span>,
-  mort <span class='op'>=</span> <span class='cn'>NULL</span>,
+  mort_prob <span class='op'>=</span> <span class='cn'>NULL</span>,
   mort_lower <span class='op'>=</span> <span class='cn'>NULL</span>,
   mort_upper <span class='op'>=</span> <span class='cn'>NULL</span>,
   rem_num <span class='op'>=</span> <span class='cn'>NULL</span>,
   rem_denom <span class='op'>=</span> <span class='cn'>NULL</span>,
-  rem <span class='op'>=</span> <span class='cn'>NULL</span>,
+  rem_prob <span class='op'>=</span> <span class='cn'>NULL</span>,
   rem_lower <span class='op'>=</span> <span class='cn'>NULL</span>,
   rem_upper <span class='op'>=</span> <span class='cn'>NULL</span>,
   age <span class='op'>=</span> <span class='st'>"age"</span>,
@@ -209,7 +209,7 @@ for example, multiplying both the numerator and denominator by 0.5 would
 give the data source half its original weight.</p></td>
     </tr>
     <tr>
-      <th>inc</th>
+      <th>inc_prob</th>
       <td><p>Estimate of the incidence probability</p></td>
     </tr>
     <tr>
@@ -231,7 +231,7 @@ number of people currently with a disease.</p></td>
 of the survey used to obtain the prevalence estimate)</p></td>
     </tr>
     <tr>
-      <th>prev</th>
+      <th>prev_prob</th>
       <td><p>Estimate of the prevalence probability</p></td>
     </tr>
     <tr>
@@ -254,7 +254,7 @@ the population size, if the estimates were obtained from a comprehensive
 register)</p></td>
     </tr>
     <tr>
-      <th>mort</th>
+      <th>mort_prob</th>
       <td><p>Estimate of the mortality probability</p></td>
     </tr>
     <tr>
@@ -282,7 +282,7 @@ weaker prior information.</p></td>
       <td><p>Denominator for the estimate of the remission probability</p></td>
     </tr>
     <tr>
-      <th>rem</th>
+      <th>rem_prob</th>
       <td><p>Estimate of the remission probability</p></td>
     </tr>
     <tr>

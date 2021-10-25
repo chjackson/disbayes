@@ -74,7 +74,7 @@
                         <h4 class="author">Chris Jackson <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk" class="email">chris.jackson@mrc-bsu.cam.ac.uk</a>
 </h4>
             
-            <h4 class="date">2021-10-24</h4>
+            <h4 class="date">2021-10-25</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/chjackson/disbayes/blob/master/vignettes/disbayes.Rmd"><code>vignettes/disbayes.Rmd</code></a></small>
       <div class="hidden name"><code>disbayes.Rmd</code></div>
@@ -281,8 +281,8 @@
 <p>The required variables include at least information about incidence and mortality, optionally information about prevalence, and some indication of uncertainty around this information. This information can be supplied in three alternative ways. For example (using incidence as an example):</p>
 <ol style="list-style-type: decimal">
 <li><p><em>numerator and denominator</em>, through arguments <code>inc_num</code> and <code>inc_denom</code>. This is what is done in the example here.</p></li>
-<li><p><em>risk probability estimate with denominator</em>: through arguments <code>inc</code> and <code>inc_denom</code>. The numerator is computed automatically, by multiplying the denominator by the risk estimate.</p></li>
-<li><p><em>estimate with lower and upper 95% credible limits</em>, through arguments <code>inc</code>, <code>inc_lower</code> and <code>inc_upper</code>. The numerator and denominator are computed automatically, as described above.</p></li>
+<li><p><em>risk probability estimate with denominator</em>: through arguments <code>inc_prob</code> and <code>inc_denom</code>. The numerator is computed automatically, by multiplying the denominator by the risk estimate. Note these refer to annual probabilities of having an event, not rates.</p></li>
+<li><p><em>risk probability estimate with lower and upper 95% credible limits</em>, through arguments <code>inc_prob</code>, <code>inc_lower</code> and <code>inc_upper</code>. The numerator and denominator are computed automatically, as described above.</p></li>
 </ol>
 <p>The value given for the argument is a character string identifying the corresponding variable in the data. For mortality, prevalence and remission, arguments with names beginning <code>mort</code>, <code>prev</code> and <code>rem</code> are supplied in the same manner.</p>
 <p>If remission data are omitted, it is assumed that there is no remission from the disease. If remission data are included, it is assumed that remission is possible and remission rates are estimated from the data.</p>
@@ -339,12 +339,12 @@
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">var</span><span class="op">==</span><span class="st">"cf"</span>, <span class="fu"><a href="https://dplyr.tidyverse.org/reference/between.html">between</a></span><span class="op">(</span><span class="va">age</span>,<span class="fl">60</span>,<span class="fl">65</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">age</span>, <span class="va">`25%`</span>, <span class="va">`50%`</span>, <span class="va">`75%`</span><span class="op">)</span></code></pre></div>
 <pre><code>##   age        25%        50%        75%
-## 1  60 0.01602696 0.01721721 0.01859186
-## 2  61 0.01619138 0.01737701 0.01866103
-## 3  62 0.01631291 0.01754700 0.01873964
-## 4  63 0.01644726 0.01771778 0.01876825
-## 5  64 0.01663418 0.01787475 0.01894261
-## 6  65 0.01683810 0.01801723 0.01912702</code></pre>
+## 1  60 0.01636503 0.01757685 0.01894753
+## 2  61 0.01648179 0.01773545 0.01904587
+## 3  62 0.01665212 0.01788809 0.01915953
+## 4  63 0.01679037 0.01798298 0.01924406
+## 5  64 0.01692433 0.01816547 0.01935120
+## 6  65 0.01715271 0.01837847 0.01956834</code></pre>
 <p>The default <code>plot</code> method for objects returned by <code>disbayes</code> plots the posterior summaries for case fatality, allowing a quick check of the model results. Or do <code><a href="https://rdrr.io/r/graphics/plot.default.html">plot(..., variable="inc")</a></code> for incidence. The function returns a <code>ggplot2</code> object that can be modified with <code>ggplot2</code> functions, e.g. to add axis labels.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span>
