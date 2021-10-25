@@ -10,6 +10,7 @@ test_that("fixing smoothness parameters",{
                     chains=1, iter=100)
   expect_equal(dbres$hp_fixed[["scf"]], 1.234)
   
+  set.seed(1)
   dbres <- disbayes(dat = ihdbristol,
                     inc_num = "inc_num", inc_denom = "inc_denom",
                     prev_num = "prev_num", prev_denom = "prev_denom",
@@ -21,6 +22,7 @@ test_that("fixing smoothness parameters",{
   expect_equal(dbres$hp_fixed[["sinc"]], 5.822661, tol=1e-03)
   expect_equal(dbres$hp_fixed[["sinc"]], dbres$stan_data$lambda_inc_fixed, tol=1e-03)
 
+  set.seed(1)
   dbres <- disbayes(dat = ihdbristol,
                     inc_num = "inc_num", inc_denom = "inc_denom",
                     prev_num = "prev_num", prev_denom = "prev_denom",
