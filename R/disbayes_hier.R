@@ -127,10 +127,10 @@
 disbayes_hier <- function(data,
                           group, 
                           gender=NULL, 
-                          inc_num=NULL, inc_denom=NULL, inc=NULL, inc_lower=NULL, inc_upper=NULL,
-                          prev_num=NULL, prev_denom=NULL, prev=NULL, prev_lower=NULL, prev_upper=NULL,
-                          mort_num=NULL, mort_denom=NULL, mort=NULL, mort_lower=NULL, mort_upper=NULL,
-                          rem_num=NULL, rem_denom=NULL, rem=NULL, rem_lower=NULL, rem_upper=NULL,
+                          inc_num=NULL, inc_denom=NULL, inc_prob=NULL, inc_lower=NULL, inc_upper=NULL,
+                          prev_num=NULL, prev_denom=NULL, prev_prob=NULL, prev_lower=NULL, prev_upper=NULL,
+                          mort_num=NULL, mort_denom=NULL, mort_prob=NULL, mort_lower=NULL, mort_upper=NULL,
+                          rem_num=NULL, rem_denom=NULL, rem_prob=NULL, rem_lower=NULL, rem_upper=NULL,
                           age="age",
                           cf_init = 0.01,
                           eqage = 30,
@@ -187,13 +187,13 @@ disbayes_hier <- function(data,
         nage <- nrow(data[area==1 & gender==1,,drop=FALSE])
     }
 
-    inc_data <- process_data(data, "inc", inc_num, inc_denom, inc, inc_lower, inc_upper, nage, narea, ng, hier=TRUE)
-    prev_data <- process_data(data, "prev", prev_num, prev_denom, prev, prev_lower, prev_upper, nage, narea, ng, hier=TRUE)
+    inc_data <- process_data(data, "inc", inc_num, inc_denom, inc_prob, inc_lower, inc_upper, nage, narea, ng, hier=TRUE)
+    prev_data <- process_data(data, "prev", prev_num, prev_denom, prev_prob, prev_lower, prev_upper, nage, narea, ng, hier=TRUE)
     if (!inc_data$supplied && !prev_data$supplied)
         stop("At least one of incidence or prevalence should be supplied")
-    mort_data <- process_data(data, "mort", mort_num, mort_denom, mort, mort_lower, mort_upper, nage, narea, ng, hier=TRUE)
+    mort_data <- process_data(data, "mort", mort_num, mort_denom, mort_prob, mort_lower, mort_upper, nage, narea, ng, hier=TRUE)
 
-    rem_data <- process_data(data, "rem", rem_num, rem_denom, rem, rem_lower, rem_upper, nage, narea, ng, hier=TRUE)
+    rem_data <- process_data(data, "rem", rem_num, rem_denom, rem_prob, rem_lower, rem_upper, nage, narea, ng, hier=TRUE)
     remission <- rem_data$supplied
     smooth_rem <- (remission && rem_model=="smooth")
 

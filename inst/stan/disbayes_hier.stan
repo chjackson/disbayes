@@ -94,8 +94,8 @@ transformed parameters {
   real<lower=0> cf[nage,narea,ng];
   real<lower=0> dcf[nage*increasing,narea,ng];  // only in increasing model
   real<lower=0> inc_prob[nage,narea,ng];
-  real<lower=0> prev[nage,narea,ng];
-  real<lower=0> mort[nage,narea,ng];
+  real<lower=0> prev_prob[nage,narea,ng];
+  real<lower=0> mort_prob[nage,narea,ng];
   real<lower=0> rem[nage,narea,ng];
   real<lower=0> rem_prob[nage*remission,narea,ng];
   matrix[nage+1,3] state_probs; 
@@ -189,8 +189,8 @@ transformed parameters {
 
       // Infer age zero prevalence from data if there are any data at age zero, or if we asked it to
       if (prev_denom[1,j,g] > 0 && (prev_num[1,j,g] > 0 || prev_zero))
-	prev[1,j,g] = prevzero[j,g];
-      else prev[1,j,g] = 0; 
+	prev_prob[1,j,g] = prevzero[j,g];
+      else prev_prob[1,j,g] = 0; 
       state_probs[1,1] = 1;
       state_probs[1,2] = 0;
       state_probs[1,3] = 0;
@@ -231,17 +231,17 @@ transformed parameters {
       } else { 	for (a in 1:nage) { rem[a,j,g] = 0; } }
       for (a in 1:nage){
 	P = trans_probs(inc[a,j,g], cf[a,j,g], rem[a,j,g]);
-	inc_prob[a,j,g] = P[1,2] + P[1,3];
+	inc_prob[a,j,g] = bound_prob(P[1,2] + P[1,3]);
 	if (remission) 
 	  rem_prob[a,j,g] = P[2,1];
 	if (a > 1)
-	  prev[a,j,g] = state_probs[a,2] / (state_probs[a,1] + state_probs[a,2]);
+	  prev_prob[a,j,g] = state_probs[a,2] / (state_probs[a,1] + state_probs[a,2]);
 	tmp = state_probs[a,1:3] * P;  // temp variable to avoid warning
 	state_probs[a+1,1:3] = tmp;
-	mort[a,j,g] = P[1,3]*(1 - prev[a,j,g]) + P[2,3]*prev[a,j,g];
+	mort_prob[a,j,g] = P[1,3]*(1 - prev_prob[a,j,g]) + P[2,3]*prev_prob[a,j,g];
 	//// work around floating point fuzz
-	if (mort[a,j,g] < 0) mort[a,j,g] = 0;
-	if (mort[a,j,g] > 1) mort[a,j,g] = 1;
+	mort_prob[a,j,g] = bound_prob(mort_prob[a,j,g]);
+	mort_prob[a,j,g] = bound_prob(mort_prob[a,j,g]);
       }
     }
   }
@@ -295,9 +295,9 @@ model {
   }
   for (j in 1:narea){
     for (g in 1:ng) {
-      mort_num[,j,g] ~ binomial(mort_denom[,j,g], mort[,j,g]);
+      mort_num[,j,g] ~ binomial(mort_denom[,j,g], mort_prob[,j,g]);
       inc_num[,j,g] ~ binomial(inc_denom[,j,g], inc_prob[,j,g]);
-      prev_num[,j,g] ~ binomial(prev_denom[,j,g], prev[,j,g]);
+      prev_num[,j,g] ~ binomial(prev_denom[,j,g], prev_prob[,j,g]);
       if (remission) {
 	rem_num[,j,g] ~ binomial(rem_denom[,j,g], rem_prob[,j,g]);
       }
@@ -393,9 +393,9 @@ generated quantities {
   for (a in 1:nage) {
     for (j in 1:narea) {
       for (g in 1:ng) {
-	ll_mort[i] = binomial_lpmf(mort_num[a,j,g] | mort_denom[a,j,g], mort[a,j,g]);
+	ll_mort[i] = binomial_lpmf(mort_num[a,j,g] | mort_denom[a,j,g], mort_prob[a,j,g]);
 	ll_inc[i] = binomial_lpmf(inc_num[a,j,g] | inc_denom[a,j,g], inc_prob[a,j,g]);
-	ll_prev[i] = binomial_lpmf(prev_num[a,j,g] | prev_denom[a,j,g], prev[a,j,g]);
+	ll_prev[i] = binomial_lpmf(prev_num[a,j,g] | prev_denom[a,j,g], prev_prob[a,j,g]);
 	if (remission) 
 	  ll_rem[i] = binomial_lpmf(rem_num[a,j,g] | rem_denom[a,j,g], rem_prob[a,j,g]);
 	i = i + 1;

@@ -24,13 +24,9 @@ to make it easier to summarise and plot the results, e.g. using \pkg{ggplot2}.
 
 Model parameters might include, depending on the model specification,
 \itemize{
-\item \code{cf} Case fatality rates
-\item \code{inc} Incidence rates
-\item \code{rem} Remission rates
-\item \code{inc_par}, \code{cf_par}, \code{rem_par}.  Same as the above - should
-\item \code{inc_prob}, \code{rem_prob}.  Annual incidence and remission probabilities.
-\item \code{mort} Annual mortality probability.
-\item \code{prev} Prevalence probability.
+\item \code{cf}, \code{inc}, \code{rem}: Case fatality, incidence, remission rates
+\item \code{inc_prob}, \code{rem_prob}, \code{mort_prob}:  Annual incidence, remission and mortality probabilities.
+\item \code{prev_prob} Prevalence probability.
 \item \code{state_probs} State occupancy probabilities.
 \item \code{beta}, \code{beta_inc} Coefficients of the spline basis for case fatality and incidence respectively.
 \item \code{lambda_cf}, \code{lambda_inc} Smoothness parameters of the spline functions.

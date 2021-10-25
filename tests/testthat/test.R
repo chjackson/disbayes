@@ -14,21 +14,17 @@ test_that("data supplied as estimate and denominator",{
   dbres <- disbayes(dat = ihdbristol,
                     inc_num = "inc_num", inc_denom = "inc_denom",
                     prev_num = "prev_num", prev_denom = "prev_denom",
-                    mort = "mort_prob", mort_denom = "mort_denom",
+                    mort_prob = "mort_prob", mort_denom = "mort_denom",
                     eqage = 40, loo=FALSE, method="mcmc", algorithm="Fixed_param", 
                     chains=1, iter=100)
   expect_s3_class(dbres, "disbayes")
 })
 
 test_that("data supplied as estimate and credible limits",{
-  x <- with(ihdbristol, ci2num(mort_prob, mort_lower, mort_upper, denom0=1400))
-  expect_equal(x$num[1], 0)
-  expect_equal(x$denom[1], 1400)
-  
   dbres <- disbayes(dat = ihdbristol,
                     inc_num = "inc_num", inc_denom = "inc_denom",
                     prev_num = "prev_num", prev_denom = "prev_denom",
-                    mort = "mort_prob", mort_lower = "mort_lower", mort_upper="mort_upper",
+                    mort_prob = "mort_prob", mort_lower = "mort_lower", mort_upper="mort_upper",
                     eqage = 40, loo=FALSE, method="mcmc", algorithm="Fixed_param", chains=1, iter=100)
   expect_s3_class(dbres, "disbayes")
 })
@@ -38,7 +34,7 @@ test_that("errors when insufficient data supplied",{
    disbayes(dat = ihdbristol,
                         inc_num = "inc_num", inc_denom = "inc_denom",
                         prev_num = "prev_num", prev_denom = "prev_denom",
-                        mort = "mort_prob", 
+                        mort_prob = "mort_prob", 
                         eqage = 40, loo=FALSE, algorithm="Fixed_param"),
    "Not enough information"
   )
@@ -167,7 +163,7 @@ test_that("errors when data are invalid",{
     disbayes(dat = baddat,
              inc_num = "inc_num", inc_denom = "inc_denom",
              prev_num = "prev_num", prev_denom = "prev_denom",
-             mort = "mort_prob", 
+             mort_prob = "mort_prob", 
              eqage = 40),
     "should be <="
   )
@@ -189,7 +185,7 @@ test_that("errors when data are invalid",{
     disbayes(dat = baddat,
              inc_num = "inc_num", inc_denom = "inc_denom",
              prev_num = "prev_num", prev_denom = "prev_denom",
-             mort = "mort_prob", mort_lower = "mort_lower", mort_upper = "mort_upper",
+             mort_prob = "mort_prob", mort_lower = "mort_lower", mort_upper = "mort_upper",
              eqage = 40)
     ,
     "should be inside the credible interval"
@@ -201,7 +197,7 @@ test_that("errors when data are invalid",{
     disbayes(dat = baddat,
              inc_num = "inc_num", inc_denom = "inc_denom",
              prev_num = "prev_num", prev_denom = "prev_denom",
-             mort = "mort_prob", mort_lower = "mort_lower", mort_upper = "mort_upper",
+             mort_prob = "mort_prob", mort_lower = "mort_lower", mort_upper = "mort_upper",
              eqage = 40)
     ,
     "should be < mort_upper"

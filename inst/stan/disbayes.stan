@@ -71,19 +71,18 @@ parameters {
 }
 
 transformed parameters {
-  //// range constraints on these cause problems due to floating point fuzz
   vector<lower=0>[nage] cf;
   vector<lower=0>[nage*increasing_cf] dcf;  // only in increasing model
   matrix<lower=0>[nage,nbias] inc;
-  matrix<lower=0,upper=1>[nage,nbias] inc_prob;
+  matrix<lower=0,upper=1>[nage,nbias] inc_prob; // don't bound due to occasional numerical fuzz in Hessian
   vector<lower=0>[nage] rem;
   vector<lower=0,upper=1>[nage*remission] rem_prob;
   
   row_vector[3] state_probs[(nage+1)*(1-trend),nbias]; 
   row_vector[3] tmp;
   matrix<lower=0,upper=1>[3,3] P;
-  matrix<lower=0>[nage,nbias] prev;
-  real<lower=0> mort[nage];
+  matrix<lower=0>[nage,nbias] prev_prob;
+  real<lower=0> mort_prob[nage];
 
   matrix<lower=0>[nage*trend,nyr*trend] cf_yr;
   real<lower=0> inc_yr[nage*trend,nyr*trend,nbias];
@@ -114,8 +113,8 @@ transformed parameters {
   // Infer age zero prevalence from data if there are any data at age zero, or if we asked it to
   for (k in 1:nbias) { 
     if (prev_denom[1] > 0 && (prev_num[1] > 0 || prev_zero))
-      prev[1,k] = prevzero[1];
-    else prev[1,k] = 0; 
+      prev_prob[1,k] = prevzero[1];
+    else prev_prob[1,k] = 0; 
   }
   
   if (increasing_cf) {
@@ -179,22 +178,22 @@ transformed parameters {
 	}
 	// data are the outcomes at the end of the current year
 	P = trans_probs(inc_yr[a,nyr,k], cf_yr[a,nyr], rem[a]);
-	inc_prob[a,k] = P[1,2] + P[1,3];
-	prev[a,k] = state_probs_yr[a,nyr,k,2] /
+	inc_prob[a,k] = bound_prob(P[1,2] + P[1,3]);
+	prev_prob[a,k] = state_probs_yr[a,nyr,k,2] /
 	  (state_probs_yr[a,nyr,k,1] + state_probs_yr[a,nyr,k,2]);
-	if (k==1) mort[a] = P[1,3]*(1 - prev[a,1]) + P[2,3]*prev[a,1];
+	if (k==1) mort_prob[a] = P[1,3]*(1 - prev_prob[a,1]) + P[2,3]*prev_prob[a,1];
       }
     } else { 
 
       for (k in 1:nbias){ 
 	P = trans_probs(inc[a,k], cf[a], rem[a]);
-	inc_prob[a,k] = P[1,2] + P[1,3];
+	inc_prob[a,k] = bound_prob(P[1,2] + P[1,3]);
 	if (a > 1)
-	  prev[a,k] = state_probs[a,k,2] / (state_probs[a,k,1] + state_probs[a,k,2]);
+	  prev_prob[a,k] = state_probs[a,k,2] / (state_probs[a,k,1] + state_probs[a,k,2]);
 	tmp = state_probs[a,k,1:3] * P;  // temp variable to avoid warning
 	state_probs[a+1,k,1:3] = tmp;
 	if (k==1) {
-	  mort[a] = P[1,3]*(1 - prev[a,1]) + P[2,3]*prev[a,1];
+	  mort_prob[a] = P[1,3]*(1 - prev_prob[a,1]) + P[2,3]*prev_prob[a,1];
 	  if (remission) 
 	    rem_prob[a] = P[2,1];
 	}
@@ -202,15 +201,14 @@ transformed parameters {
 
     }
     //// work around floating point fuzz
-    if (mort[a] < 0) mort[a] = 0;
-    if (mort[a] > 1) mort[a] = 1;
+    mort_prob[a] = bound_prob(mort_prob[a]);
   }
 }
 
 model {
-  mort_num ~ binomial(mort_denom, mort);
+  mort_num ~ binomial(mort_denom, mort_prob);
   inc_num ~ binomial(inc_denom, inc_prob[1:nage,incdata_ind]);
-  prev_num ~ binomial(prev_denom, prev[1:nage,prevdata_ind]);
+  prev_num ~ binomial(prev_denom, prev_prob[1:nage,prevdata_ind]);
   if (remission) {
     rem_num ~ binomial(rem_denom, rem_prob);
   }
@@ -285,11 +283,13 @@ generated quantities {
   vector[nage] ll_inc;
   vector[nage] ll_prev;
   vector[nage*remission] ll_rem;
+  vector[nage*(3 + remission)] ll_overall;
   for (a in 1:nage) {
-      ll_mort[a] = binomial_lpmf(mort_num[a] | mort_denom[a], mort[a]);
+      ll_mort[a] = binomial_lpmf(mort_num[a] | mort_denom[a], mort_prob[a]);
       ll_inc[a] = binomial_lpmf(inc_num[a] | inc_denom[a], inc_prob[a]);
-      ll_prev[a] = binomial_lpmf(prev_num[a] | prev_denom[a], prev[a]);
+      ll_prev[a] = binomial_lpmf(prev_num[a] | prev_denom[a], prev_prob[a]);
       if (remission) 
 	  ll_rem[a] = binomial_lpmf(rem_num[a] | rem_denom[a], rem_prob[a]);
   }
+  ll_overall = append_row(ll_mort, append_row(ll_inc, append_row(ll_prev, ll_rem)));
 }

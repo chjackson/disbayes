@@ -16,3 +16,5 @@ vignettes/disbayes_cache
 vignettes/disbayes_files
 vignettes/disbayes.html
 data/ihdtrends2019.rda
+R/cfnaive.R
+man/cfnaive.Rd

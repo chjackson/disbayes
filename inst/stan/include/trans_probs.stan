@@ -87,4 +87,14 @@ functions {
     return defuzz_P(P);
   }
   
+  real bound_prob(real x){
+    real ret;
+    if (x >= 1) {
+      ret = 1 - machine_precision();
+    } else if (x <= 0) {
+      ret = machine_precision();
+    } else { ret = x; } 
+    return x;
+  }
+
 }

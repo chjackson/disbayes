@@ -1,10 +1,23 @@
 
-db <- disbayes_hier(ihdengland, age="age", group="area", gender="gender",
-                    inc_num = "inc_num", inc_denom = "inc_denom",
-                    prev_num = "prev_num", prev_denom = "prev_denom",
-                    mort_num = "mort_num", mort_denom = "mort_denom",
-                    iter=10, chains=1, loo=FALSE, algorithm="Fixed_param")
-expect_s3_class(db, "disbayes_hier")
+test_that("hierarchical model with additive area and gender effects",{
+  db <- disbayes_hier(ihdengland, age="age", group="area", gender="gender",
+                      inc_num = "inc_num", inc_denom = "inc_denom",
+                      prev_num = "prev_num", prev_denom = "prev_denom",
+                      mort_num = "mort_num", mort_denom = "mort_denom",
+                      iter=10, chains=1, loo=FALSE, algorithm="Fixed_param")
+  expect_s3_class(db, "disbayes_hier")
+})
+
+test_that("fixed smoothness for gender effect",{
+  set.seed(1)
+  db <- disbayes_hier(ihdengland, age="age", group="area", gender="gender",
+                      inc_num = "inc_num", inc_denom = "inc_denom",
+                      prev_num = "prev_num", prev_denom = "prev_denom",
+                      mort_num = "mort_num", mort_denom = "mort_denom",
+                      hp_fixed = list(scfmale = TRUE),
+                      iter=10, chains=1, loo=FALSE, algorithm="Fixed_param")
+  expect_equal(db$hp_fixed[["scfmale"]],  0.5026838, tol=1e-03)
+})
 
 test_that("errors in specifying gender model", {
   expect_error(disbayes_hier(ihdengland, age="age", group="area",  

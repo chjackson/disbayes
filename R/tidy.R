@@ -21,19 +21,11 @@
 ##'
 ##' Model parameters might include, depending on the model specification, 
 ##'
-##' * `cf` Case fatality rates
+##' * `cf`, `inc`, `rem`: Case fatality, incidence, remission rates
 ##'
-##' * `inc` Incidence rates
+##' * `inc_prob`, `rem_prob`, `mort_prob`:  Annual incidence, remission and mortality probabilities. 
 ##'
-##' * `rem` Remission rates
-##'
-##' * `inc_par`, `cf_par`, `rem_par`.  Same as the above - should
-##'
-##' * `inc_prob`, `rem_prob`.  Annual incidence and remission probabilities. 
-##'
-##' * `mort` Annual mortality probability.
-##'
-##' * `prev` Prevalence probability. 
+##' * `prev_prob` Prevalence probability. 
 ##'
 ##' * `state_probs` State occupancy probabilities.
 ##'
@@ -125,32 +117,34 @@ tidy_disbayes_full <- function(fit, varlist, method, levs=NULL, ...) {
 .disbayes_vars <- list(
     age = list(indnames = "age",
                varnames = c("cf","inc_par","cf_par","rem_par",
-                            "dcf","rem","rem_prob","mort")), 
+                            "dcf","rem","rem_prob","mort_prob")), 
     agebias =  list(indnames = c("age", "bias"),
-                    varnames = c("inc", "inc_prob", "prev")),
+                    varnames = c("inc", "inc_prob", "prev_prob")),
     agebiasstate = list(indnames = c("age", "bias", "state"),
                         varnames = "state_probs"),
     term = list(indnames = "term", 
                 varnames = c("beta", "beta_inc")),
-    const = c("lambda_cf","lambda_inc","prevzero","cfbase","bias_loghr")
+    const = c("lambda_cf","lambda_inc","prevzero","cfbase","bias_loghr"),
+    redundant = c("inc_par","cf_par","rem_par")
 )
 attr(.disbayes_vars, "numerics") <- c("age", "bias", "state", "term")
 attr(.disbayes_vars, "order") <- c("age", "bias", "state", "term")
 
 .disbayes_trend_vars <- list(
     age = list(indnames="age",
-               varnames = c("cf", "inc_par", "rem_par", "rem", "rem_prob", "mort")),
+               varnames = c("cf", "inc_par", "rem_par", "rem", "rem_prob", "mort_prob")),
     ageyear = list(indnames = c("age", "year"),
                    varnames = c("cf_yr")),
     agebias = list(indnames = c("age", "bias"),
-                   varnames = c("inc","inc_prob","prev")),
+                   varnames = c("inc","inc_prob","prev_prob")),
     ageyearbias = list(indnames = c("age", "year", "bias"),
                        varnames = c("inc_yr")),
     ageyearbiasstate = list(indnames = c("age","year","bias","state"),
                             varnames = c("state_probs_yr")),
     term = list(indnames = "term", 
                 varnames = c("beta", "beta_inc")),
-    const = c("lambda_cf","lambda_inc","prevzero","cfbase","bias_loghr")
+    const = c("lambda_cf","lambda_inc","prevzero","cfbase","bias_loghr"),
+    redundant = c("inc_par","cf_par","rem_par")
 )
 attr(.disbayes_trend_vars, "numerics") <- c("age","year","bias", "state", "term")
 attr(.disbayes_trend_vars, "order") <- c("age", "year", "bias", "state", "term")
@@ -158,7 +152,7 @@ attr(.disbayes_trend_vars, "order") <- c("age", "year", "bias", "state", "term")
 .disbayes_hier_vars <- list(
     ageareagender = list(
         indnames = c("age","area","gender"), 
-        varnames =  c("inc","cf","dcf","inc_prob","prev","mort","rem","rem_prob")
+        varnames =  c("inc","cf","dcf","inc_prob","prev_prob","mort_prob","rem","rem_prob")
     ),
     agegender = list(
         indnames = c("age", "gender"), 
@@ -180,7 +174,8 @@ attr(.disbayes_trend_vars, "order") <- c("age", "year", "bias", "state", "term")
     term = list(indnames="term",
                 varnames = c("bmale", "sd_inter", "mean_slope", "sd_slope",
                              "lambda_cf","lambda_cf_male","lambda_inc")),
-    const = c("mean_inter")
+    const = c("mean_inter"),
+    redundant = c("inc_par","cf_par","rem_par")
 )
 attr(.disbayes_hier_vars, "numerics") <- c("age", "state", "term")
 attr(.disbayes_hier_vars, "factors") <- data.frame(vars = c("area","gender"),
@@ -194,7 +189,7 @@ attr(.disbayes_hier_vars, "order") <- c("age", "gender", "area", "state", "term"
 ## tidybayes and ggmcmc have similar functionality, but work on the draws rather than the output of rstan::summary. 
 ## tidybayes::spread_draws has one col per variable and rows for different indices, iterations and draws
 ## gather_draws does the same in long format with a .variable col
-## Then ggdist::median_qi is used to get summary statistica
+## Then ggdist::median_qi is used to get summary statistics
 
 tidy_stansumm <- function(summ, varlist, stats, levs=NULL){
     var <- varorig <- NULL
@@ -202,7 +197,7 @@ tidy_stansumm <- function(summ, varlist, stats, levs=NULL){
       filter(var %in% varlist$const) %>%
       select(-varorig)
 
-    varnc <- varlist[names(varlist)!="const"]
+    varnc <- varlist[!(names(varlist) %in% c("const","redundant"))]
     nvartypes <- length(varnc)
     summs <- vector(nvartypes, mode="list")
     for (i in seq_along(varnc)){
@@ -232,6 +227,8 @@ tidy_stansumm <- function(summ, varlist, stats, levs=NULL){
         else summ[[facs$vars[i]]] <- NULL
       }
     }
+    for (i in varlist$redundant)
+        summ[[i]] <- NULL
     summ$age <- summ$age - 1
     summ
 }

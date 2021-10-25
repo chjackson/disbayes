@@ -236,9 +236,9 @@ The required variables include at least information about incidence and mortalit
 
 1. _numerator and denominator_, through arguments `inc_num` and `inc_denom`.  This is what is done in the example here. 
 
-2. _risk probability estimate with denominator_: through arguments `inc` and `inc_denom`.  The numerator is computed automatically, by multiplying the denominator by the risk estimate. 
+2. _risk probability estimate with denominator_: through arguments `inc_prob` and `inc_denom`.  The numerator is computed automatically, by multiplying the denominator by the risk estimate.  Note these refer to annual probabilities of having an event, not rates. 
 
-3. _estimate with lower and upper 95% credible limits_, through arguments `inc`, `inc_lower` and `inc_upper`. The numerator and denominator are computed automatically, as described above. 
+3. _risk probability estimate with lower and upper 95% credible limits_, through arguments `inc_prob`, `inc_lower` and `inc_upper`. The numerator and denominator are computed automatically, as described above. 
 
 The value given for the argument is a character string identifying the corresponding variable in the data.  For mortality, prevalence and remission, arguments with names beginning `mort`, `prev` and `rem` are supplied in the same manner.
 

@@ -35,9 +35,9 @@ stan::io::program_reader prog_reader__() {
     reader.add_event(0, 0, "start", "model_disbayes");
     reader.add_event(0, 0, "include", "/include/trans_probs.stan");
     reader.add_event(0, 0, "start", "/include/trans_probs.stan");
-    reader.add_event(90, 90, "end", "/include/trans_probs.stan");
-    reader.add_event(90, 1, "restart", "model_disbayes");
-    reader.add_event(386, 295, "end", "model_disbayes");
+    reader.add_event(100, 100, "end", "/include/trans_probs.stan");
+    reader.add_event(100, 1, "restart", "model_disbayes");
+    reader.add_event(396, 295, "end", "model_disbayes");
     return reader;
 }
 template <typename T0__, typename T1__, typename T2__>
@@ -444,6 +444,50 @@ struct trans_probs_functor__ {
         return trans_probs(i, f, r, pstream__);
     }
 };
+template <typename T0__>
+typename boost::math::tools::promote_args<T0__>::type
+bound_prob(const T0__& x, std::ostream* pstream__) {
+    typedef typename boost::math::tools::promote_args<T0__>::type local_scalar_t__;
+    typedef local_scalar_t__ fun_return_scalar_t__;
+    const static bool propto__ = true;
+    (void) propto__;
+        local_scalar_t__ DUMMY_VAR__(std::numeric_limits<double>::quiet_NaN());
+        (void) DUMMY_VAR__;  // suppress unused var warning
+    int current_statement_begin__ = -1;
+    try {
+        {
+        current_statement_begin__ = 91;
+        local_scalar_t__ ret(DUMMY_VAR__);
+        (void) ret;  // dummy to suppress unused var warning
+        stan::math::initialize(ret, DUMMY_VAR__);
+        stan::math::fill(ret, DUMMY_VAR__);
+        current_statement_begin__ = 92;
+        if (as_bool(logical_gte(x, 1))) {
+            current_statement_begin__ = 93;
+            stan::math::assign(ret, (1 - stan::math::machine_precision()));
+        } else if (as_bool(logical_lte(x, 0))) {
+            current_statement_begin__ = 95;
+            stan::math::assign(ret, stan::math::machine_precision());
+        } else {
+            current_statement_begin__ = 96;
+            stan::math::assign(ret, x);
+        }
+        current_statement_begin__ = 97;
+        return stan::math::promote_scalar<fun_return_scalar_t__>(x);
+        }
+    } catch (const std::exception& e) {
+        stan::lang::rethrow_located(e, current_statement_begin__, prog_reader__());
+        // Next line prevents compiler griping about no return
+        throw std::runtime_error("*** IF YOU SEE THIS, PLEASE REPORT A BUG ***");
+    }
+}
+struct bound_prob_functor__ {
+    template <typename T0__>
+        typename boost::math::tools::promote_args<T0__>::type
+    operator()(const T0__& x, std::ostream* pstream__) const {
+        return bound_prob(x, pstream__);
+    }
+};
 #include <stan_meta_header.hpp>
 class model_disbayes
   : public stan::model::model_base_crtp<model_disbayes> {
@@ -515,57 +559,57 @@ public:
         (void) DUMMY_VAR__;  // suppress unused var warning
         try {
             // initialize data block variables from context__
-            current_statement_begin__ = 93;
+            current_statement_begin__ = 103;
             context__.validate_dims("data initialization", "smooth_cf", "int", context__.to_vec());
             smooth_cf = int(0);
             vals_i__ = context__.vals_i("smooth_cf");
             pos__ = 0;
             smooth_cf = vals_i__[pos__++];
-            current_statement_begin__ = 94;
+            current_statement_begin__ = 104;
             context__.validate_dims("data initialization", "smooth_inc", "int", context__.to_vec());
             smooth_inc = int(0);
             vals_i__ = context__.vals_i("smooth_inc");
             pos__ = 0;
             smooth_inc = vals_i__[pos__++];
-            current_statement_begin__ = 95;
+            current_statement_begin__ = 105;
             context__.validate_dims("data initialization", "smooth_rem", "int", context__.to_vec());
             smooth_rem = int(0);
             vals_i__ = context__.vals_i("smooth_rem");
             pos__ = 0;
             smooth_rem = vals_i__[pos__++];
-            current_statement_begin__ = 96;
+            current_statement_begin__ = 106;
             context__.validate_dims("data initialization", "remission", "int", context__.to_vec());
             remission = int(0);
             vals_i__ = context__.vals_i("remission");
             pos__ = 0;
             remission = vals_i__[pos__++];
-            current_statement_begin__ = 97;
+            current_statement_begin__ = 107;
             context__.validate_dims("data initialization", "trend", "int", context__.to_vec());
             trend = int(0);
             vals_i__ = context__.vals_i("trend");
             pos__ = 0;
             trend = vals_i__[pos__++];
-            current_statement_begin__ = 98;
+            current_statement_begin__ = 108;
             context__.validate_dims("data initialization", "prev_zero", "int", context__.to_vec());
             prev_zero = int(0);
             vals_i__ = context__.vals_i("prev_zero");
             pos__ = 0;
             prev_zero = vals_i__[pos__++];
-            current_statement_begin__ = 99;
+            current_statement_begin__ = 109;
             context__.validate_dims("data initialization", "nage", "int", context__.to_vec());
             nage = int(0);
             vals_i__ = context__.vals_i("nage");
             pos__ = 0;
             nage = vals_i__[pos__++];
             check_greater_or_equal(function__, "nage", nage, 0);
-            current_statement_begin__ = 100;
+            current_statement_begin__ = 110;
             context__.validate_dims("data initialization", "eqage", "int", context__.to_vec());
             eqage = int(0);
             vals_i__ = context__.vals_i("eqage");
             pos__ = 0;
             eqage = vals_i__[pos__++];
             check_greater_or_equal(function__, "eqage", eqage, 0);
-            current_statement_begin__ = 101;
+            current_statement_begin__ = 111;
             validate_non_negative_index("mort_num", "nage", nage);
             context__.validate_dims("data initialization", "mort_num", "int", context__.to_vec(nage));
             mort_num = std::vector<int>(nage, int(0));
@@ -579,7 +623,7 @@ public:
             for (size_t i_0__ = 0; i_0__ < mort_num_i_0_max__; ++i_0__) {
                 check_greater_or_equal(function__, "mort_num[i_0__]", mort_num[i_0__], 0);
             }
-            current_statement_begin__ = 102;
+            current_statement_begin__ = 112;
             validate_non_negative_index("mort_denom", "nage", nage);
             context__.validate_dims("data initialization", "mort_denom", "int", context__.to_vec(nage));
             mort_denom = std::vector<int>(nage, int(0));
@@ -593,7 +637,7 @@ public:
             for (size_t i_0__ = 0; i_0__ < mort_denom_i_0_max__; ++i_0__) {
                 check_greater_or_equal(function__, "mort_denom[i_0__]", mort_denom[i_0__], 0);
             }
-            current_statement_begin__ = 103;
+            current_statement_begin__ = 113;
             validate_non_negative_index("prev_num", "nage", nage);
             context__.validate_dims("data initialization", "prev_num", "int", context__.to_vec(nage));
             prev_num = std::vector<int>(nage, int(0));
@@ -607,7 +651,7 @@ public:
             for (size_t i_0__ = 0; i_0__ < prev_num_i_0_max__; ++i_0__) {
                 check_greater_or_equal(function__, "prev_num[i_0__]", prev_num[i_0__], 0);
             }
-            current_statement_begin__ = 104;
+            current_statement_begin__ = 114;
             validate_non_negative_index("prev_denom", "nage", nage);
             context__.validate_dims("data initialization", "prev_denom", "int", context__.to_vec(nage));
             prev_denom = std::vector<int>(nage, int(0));
@@ -621,7 +665,7 @@ public:
             for (size_t i_0__ = 0; i_0__ < prev_denom_i_0_max__; ++i_0__) {
                 check_greater_or_equal(function__, "prev_denom[i_0__]", prev_denom[i_0__], 0);
             }
-            current_statement_begin__ = 105;
+            current_statement_begin__ = 115;
             validate_non_negative_index("inc_num", "nage", nage);
             context__.validate_dims("data initialization", "inc_num", "int", context__.to_vec(nage));
             inc_num = std::vector<int>(nage, int(0));
@@ -635,7 +679,7 @@ public:
             for (size_t i_0__ = 0; i_0__ < inc_num_i_0_max__; ++i_0__) {
                 check_greater_or_equal(function__, "inc_num[i_0__]", inc_num[i_0__], 0);
             }
-            current_statement_begin__ = 106;
+            current_statement_begin__ = 116;
             validate_non_negative_index("inc_denom", "nage", nage);
             context__.validate_dims("data initialization", "inc_denom", "int", context__.to_vec(nage));
             inc_denom = std::vector<int>(nage, int(0));
@@ -649,7 +693,7 @@ public:
             for (size_t i_0__ = 0; i_0__ < inc_denom_i_0_max__; ++i_0__) {
                 check_greater_or_equal(function__, "inc_denom[i_0__]", inc_denom[i_0__], 0);
             }
-            current_statement_begin__ = 107;
+            current_statement_begin__ = 117;
             validate_non_negative_index("rem_num", "nage", nage);
             context__.validate_dims("data initialization", "rem_num", "int", context__.to_vec(nage));
             rem_num = std::vector<int>(nage, int(0));
@@ -663,7 +707,7 @@ public:
             for (size_t i_0__ = 0; i_0__ < rem_num_i_0_max__; ++i_0__) {
                 check_greater_or_equal(function__, "rem_num[i_0__]", rem_num[i_0__], 0);
             }
-            current_statement_begin__ = 108;
+            current_statement_begin__ = 118;
             validate_non_negative_index("rem_denom", "nage", nage);
             context__.validate_dims("data initialization", "rem_denom", "int", context__.to_vec(nage));
             rem_denom = std::vector<int>(nage, int(0));
@@ -677,21 +721,21 @@ public:
             for (size_t i_0__ = 0; i_0__ < rem_denom_i_0_max__; ++i_0__) {
                 check_greater_or_equal(function__, "rem_denom[i_0__]", rem_denom[i_0__], 0);
             }
-            current_statement_begin__ = 109;
+            current_statement_begin__ = 119;
             context__.validate_dims("data initialization", "nyr", "int", context__.to_vec());
             nyr = int(0);
             vals_i__ = context__.vals_i("nyr");
             pos__ = 0;
             nyr = vals_i__[pos__++];
             check_greater_or_equal(function__, "nyr", nyr, 0);
-            current_statement_begin__ = 112;
+            current_statement_begin__ = 122;
             context__.validate_dims("data initialization", "K", "int", context__.to_vec());
             K = int(0);
             vals_i__ = context__.vals_i("K");
             pos__ = 0;
             K = vals_i__[pos__++];
             check_greater_or_equal(function__, "K", K, 0);
-            current_statement_begin__ = 113;
+            current_statement_begin__ = 123;
             validate_non_negative_index("X", "nage", nage);
             validate_non_negative_index("X", "K", K);
             context__.validate_dims("data initialization", "X", "matrix_d", context__.to_vec(nage,K));
@@ -705,7 +749,7 @@ public:
                     X(j_1__, j_2__) = vals_r__[pos__++];
                 }
             }
-            current_statement_begin__ = 114;
+            current_statement_begin__ = 124;
             validate_non_negative_index("sprior", "3", 3);
             context__.validate_dims("data initialization", "sprior", "double", context__.to_vec(3));
             sprior = std::vector<double>(3, double(0));
@@ -719,43 +763,43 @@ public:
             for (size_t i_0__ = 0; i_0__ < sprior_i_0_max__; ++i_0__) {
                 check_greater_or_equal(function__, "sprior[i_0__]", sprior[i_0__], 0);
             }
-            current_statement_begin__ = 117;
+            current_statement_begin__ = 127;
             context__.validate_dims("data initialization", "increasing_cf", "int", context__.to_vec());
             increasing_cf = int(0);
             vals_i__ = context__.vals_i("increasing_cf");
             pos__ = 0;
             increasing_cf = vals_i__[pos__++];
-            current_statement_begin__ = 118;
+            current_statement_begin__ = 128;
             context__.validate_dims("data initialization", "const_cf", "int", context__.to_vec());
             const_cf = int(0);
             vals_i__ = context__.vals_i("const_cf");
             pos__ = 0;
             const_cf = vals_i__[pos__++];
-            current_statement_begin__ = 119;
+            current_statement_begin__ = 129;
             context__.validate_dims("data initialization", "const_rem", "int", context__.to_vec());
             const_rem = int(0);
             vals_i__ = context__.vals_i("const_rem");
             pos__ = 0;
             const_rem = vals_i__[pos__++];
-            current_statement_begin__ = 121;
+            current_statement_begin__ = 131;
             context__.validate_dims("data initialization", "nbias", "int", context__.to_vec());
             nbias = int(0);
             vals_i__ = context__.vals_i("nbias");
             pos__ = 0;
             nbias = vals_i__[pos__++];
-            current_statement_begin__ = 123;
+            current_statement_begin__ = 133;
             context__.validate_dims("data initialization", "incdata_ind", "int", context__.to_vec());
             incdata_ind = int(0);
             vals_i__ = context__.vals_i("incdata_ind");
             pos__ = 0;
             incdata_ind = vals_i__[pos__++];
-            current_statement_begin__ = 124;
+            current_statement_begin__ = 134;
             context__.validate_dims("data initialization", "prevdata_ind", "int", context__.to_vec());
             prevdata_ind = int(0);
             vals_i__ = context__.vals_i("prevdata_ind");
             pos__ = 0;
             prevdata_ind = vals_i__[pos__++];
-            current_statement_begin__ = 128;
+            current_statement_begin__ = 138;
             validate_non_negative_index("inc_trend", "nage", nage);
             validate_non_negative_index("inc_trend", "nyr", nyr);
             context__.validate_dims("data initialization", "inc_trend", "matrix_d", context__.to_vec(nage,nyr));
@@ -770,7 +814,7 @@ public:
                 }
             }
             check_greater_or_equal(function__, "inc_trend", inc_trend, 0);
-            current_statement_begin__ = 129;
+            current_statement_begin__ = 139;
             validate_non_negative_index("cf_trend", "nage", nage);
             validate_non_negative_index("cf_trend", "nyr", nyr);
             context__.validate_dims("data initialization", "cf_trend", "matrix_d", context__.to_vec(nage,nyr));
@@ -785,7 +829,7 @@ public:
                 }
             }
             check_greater_or_equal(function__, "cf_trend", cf_trend, 0);
-            current_statement_begin__ = 131;
+            current_statement_begin__ = 141;
             validate_non_negative_index("inc_prior", "2", 2);
             context__.validate_dims("data initialization", "inc_prior", "double", context__.to_vec(2));
             inc_prior = std::vector<double>(2, double(0));
@@ -799,7 +843,7 @@ public:
             for (size_t i_0__ = 0; i_0__ < inc_prior_i_0_max__; ++i_0__) {
                 check_greater_or_equal(function__, "inc_prior[i_0__]", inc_prior[i_0__], 0);
             }
-            current_statement_begin__ = 132;
+            current_statement_begin__ = 142;
             validate_non_negative_index("cf_prior", "2", 2);
             context__.validate_dims("data initialization", "cf_prior", "double", context__.to_vec(2));
             cf_prior = std::vector<double>(2, double(0));
@@ -813,7 +857,7 @@ public:
             for (size_t i_0__ = 0; i_0__ < cf_prior_i_0_max__; ++i_0__) {
                 check_greater_or_equal(function__, "cf_prior[i_0__]", cf_prior[i_0__], 0);
             }
-            current_statement_begin__ = 133;
+            current_statement_begin__ = 143;
             validate_non_negative_index("rem_prior", "2", 2);
             context__.validate_dims("data initialization", "rem_prior", "double", context__.to_vec(2));
             rem_prior = std::vector<double>(2, double(0));
@@ -827,39 +871,39 @@ public:
             for (size_t i_0__ = 0; i_0__ < rem_prior_i_0_max__; ++i_0__) {
                 check_greater_or_equal(function__, "rem_prior[i_0__]", rem_prior[i_0__], 0);
             }
-            current_statement_begin__ = 136;
+            current_statement_begin__ = 146;
             context__.validate_dims("data initialization", "scf_isfixed", "int", context__.to_vec());
             scf_isfixed = int(0);
             vals_i__ = context__.vals_i("scf_isfixed");
             pos__ = 0;
             scf_isfixed = vals_i__[pos__++];
-            current_statement_begin__ = 137;
+            current_statement_begin__ = 147;
             context__.validate_dims("data initialization", "sinc_isfixed", "int", context__.to_vec());
             sinc_isfixed = int(0);
             vals_i__ = context__.vals_i("sinc_isfixed");
             pos__ = 0;
             sinc_isfixed = vals_i__[pos__++];
-            current_statement_begin__ = 138;
+            current_statement_begin__ = 148;
             context__.validate_dims("data initialization", "srem_isfixed", "int", context__.to_vec());
             srem_isfixed = int(0);
             vals_i__ = context__.vals_i("srem_isfixed");
             pos__ = 0;
             srem_isfixed = vals_i__[pos__++];
-            current_statement_begin__ = 139;
+            current_statement_begin__ = 149;
             context__.validate_dims("data initialization", "lambda_cf_fixed", "double", context__.to_vec());
             lambda_cf_fixed = double(0);
             vals_r__ = context__.vals_r("lambda_cf_fixed");
             pos__ = 0;
             lambda_cf_fixed = vals_r__[pos__++];
             check_greater_or_equal(function__, "lambda_cf_fixed", lambda_cf_fixed, 0);
-            current_statement_begin__ = 140;
+            current_statement_begin__ = 150;
             context__.validate_dims("data initialization", "lambda_inc_fixed", "double", context__.to_vec());
             lambda_inc_fixed = double(0);
             vals_r__ = context__.vals_r("lambda_inc_fixed");
             pos__ = 0;
             lambda_inc_fixed = vals_r__[pos__++];
             check_greater_or_equal(function__, "lambda_inc_fixed", lambda_inc_fixed, 0);
-            current_statement_begin__ = 141;
+            current_statement_begin__ = 151;
             context__.validate_dims("data initialization", "lambda_rem_fixed", "double", context__.to_vec());
             lambda_rem_fixed = double(0);
             vals_r__ = context__.vals_r("lambda_rem_fixed");
@@ -872,40 +916,40 @@ public:
             // validate, set parameter ranges
             num_params_r__ = 0U;
             param_ranges_i__.clear();
-            current_statement_begin__ = 145;
+            current_statement_begin__ = 155;
             validate_non_negative_index("inc_par", "(nage * (1 - smooth_inc))", (nage * (1 - smooth_inc)));
             num_params_r__ += (nage * (1 - smooth_inc));
-            current_statement_begin__ = 146;
+            current_statement_begin__ = 156;
             validate_non_negative_index("cf_par", "(nage * (1 - smooth_cf))", (nage * (1 - smooth_cf)));
             num_params_r__ += (nage * (1 - smooth_cf));
-            current_statement_begin__ = 147;
+            current_statement_begin__ = 157;
             validate_non_negative_index("rem_par", "((remission * (1 - smooth_rem)) * ((nage * (1 - const_rem)) + (1 * const_rem)))", ((remission * (1 - smooth_rem)) * ((nage * (1 - const_rem)) + (1 * const_rem))));
             num_params_r__ += ((remission * (1 - smooth_rem)) * ((nage * (1 - const_rem)) + (1 * const_rem)));
-            current_statement_begin__ = 148;
+            current_statement_begin__ = 158;
             validate_non_negative_index("beta", "((K * smooth_cf) * (1 - const_cf))", ((K * smooth_cf) * (1 - const_cf)));
             num_params_r__ += ((K * smooth_cf) * (1 - const_cf));
-            current_statement_begin__ = 149;
+            current_statement_begin__ = 159;
             validate_non_negative_index("lambda_cf", "(smooth_cf * (1 - scf_isfixed))", (smooth_cf * (1 - scf_isfixed)));
             num_params_r__ += (smooth_cf * (1 - scf_isfixed));
-            current_statement_begin__ = 150;
+            current_statement_begin__ = 160;
             validate_non_negative_index("lambda_inc", "(smooth_inc * (1 - sinc_isfixed))", (smooth_inc * (1 - sinc_isfixed)));
             num_params_r__ += (smooth_inc * (1 - sinc_isfixed));
-            current_statement_begin__ = 151;
+            current_statement_begin__ = 161;
             validate_non_negative_index("beta_inc", "(K * smooth_inc)", (K * smooth_inc));
             num_params_r__ += (K * smooth_inc);
-            current_statement_begin__ = 152;
+            current_statement_begin__ = 162;
             validate_non_negative_index("lambda_rem", "(smooth_rem * (1 - srem_isfixed))", (smooth_rem * (1 - srem_isfixed)));
             num_params_r__ += (smooth_rem * (1 - srem_isfixed));
-            current_statement_begin__ = 153;
+            current_statement_begin__ = 163;
             validate_non_negative_index("beta_rem", "(K * smooth_rem)", (K * smooth_rem));
             num_params_r__ += (K * smooth_rem);
-            current_statement_begin__ = 154;
+            current_statement_begin__ = 164;
             validate_non_negative_index("prevzero", "prev_zero", prev_zero);
             num_params_r__ += prev_zero;
-            current_statement_begin__ = 157;
+            current_statement_begin__ = 167;
             validate_non_negative_index("bias_loghr", "logical_eq(nbias, 2)", logical_eq(nbias, 2));
             num_params_r__ += logical_eq(nbias, 2);
-            current_statement_begin__ = 159;
+            current_statement_begin__ = 169;
             validate_non_negative_index("cfbase", "(1 * increasing_cf)", (1 * increasing_cf));
             num_params_r__ += (1 * increasing_cf);
         } catch (const std::exception& e) {
@@ -925,7 +969,7 @@ public:
         (void) pos__; // dummy call to supress warning
         std::vector<double> vals_r__;
         std::vector<int> vals_i__;
-        current_statement_begin__ = 145;
+        current_statement_begin__ = 155;
         if (!(context__.contains_r("inc_par")))
             stan::lang::rethrow_located(std::runtime_error(std::string("Variable inc_par missing")), current_statement_begin__, prog_reader__());
         vals_r__ = context__.vals_r("inc_par");
@@ -942,7 +986,7 @@ public:
         } catch (const std::exception& e) {
             stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable inc_par: ") + e.what()), current_statement_begin__, prog_reader__());
         }
-        current_statement_begin__ = 146;
+        current_statement_begin__ = 156;
         if (!(context__.contains_r("cf_par")))
             stan::lang::rethrow_located(std::runtime_error(std::string("Variable cf_par missing")), current_statement_begin__, prog_reader__());
         vals_r__ = context__.vals_r("cf_par");
@@ -959,7 +1003,7 @@ public:
         } catch (const std::exception& e) {
             stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable cf_par: ") + e.what()), current_statement_begin__, prog_reader__());
         }
-        current_statement_begin__ = 147;
+        current_statement_begin__ = 157;
         if (!(context__.contains_r("rem_par")))
             stan::lang::rethrow_located(std::runtime_error(std::string("Variable rem_par missing")), current_statement_begin__, prog_reader__());
         vals_r__ = context__.vals_r("rem_par");
@@ -976,7 +1020,7 @@ public:
         } catch (const std::exception& e) {
             stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable rem_par: ") + e.what()), current_statement_begin__, prog_reader__());
         }
-        current_statement_begin__ = 148;
+        current_statement_begin__ = 158;
         if (!(context__.contains_r("beta")))
             stan::lang::rethrow_located(std::runtime_error(std::string("Variable beta missing")), current_statement_begin__, prog_reader__());
         vals_r__ = context__.vals_r("beta");
@@ -993,7 +1037,7 @@ public:
         } catch (const std::exception& e) {
             stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable beta: ") + e.what()), current_statement_begin__, prog_reader__());
         }
-        current_statement_begin__ = 149;
+        current_statement_begin__ = 159;
         if (!(context__.contains_r("lambda_cf")))
             stan::lang::rethrow_located(std::runtime_error(std::string("Variable lambda_cf missing")), current_statement_begin__, prog_reader__());
         vals_r__ = context__.vals_r("lambda_cf");
@@ -1010,7 +1054,7 @@ public:
         } catch (const std::exception& e) {
             stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable lambda_cf: ") + e.what()), current_statement_begin__, prog_reader__());
         }
-        current_statement_begin__ = 150;
+        current_statement_begin__ = 160;
         if (!(context__.contains_r("lambda_inc")))
             stan::lang::rethrow_located(std::runtime_error(std::string("Variable lambda_inc missing")), current_statement_begin__, prog_reader__());
         vals_r__ = context__.vals_r("lambda_inc");
@@ -1027,7 +1071,7 @@ public:
         } catch (const std::exception& e) {
             stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable lambda_inc: ") + e.what()), current_statement_begin__, prog_reader__());
         }
-        current_statement_begin__ = 151;
+        current_statement_begin__ = 161;
         if (!(context__.contains_r("beta_inc")))
             stan::lang::rethrow_located(std::runtime_error(std::string("Variable beta_inc missing")), current_statement_begin__, prog_reader__());
         vals_r__ = context__.vals_r("beta_inc");
@@ -1044,7 +1088,7 @@ public:
         } catch (const std::exception& e) {
             stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable beta_inc: ") + e.what()), current_statement_begin__, prog_reader__());
         }
-        current_statement_begin__ = 152;
+        current_statement_begin__ = 162;
         if (!(context__.contains_r("lambda_rem")))
             stan::lang::rethrow_located(std::runtime_error(std::string("Variable lambda_rem missing")), current_statement_begin__, prog_reader__());
         vals_r__ = context__.vals_r("lambda_rem");
@@ -1061,7 +1105,7 @@ public:
         } catch (const std::exception& e) {
             stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable lambda_rem: ") + e.what()), current_statement_begin__, prog_reader__());
         }
-        current_statement_begin__ = 153;
+        current_statement_begin__ = 163;
         if (!(context__.contains_r("beta_rem")))
             stan::lang::rethrow_located(std::runtime_error(std::string("Variable beta_rem missing")), current_statement_begin__, prog_reader__());
         vals_r__ = context__.vals_r("beta_rem");
@@ -1078,7 +1122,7 @@ public:
         } catch (const std::exception& e) {
             stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable beta_rem: ") + e.what()), current_statement_begin__, prog_reader__());
         }
-        current_statement_begin__ = 154;
+        current_statement_begin__ = 164;
         if (!(context__.contains_r("prevzero")))
             stan::lang::rethrow_located(std::runtime_error(std::string("Variable prevzero missing")), current_statement_begin__, prog_reader__());
         vals_r__ = context__.vals_r("prevzero");
@@ -1095,7 +1139,7 @@ public:
         } catch (const std::exception& e) {
             stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable prevzero: ") + e.what()), current_statement_begin__, prog_reader__());
         }
-        current_statement_begin__ = 157;
+        current_statement_begin__ = 167;
         if (!(context__.contains_r("bias_loghr")))
             stan::lang::rethrow_located(std::runtime_error(std::string("Variable bias_loghr missing")), current_statement_begin__, prog_reader__());
         vals_r__ = context__.vals_r("bias_loghr");
@@ -1112,7 +1156,7 @@ public:
         } catch (const std::exception& e) {
             stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable bias_loghr: ") + e.what()), current_statement_begin__, prog_reader__());
         }
-        current_statement_begin__ = 159;
+        current_statement_begin__ = 169;
         if (!(context__.contains_r("cfbase")))
             stan::lang::rethrow_located(std::runtime_error(std::string("Variable cfbase missing")), current_statement_begin__, prog_reader__());
         vals_r__ = context__.vals_r("cfbase");
@@ -1154,84 +1198,84 @@ public:
         try {
             stan::io::reader<local_scalar_t__> in__(params_r__, params_i__);
             // model parameters
-            current_statement_begin__ = 145;
+            current_statement_begin__ = 155;
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> inc_par;
             (void) inc_par;  // dummy to suppress unused var warning
             if (jacobian__)
                 inc_par = in__.vector_lb_constrain(0, (nage * (1 - smooth_inc)), lp__);
             else
                 inc_par = in__.vector_lb_constrain(0, (nage * (1 - smooth_inc)));
-            current_statement_begin__ = 146;
+            current_statement_begin__ = 156;
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> cf_par;
             (void) cf_par;  // dummy to suppress unused var warning
             if (jacobian__)
                 cf_par = in__.vector_lb_constrain(0, (nage * (1 - smooth_cf)), lp__);
             else
                 cf_par = in__.vector_lb_constrain(0, (nage * (1 - smooth_cf)));
-            current_statement_begin__ = 147;
+            current_statement_begin__ = 157;
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> rem_par;
             (void) rem_par;  // dummy to suppress unused var warning
             if (jacobian__)
                 rem_par = in__.vector_lb_constrain(0, ((remission * (1 - smooth_rem)) * ((nage * (1 - const_rem)) + (1 * const_rem))), lp__);
             else
                 rem_par = in__.vector_lb_constrain(0, ((remission * (1 - smooth_rem)) * ((nage * (1 - const_rem)) + (1 * const_rem))));
-            current_statement_begin__ = 148;
+            current_statement_begin__ = 158;
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> beta;
             (void) beta;  // dummy to suppress unused var warning
             if (jacobian__)
                 beta = in__.vector_constrain(((K * smooth_cf) * (1 - const_cf)), lp__);
             else
                 beta = in__.vector_constrain(((K * smooth_cf) * (1 - const_cf)));
-            current_statement_begin__ = 149;
+            current_statement_begin__ = 159;
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> lambda_cf;
             (void) lambda_cf;  // dummy to suppress unused var warning
             if (jacobian__)
                 lambda_cf = in__.vector_lb_constrain(0, (smooth_cf * (1 - scf_isfixed)), lp__);
             else
                 lambda_cf = in__.vector_lb_constrain(0, (smooth_cf * (1 - scf_isfixed)));
-            current_statement_begin__ = 150;
+            current_statement_begin__ = 160;
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> lambda_inc;
             (void) lambda_inc;  // dummy to suppress unused var warning
             if (jacobian__)
                 lambda_inc = in__.vector_lb_constrain(0, (smooth_inc * (1 - sinc_isfixed)), lp__);
             else
                 lambda_inc = in__.vector_lb_constrain(0, (smooth_inc * (1 - sinc_isfixed)));
-            current_statement_begin__ = 151;
+            current_statement_begin__ = 161;
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> beta_inc;
             (void) beta_inc;  // dummy to suppress unused var warning
             if (jacobian__)
                 beta_inc = in__.vector_constrain((K * smooth_inc), lp__);
             else
                 beta_inc = in__.vector_constrain((K * smooth_inc));
-            current_statement_begin__ = 152;
+            current_statement_begin__ = 162;
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> lambda_rem;
             (void) lambda_rem;  // dummy to suppress unused var warning
             if (jacobian__)
                 lambda_rem = in__.vector_lb_constrain(0, (smooth_rem * (1 - srem_isfixed)), lp__);
             else
                 lambda_rem = in__.vector_lb_constrain(0, (smooth_rem * (1 - srem_isfixed)));
-            current_statement_begin__ = 153;
+            current_statement_begin__ = 163;
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> beta_rem;
             (void) beta_rem;  // dummy to suppress unused var warning
             if (jacobian__)
                 beta_rem = in__.vector_constrain((K * smooth_rem), lp__);
             else
                 beta_rem = in__.vector_constrain((K * smooth_rem));
-            current_statement_begin__ = 154;
+            current_statement_begin__ = 164;
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> prevzero;
             (void) prevzero;  // dummy to suppress unused var warning
             if (jacobian__)
                 prevzero = in__.vector_lub_constrain(0, 1, prev_zero, lp__);
             else
                 prevzero = in__.vector_lub_constrain(0, 1, prev_zero);
-            current_statement_begin__ = 157;
+            current_statement_begin__ = 167;
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> bias_loghr;
             (void) bias_loghr;  // dummy to suppress unused var warning
             if (jacobian__)
                 bias_loghr = in__.vector_constrain(logical_eq(nbias, 2), lp__);
             else
                 bias_loghr = in__.vector_constrain(logical_eq(nbias, 2));
-            current_statement_begin__ = 159;
+            current_statement_begin__ = 169;
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> cfbase;
             (void) cfbase;  // dummy to suppress unused var warning
             if (jacobian__)
@@ -1239,81 +1283,81 @@ public:
             else
                 cfbase = in__.vector_lb_constrain(0, (1 * increasing_cf));
             // transformed parameters
-            current_statement_begin__ = 164;
+            current_statement_begin__ = 173;
             validate_non_negative_index("cf", "nage", nage);
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> cf(nage);
             stan::math::initialize(cf, DUMMY_VAR__);
             stan::math::fill(cf, DUMMY_VAR__);
-            current_statement_begin__ = 165;
+            current_statement_begin__ = 174;
             validate_non_negative_index("dcf", "(nage * increasing_cf)", (nage * increasing_cf));
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> dcf((nage * increasing_cf));
             stan::math::initialize(dcf, DUMMY_VAR__);
             stan::math::fill(dcf, DUMMY_VAR__);
-            current_statement_begin__ = 166;
+            current_statement_begin__ = 175;
             validate_non_negative_index("inc", "nage", nage);
             validate_non_negative_index("inc", "nbias", nbias);
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, Eigen::Dynamic> inc(nage, nbias);
             stan::math::initialize(inc, DUMMY_VAR__);
             stan::math::fill(inc, DUMMY_VAR__);
-            current_statement_begin__ = 167;
+            current_statement_begin__ = 176;
             validate_non_negative_index("inc_prob", "nage", nage);
             validate_non_negative_index("inc_prob", "nbias", nbias);
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, Eigen::Dynamic> inc_prob(nage, nbias);
             stan::math::initialize(inc_prob, DUMMY_VAR__);
             stan::math::fill(inc_prob, DUMMY_VAR__);
-            current_statement_begin__ = 168;
+            current_statement_begin__ = 177;
             validate_non_negative_index("rem", "nage", nage);
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> rem(nage);
             stan::math::initialize(rem, DUMMY_VAR__);
             stan::math::fill(rem, DUMMY_VAR__);
-            current_statement_begin__ = 169;
+            current_statement_begin__ = 178;
             validate_non_negative_index("rem_prob", "(nage * remission)", (nage * remission));
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> rem_prob((nage * remission));
             stan::math::initialize(rem_prob, DUMMY_VAR__);
             stan::math::fill(rem_prob, DUMMY_VAR__);
-            current_statement_begin__ = 171;
+            current_statement_begin__ = 180;
             validate_non_negative_index("state_probs", "3", 3);
             validate_non_negative_index("state_probs", "((nage + 1) * (1 - trend))", ((nage + 1) * (1 - trend)));
             validate_non_negative_index("state_probs", "nbias", nbias);
             std::vector<std::vector<Eigen::Matrix<local_scalar_t__, 1, Eigen::Dynamic> > > state_probs(((nage + 1) * (1 - trend)), std::vector<Eigen::Matrix<local_scalar_t__, 1, Eigen::Dynamic> >(nbias, Eigen::Matrix<local_scalar_t__, 1, Eigen::Dynamic>(3)));
             stan::math::initialize(state_probs, DUMMY_VAR__);
             stan::math::fill(state_probs, DUMMY_VAR__);
-            current_statement_begin__ = 172;
+            current_statement_begin__ = 181;
             validate_non_negative_index("tmp", "3", 3);
             Eigen::Matrix<local_scalar_t__, 1, Eigen::Dynamic> tmp(3);
             stan::math::initialize(tmp, DUMMY_VAR__);
             stan::math::fill(tmp, DUMMY_VAR__);
-            current_statement_begin__ = 173;
+            current_statement_begin__ = 182;
             validate_non_negative_index("P", "3", 3);
             validate_non_negative_index("P", "3", 3);
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, Eigen::Dynamic> P(3, 3);
             stan::math::initialize(P, DUMMY_VAR__);
             stan::math::fill(P, DUMMY_VAR__);
-            current_statement_begin__ = 174;
-            validate_non_negative_index("prev", "nage", nage);
-            validate_non_negative_index("prev", "nbias", nbias);
-            Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, Eigen::Dynamic> prev(nage, nbias);
-            stan::math::initialize(prev, DUMMY_VAR__);
-            stan::math::fill(prev, DUMMY_VAR__);
-            current_statement_begin__ = 175;
-            validate_non_negative_index("mort", "nage", nage);
-            std::vector<local_scalar_t__> mort(nage, local_scalar_t__(0));
-            stan::math::initialize(mort, DUMMY_VAR__);
-            stan::math::fill(mort, DUMMY_VAR__);
-            current_statement_begin__ = 177;
+            current_statement_begin__ = 183;
+            validate_non_negative_index("prev_prob", "nage", nage);
+            validate_non_negative_index("prev_prob", "nbias", nbias);
+            Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, Eigen::Dynamic> prev_prob(nage, nbias);
+            stan::math::initialize(prev_prob, DUMMY_VAR__);
+            stan::math::fill(prev_prob, DUMMY_VAR__);
+            current_statement_begin__ = 184;
+            validate_non_negative_index("mort_prob", "nage", nage);
+            std::vector<local_scalar_t__> mort_prob(nage, local_scalar_t__(0));
+            stan::math::initialize(mort_prob, DUMMY_VAR__);
+            stan::math::fill(mort_prob, DUMMY_VAR__);
+            current_statement_begin__ = 186;
             validate_non_negative_index("cf_yr", "(nage * trend)", (nage * trend));
             validate_non_negative_index("cf_yr", "(nyr * trend)", (nyr * trend));
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, Eigen::Dynamic> cf_yr((nage * trend), (nyr * trend));
             stan::math::initialize(cf_yr, DUMMY_VAR__);
             stan::math::fill(cf_yr, DUMMY_VAR__);
-            current_statement_begin__ = 178;
+            current_statement_begin__ = 187;
             validate_non_negative_index("inc_yr", "(nage * trend)", (nage * trend));
             validate_non_negative_index("inc_yr", "(nyr * trend)", (nyr * trend));
             validate_non_negative_index("inc_yr", "nbias", nbias);
             std::vector<std::vector<std::vector<local_scalar_t__> > > inc_yr((nage * trend), std::vector<std::vector<local_scalar_t__> >((nyr * trend), std::vector<local_scalar_t__>(nbias, local_scalar_t__(0))));
             stan::math::initialize(inc_yr, DUMMY_VAR__);
             stan::math::fill(inc_yr, DUMMY_VAR__);
-            current_statement_begin__ = 179;
+            current_statement_begin__ = 188;
             validate_non_negative_index("state_probs_yr", "3", 3);
             validate_non_negative_index("state_probs_yr", "((nage + 1) * trend)", ((nage + 1) * trend));
             validate_non_negative_index("state_probs_yr", "(nyr * trend)", (nyr * trend));
@@ -1321,189 +1365,189 @@ public:
             std::vector<std::vector<std::vector<Eigen::Matrix<local_scalar_t__, 1, Eigen::Dynamic> > > > state_probs_yr(((nage + 1) * trend), std::vector<std::vector<Eigen::Matrix<local_scalar_t__, 1, Eigen::Dynamic> > >((nyr * trend), std::vector<Eigen::Matrix<local_scalar_t__, 1, Eigen::Dynamic> >(nbias, Eigen::Matrix<local_scalar_t__, 1, Eigen::Dynamic>(3))));
             stan::math::initialize(state_probs_yr, DUMMY_VAR__);
             stan::math::fill(state_probs_yr, DUMMY_VAR__);
-            current_statement_begin__ = 181;
+            current_statement_begin__ = 190;
             local_scalar_t__ lambda_cf_use;
             (void) lambda_cf_use;  // dummy to suppress unused var warning
             stan::math::initialize(lambda_cf_use, DUMMY_VAR__);
             stan::math::fill(lambda_cf_use, DUMMY_VAR__);
-            current_statement_begin__ = 182;
+            current_statement_begin__ = 191;
             local_scalar_t__ lambda_inc_use;
             (void) lambda_inc_use;  // dummy to suppress unused var warning
             stan::math::initialize(lambda_inc_use, DUMMY_VAR__);
             stan::math::fill(lambda_inc_use, DUMMY_VAR__);
-            current_statement_begin__ = 183;
+            current_statement_begin__ = 192;
             local_scalar_t__ lambda_rem_use;
             (void) lambda_rem_use;  // dummy to suppress unused var warning
             stan::math::initialize(lambda_rem_use, DUMMY_VAR__);
             stan::math::fill(lambda_rem_use, DUMMY_VAR__);
             // transformed parameters block statements
-            current_statement_begin__ = 184;
+            current_statement_begin__ = 193;
             if (as_bool((primitive_value(scf_isfixed) || primitive_value(logical_negation(smooth_cf))))) {
-                current_statement_begin__ = 184;
+                current_statement_begin__ = 193;
                 stan::math::assign(lambda_cf_use, lambda_cf_fixed);
             } else {
-                current_statement_begin__ = 184;
+                current_statement_begin__ = 193;
                 stan::math::assign(lambda_cf_use, get_base1(lambda_cf, 1, "lambda_cf", 1));
             }
-            current_statement_begin__ = 185;
+            current_statement_begin__ = 194;
             if (as_bool((primitive_value(sinc_isfixed) || primitive_value(logical_negation(smooth_inc))))) {
-                current_statement_begin__ = 185;
+                current_statement_begin__ = 194;
                 stan::math::assign(lambda_inc_use, lambda_inc_fixed);
             } else {
-                current_statement_begin__ = 185;
+                current_statement_begin__ = 194;
                 stan::math::assign(lambda_inc_use, get_base1(lambda_inc, 1, "lambda_inc", 1));
             }
-            current_statement_begin__ = 186;
+            current_statement_begin__ = 195;
             if (as_bool((primitive_value(srem_isfixed) || primitive_value(logical_negation(smooth_rem))))) {
-                current_statement_begin__ = 186;
+                current_statement_begin__ = 195;
                 stan::math::assign(lambda_rem_use, lambda_rem_fixed);
             } else {
-                current_statement_begin__ = 186;
+                current_statement_begin__ = 195;
                 stan::math::assign(lambda_rem_use, get_base1(lambda_rem, 1, "lambda_rem", 1));
             }
-            current_statement_begin__ = 190;
+            current_statement_begin__ = 199;
             if (as_bool(smooth_inc)) {
-                current_statement_begin__ = 190;
+                current_statement_begin__ = 199;
                 stan::model::assign(inc, 
                             stan::model::cons_list(stan::model::index_min_max(1, nage), stan::model::cons_list(stan::model::index_uni(1), stan::model::nil_index_list())), 
                             stan::math::exp(multiply(X, beta_inc)), 
                             "assigning variable inc");
             } else {
-                current_statement_begin__ = 190;
+                current_statement_begin__ = 199;
                 stan::model::assign(inc, 
                             stan::model::cons_list(stan::model::index_min_max(1, nage), stan::model::cons_list(stan::model::index_uni(1), stan::model::nil_index_list())), 
                             inc_par, 
                             "assigning variable inc");
             }
-            current_statement_begin__ = 191;
+            current_statement_begin__ = 200;
             if (as_bool(logical_gt(nbias, 1))) {
-                current_statement_begin__ = 192;
+                current_statement_begin__ = 201;
                 stan::model::assign(inc, 
                             stan::model::cons_list(stan::model::index_min_max(1, nage), stan::model::cons_list(stan::model::index_uni(2), stan::model::nil_index_list())), 
                             stan::model::deep_copy(stan::math::exp(add(stan::math::log(stan::model::rvalue(inc, stan::model::cons_list(stan::model::index_min_max(1, nage), stan::model::cons_list(stan::model::index_uni(1), stan::model::nil_index_list())), "inc")), get_base1(bias_loghr, 1, "bias_loghr", 1)))), 
                             "assigning variable inc");
             }
-            current_statement_begin__ = 194;
+            current_statement_begin__ = 203;
             if (as_bool(remission)) {
-                current_statement_begin__ = 195;
+                current_statement_begin__ = 204;
                 if (as_bool(const_rem)) {
-                    current_statement_begin__ = 196;
+                    current_statement_begin__ = 205;
                     for (int a = 1; a <= nage; ++a) {
-                        current_statement_begin__ = 197;
+                        current_statement_begin__ = 206;
                         stan::model::assign(rem, 
                                     stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
                                     get_base1(rem_par, 1, "rem_par", 1), 
                                     "assigning variable rem");
                     }
                 } else if (as_bool(smooth_rem)) {
-                    current_statement_begin__ = 199;
+                    current_statement_begin__ = 208;
                     stan::math::assign(rem, stan::math::exp(multiply(X, beta_rem)));
                 } else {
-                    current_statement_begin__ = 200;
+                    current_statement_begin__ = 209;
                     stan::math::assign(rem, rem_par);
                 }
             } else {
-                current_statement_begin__ = 201;
+                current_statement_begin__ = 210;
                 stan::math::assign(rem, rep_vector(0, nage));
             }
-            current_statement_begin__ = 204;
+            current_statement_begin__ = 213;
             for (int k = 1; k <= nbias; ++k) {
-                current_statement_begin__ = 205;
+                current_statement_begin__ = 214;
                 if (as_bool((primitive_value(logical_gt(get_base1(prev_denom, 1, "prev_denom", 1), 0)) && primitive_value((primitive_value(logical_gt(get_base1(prev_num, 1, "prev_num", 1), 0)) || primitive_value(prev_zero)))))) {
-                    current_statement_begin__ = 206;
-                    stan::model::assign(prev, 
+                    current_statement_begin__ = 215;
+                    stan::model::assign(prev_prob, 
                                 stan::model::cons_list(stan::model::index_uni(1), stan::model::cons_list(stan::model::index_uni(k), stan::model::nil_index_list())), 
                                 get_base1(prevzero, 1, "prevzero", 1), 
-                                "assigning variable prev");
+                                "assigning variable prev_prob");
                 } else {
-                    current_statement_begin__ = 207;
-                    stan::model::assign(prev, 
+                    current_statement_begin__ = 216;
+                    stan::model::assign(prev_prob, 
                                 stan::model::cons_list(stan::model::index_uni(1), stan::model::cons_list(stan::model::index_uni(k), stan::model::nil_index_list())), 
                                 0, 
-                                "assigning variable prev");
+                                "assigning variable prev_prob");
                 }
             }
-            current_statement_begin__ = 210;
+            current_statement_begin__ = 219;
             if (as_bool(increasing_cf)) {
-                current_statement_begin__ = 212;
+                current_statement_begin__ = 221;
                 for (int a = 1; a <= (eqage - 1); ++a) {
-                    current_statement_begin__ = 213;
+                    current_statement_begin__ = 222;
                     stan::model::assign(cf, 
                                 stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
                                 get_base1(cfbase, 1, "cfbase", 1), 
                                 "assigning variable cf");
                 }
-                current_statement_begin__ = 215;
+                current_statement_begin__ = 224;
                 if (as_bool(logical_negation(const_cf))) {
-                    current_statement_begin__ = 216;
+                    current_statement_begin__ = 225;
                     stan::math::assign(dcf, stan::math::exp(multiply(X, beta)));
                 } else {
-                    current_statement_begin__ = 217;
+                    current_statement_begin__ = 226;
                     stan::math::assign(dcf, rep_vector(0, nage));
                 }
-                current_statement_begin__ = 218;
+                current_statement_begin__ = 227;
                 for (int a = eqage; a <= nage; ++a) {
-                    current_statement_begin__ = 219;
+                    current_statement_begin__ = 228;
                     stan::model::assign(cf, 
                                 stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
                                 (get_base1(cf, (a - 1), "cf", 1) + get_base1(dcf, a, "dcf", 1)), 
                                 "assigning variable cf");
                 }
             } else {
-                current_statement_begin__ = 222;
+                current_statement_begin__ = 231;
                 if (as_bool(smooth_cf)) {
-                    current_statement_begin__ = 222;
+                    current_statement_begin__ = 231;
                     stan::math::assign(cf, stan::math::exp(multiply(X, beta)));
                 } else {
-                    current_statement_begin__ = 222;
+                    current_statement_begin__ = 231;
                     stan::math::assign(cf, cf_par);
                 }
             }
-            current_statement_begin__ = 225;
+            current_statement_begin__ = 234;
             if (as_bool(trend)) {
-                current_statement_begin__ = 227;
+                current_statement_begin__ = 236;
                 stan::math::assign(cf, stan::math::exp(multiply(X, beta)));
-                current_statement_begin__ = 228;
+                current_statement_begin__ = 237;
                 for (int b = 1; b <= nyr; ++b) {
-                    current_statement_begin__ = 229;
+                    current_statement_begin__ = 238;
                     stan::model::assign(cf_yr, 
                                 stan::model::cons_list(stan::model::index_min_max(1, nage), stan::model::cons_list(stan::model::index_uni(b), stan::model::nil_index_list())), 
                                 elt_multiply(cf, stan::model::rvalue(cf_trend, stan::model::cons_list(stan::model::index_omni(), stan::model::cons_list(stan::model::index_uni(b), stan::model::nil_index_list())), "cf_trend")), 
                                 "assigning variable cf_yr");
                 }
-                current_statement_begin__ = 231;
+                current_statement_begin__ = 240;
                 for (int k = 1; k <= nbias; ++k) {
-                    current_statement_begin__ = 232;
+                    current_statement_begin__ = 241;
                     for (int b = 1; b <= nyr; ++b) {
-                        current_statement_begin__ = 233;
+                        current_statement_begin__ = 242;
                         for (int a = 1; a <= nage; ++a) {
-                            current_statement_begin__ = 234;
+                            current_statement_begin__ = 243;
                             stan::model::assign(inc_yr, 
                                         stan::model::cons_list(stan::model::index_uni(a), stan::model::cons_list(stan::model::index_uni(b), stan::model::cons_list(stan::model::index_uni(k), stan::model::nil_index_list()))), 
                                         (get_base1(inc, a, k, "inc", 1) * get_base1(inc_trend, a, b, "inc_trend", 1)), 
                                         "assigning variable inc_yr");
                         }
                     }
-                    current_statement_begin__ = 238;
+                    current_statement_begin__ = 247;
                     for (int b = 1; b <= nyr; ++b) {
-                        current_statement_begin__ = 239;
+                        current_statement_begin__ = 248;
                         stan::model::assign(state_probs_yr, 
                                     stan::model::cons_list(stan::model::index_uni(1), stan::model::cons_list(stan::model::index_uni(b), stan::model::cons_list(stan::model::index_uni(k), stan::model::cons_list(stan::model::index_uni(1), stan::model::nil_index_list())))), 
                                     1, 
                                     "assigning variable state_probs_yr");
-                        current_statement_begin__ = 240;
+                        current_statement_begin__ = 249;
                         stan::model::assign(state_probs_yr, 
                                     stan::model::cons_list(stan::model::index_uni(1), stan::model::cons_list(stan::model::index_uni(b), stan::model::cons_list(stan::model::index_uni(k), stan::model::cons_list(stan::model::index_uni(2), stan::model::nil_index_list())))), 
                                     0, 
                                     "assigning variable state_probs_yr");
-                        current_statement_begin__ = 241;
+                        current_statement_begin__ = 250;
                         stan::model::assign(state_probs_yr, 
                                     stan::model::cons_list(stan::model::index_uni(1), stan::model::cons_list(stan::model::index_uni(b), stan::model::cons_list(stan::model::index_uni(k), stan::model::cons_list(stan::model::index_uni(3), stan::model::nil_index_list())))), 
                                     0, 
                                     "assigning variable state_probs_yr");
-                        current_statement_begin__ = 244;
+                        current_statement_begin__ = 253;
                         for (int a = 2; a <= (nage + 1); ++a) {
-                            current_statement_begin__ = 245;
+                            current_statement_begin__ = 254;
                             stan::model::assign(state_probs_yr, 
                                         stan::model::cons_list(stan::model::index_uni(a), stan::model::cons_list(stan::model::index_uni(b), stan::model::cons_list(stan::model::index_uni(k), stan::model::cons_list(stan::model::index_min_max(1, 3), stan::model::nil_index_list())))), 
                                         rep_row_vector(0, 3), 
@@ -1512,47 +1556,47 @@ public:
                     }
                 }
             } else {
-                current_statement_begin__ = 250;
+                current_statement_begin__ = 259;
                 for (int k = 1; k <= nbias; ++k) {
-                    current_statement_begin__ = 251;
+                    current_statement_begin__ = 260;
                     stan::model::assign(state_probs, 
                                 stan::model::cons_list(stan::model::index_uni(1), stan::model::cons_list(stan::model::index_uni(k), stan::model::cons_list(stan::model::index_uni(1), stan::model::nil_index_list()))), 
                                 1, 
                                 "assigning variable state_probs");
-                    current_statement_begin__ = 252;
+                    current_statement_begin__ = 261;
                     stan::model::assign(state_probs, 
                                 stan::model::cons_list(stan::model::index_uni(1), stan::model::cons_list(stan::model::index_uni(k), stan::model::cons_list(stan::model::index_uni(2), stan::model::nil_index_list()))), 
                                 0, 
                                 "assigning variable state_probs");
-                    current_statement_begin__ = 253;
+                    current_statement_begin__ = 262;
                     stan::model::assign(state_probs, 
                                 stan::model::cons_list(stan::model::index_uni(1), stan::model::cons_list(stan::model::index_uni(k), stan::model::cons_list(stan::model::index_uni(3), stan::model::nil_index_list()))), 
                                 0, 
                                 "assigning variable state_probs");
                 }
             }
-            current_statement_begin__ = 257;
+            current_statement_begin__ = 266;
             for (int a = 1; a <= nage; ++a) {
-                current_statement_begin__ = 258;
+                current_statement_begin__ = 267;
                 if (as_bool(trend)) {
-                    current_statement_begin__ = 259;
+                    current_statement_begin__ = 268;
                     for (int k = 1; k <= nbias; ++k) {
-                        current_statement_begin__ = 260;
+                        current_statement_begin__ = 269;
                         if (as_bool(logical_gt(a, 1))) {
                             {
-                            current_statement_begin__ = 261;
+                            current_statement_begin__ = 270;
                             int y(0);
                             (void) y;  // dummy to suppress unused var warning
                             stan::math::fill(y, std::numeric_limits<int>::min());
-                            current_statement_begin__ = 262;
+                            current_statement_begin__ = 271;
                             for (int b = 2; b <= a; ++b) {
-                                current_statement_begin__ = 263;
+                                current_statement_begin__ = 272;
                                 stan::math::assign(y, ((nyr - a) + b));
-                                current_statement_begin__ = 264;
+                                current_statement_begin__ = 273;
                                 stan::math::assign(P, trans_probs(get_base1(get_base1(get_base1(inc_yr, (b - 1), "inc_yr", 1), (y - 1), "inc_yr", 2), k, "inc_yr", 3), get_base1(cf_yr, (b - 1), (y - 1), "cf_yr", 1), get_base1(rem, (b - 1), "rem", 1), pstream__));
-                                current_statement_begin__ = 265;
+                                current_statement_begin__ = 274;
                                 stan::math::assign(tmp, multiply(stan::model::rvalue(state_probs_yr, stan::model::cons_list(stan::model::index_uni((b - 1)), stan::model::cons_list(stan::model::index_uni((y - 1)), stan::model::cons_list(stan::model::index_uni(k), stan::model::cons_list(stan::model::index_min_max(1, 3), stan::model::nil_index_list())))), "state_probs_yr"), P));
-                                current_statement_begin__ = 266;
+                                current_statement_begin__ = 275;
                                 stan::model::assign(state_probs_yr, 
                                             stan::model::cons_list(stan::model::index_uni(b), stan::model::cons_list(stan::model::index_uni(y), stan::model::cons_list(stan::model::index_uni(k), stan::model::cons_list(stan::model::index_min_max(1, 3), stan::model::nil_index_list())))), 
                                             tmp, 
@@ -1560,62 +1604,62 @@ public:
                             }
                             }
                         }
-                        current_statement_begin__ = 270;
-                        stan::math::assign(P, trans_probs(get_base1(get_base1(get_base1(inc_yr, a, "inc_yr", 1), nyr, "inc_yr", 2), k, "inc_yr", 3), get_base1(cf_yr, a, nyr, "cf_yr", 1), get_base1(rem, a, "rem", 1), pstream__));
-                        current_statement_begin__ = 271;
-                        stan::model::assign(inc_prob, 
-                                    stan::model::cons_list(stan::model::index_uni(a), stan::model::cons_list(stan::model::index_uni(k), stan::model::nil_index_list())), 
-                                    (get_base1(P, 1, 2, "P", 1) + get_base1(P, 1, 3, "P", 1)), 
-                                    "assigning variable inc_prob");
-                        current_statement_begin__ = 272;
-                        stan::model::assign(prev, 
-                                    stan::model::cons_list(stan::model::index_uni(a), stan::model::cons_list(stan::model::index_uni(k), stan::model::nil_index_list())), 
-                                    (get_base1(get_base1(get_base1(get_base1(state_probs_yr, a, "state_probs_yr", 1), nyr, "state_probs_yr", 2), k, "state_probs_yr", 3), 2, "state_probs_yr", 4) / (get_base1(get_base1(get_base1(get_base1(state_probs_yr, a, "state_probs_yr", 1), nyr, "state_probs_yr", 2), k, "state_probs_yr", 3), 1, "state_probs_yr", 4) + get_base1(get_base1(get_base1(get_base1(state_probs_yr, a, "state_probs_yr", 1), nyr, "state_probs_yr", 2), k, "state_probs_yr", 3), 2, "state_probs_yr", 4))), 
-                                    "assigning variable prev");
-                        current_statement_begin__ = 274;
-                        if (as_bool(logical_eq(k, 1))) {
-                            current_statement_begin__ = 274;
-                            stan::model::assign(mort, 
-                                        stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
-                                        ((get_base1(P, 1, 3, "P", 1) * (1 - get_base1(prev, a, 1, "prev", 1))) + (get_base1(P, 2, 3, "P", 1) * get_base1(prev, a, 1, "prev", 1))), 
-                                        "assigning variable mort");
-                        }
-                    }
-                } else {
-                    current_statement_begin__ = 278;
-                    for (int k = 1; k <= nbias; ++k) {
                         current_statement_begin__ = 279;
-                        stan::math::assign(P, trans_probs(get_base1(inc, a, k, "inc", 1), get_base1(cf, a, "cf", 1), get_base1(rem, a, "rem", 1), pstream__));
+                        stan::math::assign(P, trans_probs(get_base1(get_base1(get_base1(inc_yr, a, "inc_yr", 1), nyr, "inc_yr", 2), k, "inc_yr", 3), get_base1(cf_yr, a, nyr, "cf_yr", 1), get_base1(rem, a, "rem", 1), pstream__));
                         current_statement_begin__ = 280;
                         stan::model::assign(inc_prob, 
                                     stan::model::cons_list(stan::model::index_uni(a), stan::model::cons_list(stan::model::index_uni(k), stan::model::nil_index_list())), 
-                                    (get_base1(P, 1, 2, "P", 1) + get_base1(P, 1, 3, "P", 1)), 
+                                    bound_prob((get_base1(P, 1, 2, "P", 1) + get_base1(P, 1, 3, "P", 1)), pstream__), 
                                     "assigning variable inc_prob");
                         current_statement_begin__ = 281;
+                        stan::model::assign(prev_prob, 
+                                    stan::model::cons_list(stan::model::index_uni(a), stan::model::cons_list(stan::model::index_uni(k), stan::model::nil_index_list())), 
+                                    (get_base1(get_base1(get_base1(get_base1(state_probs_yr, a, "state_probs_yr", 1), nyr, "state_probs_yr", 2), k, "state_probs_yr", 3), 2, "state_probs_yr", 4) / (get_base1(get_base1(get_base1(get_base1(state_probs_yr, a, "state_probs_yr", 1), nyr, "state_probs_yr", 2), k, "state_probs_yr", 3), 1, "state_probs_yr", 4) + get_base1(get_base1(get_base1(get_base1(state_probs_yr, a, "state_probs_yr", 1), nyr, "state_probs_yr", 2), k, "state_probs_yr", 3), 2, "state_probs_yr", 4))), 
+                                    "assigning variable prev_prob");
+                        current_statement_begin__ = 283;
+                        if (as_bool(logical_eq(k, 1))) {
+                            current_statement_begin__ = 283;
+                            stan::model::assign(mort_prob, 
+                                        stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
+                                        ((get_base1(P, 1, 3, "P", 1) * (1 - get_base1(prev_prob, a, 1, "prev_prob", 1))) + (get_base1(P, 2, 3, "P", 1) * get_base1(prev_prob, a, 1, "prev_prob", 1))), 
+                                        "assigning variable mort_prob");
+                        }
+                    }
+                } else {
+                    current_statement_begin__ = 287;
+                    for (int k = 1; k <= nbias; ++k) {
+                        current_statement_begin__ = 288;
+                        stan::math::assign(P, trans_probs(get_base1(inc, a, k, "inc", 1), get_base1(cf, a, "cf", 1), get_base1(rem, a, "rem", 1), pstream__));
+                        current_statement_begin__ = 289;
+                        stan::model::assign(inc_prob, 
+                                    stan::model::cons_list(stan::model::index_uni(a), stan::model::cons_list(stan::model::index_uni(k), stan::model::nil_index_list())), 
+                                    bound_prob((get_base1(P, 1, 2, "P", 1) + get_base1(P, 1, 3, "P", 1)), pstream__), 
+                                    "assigning variable inc_prob");
+                        current_statement_begin__ = 290;
                         if (as_bool(logical_gt(a, 1))) {
-                            current_statement_begin__ = 282;
-                            stan::model::assign(prev, 
+                            current_statement_begin__ = 291;
+                            stan::model::assign(prev_prob, 
                                         stan::model::cons_list(stan::model::index_uni(a), stan::model::cons_list(stan::model::index_uni(k), stan::model::nil_index_list())), 
                                         (get_base1(get_base1(get_base1(state_probs, a, "state_probs", 1), k, "state_probs", 2), 2, "state_probs", 3) / (get_base1(get_base1(get_base1(state_probs, a, "state_probs", 1), k, "state_probs", 2), 1, "state_probs", 3) + get_base1(get_base1(get_base1(state_probs, a, "state_probs", 1), k, "state_probs", 2), 2, "state_probs", 3))), 
-                                        "assigning variable prev");
+                                        "assigning variable prev_prob");
                         }
-                        current_statement_begin__ = 283;
+                        current_statement_begin__ = 292;
                         stan::math::assign(tmp, multiply(stan::model::rvalue(state_probs, stan::model::cons_list(stan::model::index_uni(a), stan::model::cons_list(stan::model::index_uni(k), stan::model::cons_list(stan::model::index_min_max(1, 3), stan::model::nil_index_list()))), "state_probs"), P));
-                        current_statement_begin__ = 284;
+                        current_statement_begin__ = 293;
                         stan::model::assign(state_probs, 
                                     stan::model::cons_list(stan::model::index_uni((a + 1)), stan::model::cons_list(stan::model::index_uni(k), stan::model::cons_list(stan::model::index_min_max(1, 3), stan::model::nil_index_list()))), 
                                     tmp, 
                                     "assigning variable state_probs");
-                        current_statement_begin__ = 285;
+                        current_statement_begin__ = 294;
                         if (as_bool(logical_eq(k, 1))) {
-                            current_statement_begin__ = 286;
-                            stan::model::assign(mort, 
+                            current_statement_begin__ = 295;
+                            stan::model::assign(mort_prob, 
                                         stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
-                                        ((get_base1(P, 1, 3, "P", 1) * (1 - get_base1(prev, a, 1, "prev", 1))) + (get_base1(P, 2, 3, "P", 1) * get_base1(prev, a, 1, "prev", 1))), 
-                                        "assigning variable mort");
-                            current_statement_begin__ = 287;
+                                        ((get_base1(P, 1, 3, "P", 1) * (1 - get_base1(prev_prob, a, 1, "prev_prob", 1))) + (get_base1(P, 2, 3, "P", 1) * get_base1(prev_prob, a, 1, "prev_prob", 1))), 
+                                        "assigning variable mort_prob");
+                            current_statement_begin__ = 296;
                             if (as_bool(remission)) {
-                                current_statement_begin__ = 288;
+                                current_statement_begin__ = 297;
                                 stan::model::assign(rem_prob, 
                                             stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
                                             get_base1(P, 2, 1, "P", 1), 
@@ -1624,27 +1668,16 @@ public:
                         }
                     }
                 }
-                current_statement_begin__ = 294;
-                if (as_bool(logical_lt(get_base1(mort, a, "mort", 1), 0))) {
-                    current_statement_begin__ = 294;
-                    stan::model::assign(mort, 
-                                stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
-                                0, 
-                                "assigning variable mort");
-                }
-                current_statement_begin__ = 295;
-                if (as_bool(logical_gt(get_base1(mort, a, "mort", 1), 1))) {
-                    current_statement_begin__ = 295;
-                    stan::model::assign(mort, 
-                                stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
-                                1, 
-                                "assigning variable mort");
-                }
+                current_statement_begin__ = 303;
+                stan::model::assign(mort_prob, 
+                            stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
+                            bound_prob(get_base1(mort_prob, a, "mort_prob", 1), pstream__), 
+                            "assigning variable mort_prob");
             }
             // validate transformed parameters
             const char* function__ = "validate transformed params";
             (void) function__;  // dummy to suppress unused var warning
-            current_statement_begin__ = 164;
+            current_statement_begin__ = 173;
             size_t cf_j_1_max__ = nage;
             for (size_t j_1__ = 0; j_1__ < cf_j_1_max__; ++j_1__) {
                 if (stan::math::is_uninitialized(cf(j_1__))) {
@@ -1654,7 +1687,7 @@ public:
                 }
             }
             check_greater_or_equal(function__, "cf", cf, 0);
-            current_statement_begin__ = 165;
+            current_statement_begin__ = 174;
             size_t dcf_j_1_max__ = (nage * increasing_cf);
             for (size_t j_1__ = 0; j_1__ < dcf_j_1_max__; ++j_1__) {
                 if (stan::math::is_uninitialized(dcf(j_1__))) {
@@ -1664,7 +1697,7 @@ public:
                 }
             }
             check_greater_or_equal(function__, "dcf", dcf, 0);
-            current_statement_begin__ = 166;
+            current_statement_begin__ = 175;
             size_t inc_j_1_max__ = nage;
             size_t inc_j_2_max__ = nbias;
             for (size_t j_1__ = 0; j_1__ < inc_j_1_max__; ++j_1__) {
@@ -1677,7 +1710,7 @@ public:
                 }
             }
             check_greater_or_equal(function__, "inc", inc, 0);
-            current_statement_begin__ = 167;
+            current_statement_begin__ = 176;
             size_t inc_prob_j_1_max__ = nage;
             size_t inc_prob_j_2_max__ = nbias;
             for (size_t j_1__ = 0; j_1__ < inc_prob_j_1_max__; ++j_1__) {
@@ -1691,7 +1724,7 @@ public:
             }
             check_greater_or_equal(function__, "inc_prob", inc_prob, 0);
             check_less_or_equal(function__, "inc_prob", inc_prob, 1);
-            current_statement_begin__ = 168;
+            current_statement_begin__ = 177;
             size_t rem_j_1_max__ = nage;
             for (size_t j_1__ = 0; j_1__ < rem_j_1_max__; ++j_1__) {
                 if (stan::math::is_uninitialized(rem(j_1__))) {
@@ -1701,7 +1734,7 @@ public:
                 }
             }
             check_greater_or_equal(function__, "rem", rem, 0);
-            current_statement_begin__ = 169;
+            current_statement_begin__ = 178;
             size_t rem_prob_j_1_max__ = (nage * remission);
             for (size_t j_1__ = 0; j_1__ < rem_prob_j_1_max__; ++j_1__) {
                 if (stan::math::is_uninitialized(rem_prob(j_1__))) {
@@ -1712,7 +1745,7 @@ public:
             }
             check_greater_or_equal(function__, "rem_prob", rem_prob, 0);
             check_less_or_equal(function__, "rem_prob", rem_prob, 1);
-            current_statement_begin__ = 171;
+            current_statement_begin__ = 180;
             size_t state_probs_k_0_max__ = ((nage + 1) * (1 - trend));
             size_t state_probs_k_1_max__ = nbias;
             size_t state_probs_j_1_max__ = 3;
@@ -1727,7 +1760,7 @@ public:
                     }
                 }
             }
-            current_statement_begin__ = 172;
+            current_statement_begin__ = 181;
             size_t tmp_j_1_max__ = 3;
             for (size_t j_1__ = 0; j_1__ < tmp_j_1_max__; ++j_1__) {
                 if (stan::math::is_uninitialized(tmp(j_1__))) {
@@ -1736,7 +1769,7 @@ public:
                     stan::lang::rethrow_located(std::runtime_error(std::string("Error initializing variable tmp: ") + msg__.str()), current_statement_begin__, prog_reader__());
                 }
             }
-            current_statement_begin__ = 173;
+            current_statement_begin__ = 182;
             size_t P_j_1_max__ = 3;
             size_t P_j_2_max__ = 3;
             for (size_t j_1__ = 0; j_1__ < P_j_1_max__; ++j_1__) {
@@ -1750,33 +1783,33 @@ public:
             }
             check_greater_or_equal(function__, "P", P, 0);
             check_less_or_equal(function__, "P", P, 1);
-            current_statement_begin__ = 174;
-            size_t prev_j_1_max__ = nage;
-            size_t prev_j_2_max__ = nbias;
-            for (size_t j_1__ = 0; j_1__ < prev_j_1_max__; ++j_1__) {
-                for (size_t j_2__ = 0; j_2__ < prev_j_2_max__; ++j_2__) {
-                    if (stan::math::is_uninitialized(prev(j_1__, j_2__))) {
+            current_statement_begin__ = 183;
+            size_t prev_prob_j_1_max__ = nage;
+            size_t prev_prob_j_2_max__ = nbias;
+            for (size_t j_1__ = 0; j_1__ < prev_prob_j_1_max__; ++j_1__) {
+                for (size_t j_2__ = 0; j_2__ < prev_prob_j_2_max__; ++j_2__) {
+                    if (stan::math::is_uninitialized(prev_prob(j_1__, j_2__))) {
                         std::stringstream msg__;
-                        msg__ << "Undefined transformed parameter: prev" << "(" << j_1__ << ", " << j_2__ << ")";
-                        stan::lang::rethrow_located(std::runtime_error(std::string("Error initializing variable prev: ") + msg__.str()), current_statement_begin__, prog_reader__());
+                        msg__ << "Undefined transformed parameter: prev_prob" << "(" << j_1__ << ", " << j_2__ << ")";
+                        stan::lang::rethrow_located(std::runtime_error(std::string("Error initializing variable prev_prob: ") + msg__.str()), current_statement_begin__, prog_reader__());
                     }
                 }
             }
-            check_greater_or_equal(function__, "prev", prev, 0);
-            current_statement_begin__ = 175;
-            size_t mort_k_0_max__ = nage;
-            for (size_t k_0__ = 0; k_0__ < mort_k_0_max__; ++k_0__) {
-                if (stan::math::is_uninitialized(mort[k_0__])) {
+            check_greater_or_equal(function__, "prev_prob", prev_prob, 0);
+            current_statement_begin__ = 184;
+            size_t mort_prob_k_0_max__ = nage;
+            for (size_t k_0__ = 0; k_0__ < mort_prob_k_0_max__; ++k_0__) {
+                if (stan::math::is_uninitialized(mort_prob[k_0__])) {
                     std::stringstream msg__;
-                    msg__ << "Undefined transformed parameter: mort" << "[" << k_0__ << "]";
-                    stan::lang::rethrow_located(std::runtime_error(std::string("Error initializing variable mort: ") + msg__.str()), current_statement_begin__, prog_reader__());
+                    msg__ << "Undefined transformed parameter: mort_prob" << "[" << k_0__ << "]";
+                    stan::lang::rethrow_located(std::runtime_error(std::string("Error initializing variable mort_prob: ") + msg__.str()), current_statement_begin__, prog_reader__());
                 }
             }
-            size_t mort_i_0_max__ = nage;
-            for (size_t i_0__ = 0; i_0__ < mort_i_0_max__; ++i_0__) {
-                check_greater_or_equal(function__, "mort[i_0__]", mort[i_0__], 0);
+            size_t mort_prob_i_0_max__ = nage;
+            for (size_t i_0__ = 0; i_0__ < mort_prob_i_0_max__; ++i_0__) {
+                check_greater_or_equal(function__, "mort_prob[i_0__]", mort_prob[i_0__], 0);
             }
-            current_statement_begin__ = 177;
+            current_statement_begin__ = 186;
             size_t cf_yr_j_1_max__ = (nage * trend);
             size_t cf_yr_j_2_max__ = (nyr * trend);
             for (size_t j_1__ = 0; j_1__ < cf_yr_j_1_max__; ++j_1__) {
@@ -1789,7 +1822,7 @@ public:
                 }
             }
             check_greater_or_equal(function__, "cf_yr", cf_yr, 0);
-            current_statement_begin__ = 178;
+            current_statement_begin__ = 187;
             size_t inc_yr_k_0_max__ = (nage * trend);
             size_t inc_yr_k_1_max__ = (nyr * trend);
             size_t inc_yr_k_2_max__ = nbias;
@@ -1814,7 +1847,7 @@ public:
                     }
                 }
             }
-            current_statement_begin__ = 179;
+            current_statement_begin__ = 188;
             size_t state_probs_yr_k_0_max__ = ((nage + 1) * trend);
             size_t state_probs_yr_k_1_max__ = (nyr * trend);
             size_t state_probs_yr_k_2_max__ = nbias;
@@ -1832,21 +1865,21 @@ public:
                     }
                 }
             }
-            current_statement_begin__ = 181;
+            current_statement_begin__ = 190;
             if (stan::math::is_uninitialized(lambda_cf_use)) {
                 std::stringstream msg__;
                 msg__ << "Undefined transformed parameter: lambda_cf_use";
                 stan::lang::rethrow_located(std::runtime_error(std::string("Error initializing variable lambda_cf_use: ") + msg__.str()), current_statement_begin__, prog_reader__());
             }
             check_greater_or_equal(function__, "lambda_cf_use", lambda_cf_use, 0);
-            current_statement_begin__ = 182;
+            current_statement_begin__ = 191;
             if (stan::math::is_uninitialized(lambda_inc_use)) {
                 std::stringstream msg__;
                 msg__ << "Undefined transformed parameter: lambda_inc_use";
                 stan::lang::rethrow_located(std::runtime_error(std::string("Error initializing variable lambda_inc_use: ") + msg__.str()), current_statement_begin__, prog_reader__());
             }
             check_greater_or_equal(function__, "lambda_inc_use", lambda_inc_use, 0);
-            current_statement_begin__ = 183;
+            current_statement_begin__ = 192;
             if (stan::math::is_uninitialized(lambda_rem_use)) {
                 std::stringstream msg__;
                 msg__ << "Undefined transformed parameter: lambda_rem_use";
@@ -1854,111 +1887,111 @@ public:
             }
             check_greater_or_equal(function__, "lambda_rem_use", lambda_rem_use, 0);
             // model body
-            current_statement_begin__ = 300;
-            lp_accum__.add(binomial_log<propto__>(mort_num, mort_denom, mort));
-            current_statement_begin__ = 301;
+            current_statement_begin__ = 308;
+            lp_accum__.add(binomial_log<propto__>(mort_num, mort_denom, mort_prob));
+            current_statement_begin__ = 309;
             lp_accum__.add(binomial_log<propto__>(inc_num, inc_denom, stan::model::rvalue(inc_prob, stan::model::cons_list(stan::model::index_min_max(1, nage), stan::model::cons_list(stan::model::index_uni(incdata_ind), stan::model::nil_index_list())), "inc_prob")));
-            current_statement_begin__ = 302;
-            lp_accum__.add(binomial_log<propto__>(prev_num, prev_denom, stan::model::rvalue(prev, stan::model::cons_list(stan::model::index_min_max(1, nage), stan::model::cons_list(stan::model::index_uni(prevdata_ind), stan::model::nil_index_list())), "prev")));
-            current_statement_begin__ = 303;
+            current_statement_begin__ = 310;
+            lp_accum__.add(binomial_log<propto__>(prev_num, prev_denom, stan::model::rvalue(prev_prob, stan::model::cons_list(stan::model::index_min_max(1, nage), stan::model::cons_list(stan::model::index_uni(prevdata_ind), stan::model::nil_index_list())), "prev_prob")));
+            current_statement_begin__ = 311;
             if (as_bool(remission)) {
-                current_statement_begin__ = 304;
+                current_statement_begin__ = 312;
                 lp_accum__.add(binomial_log<propto__>(rem_num, rem_denom, rem_prob));
             }
-            current_statement_begin__ = 307;
+            current_statement_begin__ = 315;
             if (as_bool(smooth_cf)) {
-                current_statement_begin__ = 308;
+                current_statement_begin__ = 316;
                 if (as_bool(logical_negation(const_cf))) {
-                    current_statement_begin__ = 309;
+                    current_statement_begin__ = 317;
                     for (int i = 1; i <= (K - 2); ++i) {
-                        current_statement_begin__ = 310;
+                        current_statement_begin__ = 318;
                         lp_accum__.add(normal_log<propto__>(get_base1(beta, i, "beta", 1), 0, lambda_cf_use));
                     }
-                    current_statement_begin__ = 312;
+                    current_statement_begin__ = 320;
                     for (int i = (K - 1); i <= K; ++i) {
-                        current_statement_begin__ = 313;
+                        current_statement_begin__ = 321;
                         lp_accum__.add(normal_log<propto__>(get_base1(beta, i, "beta", 1), 0, 100));
                     }
                 }
-                current_statement_begin__ = 316;
+                current_statement_begin__ = 324;
                 if (as_bool(logical_negation(scf_isfixed))) {
-                    current_statement_begin__ = 317;
+                    current_statement_begin__ = 325;
                     lp_accum__.add(gamma_log<propto__>(get_base1(lambda_cf, 1, "lambda_cf", 1), 2, get_base1(sprior, 2, "sprior", 1)));
                 }
             } else {
-                current_statement_begin__ = 320;
+                current_statement_begin__ = 328;
                 for (int a = 1; a <= nage; ++a) {
-                    current_statement_begin__ = 321;
+                    current_statement_begin__ = 329;
                     lp_accum__.add(gamma_log<propto__>(get_base1(cf_par, a, "cf_par", 1), get_base1(cf_prior, 1, "cf_prior", 1), get_base1(cf_prior, 2, "cf_prior", 1)));
                 }
             }
-            current_statement_begin__ = 324;
+            current_statement_begin__ = 332;
             if (as_bool(increasing_cf)) {
-                current_statement_begin__ = 325;
+                current_statement_begin__ = 333;
                 lp_accum__.add(gamma_log<propto__>(get_base1(cfbase, 1, "cfbase", 1), get_base1(cf_prior, 1, "cf_prior", 1), get_base1(cf_prior, 2, "cf_prior", 1)));
             }
-            current_statement_begin__ = 328;
+            current_statement_begin__ = 336;
             if (as_bool(smooth_inc)) {
-                current_statement_begin__ = 329;
+                current_statement_begin__ = 337;
                 for (int i = 1; i <= (K - 2); ++i) {
-                    current_statement_begin__ = 330;
+                    current_statement_begin__ = 338;
                     lp_accum__.add(normal_log<propto__>(get_base1(beta_inc, i, "beta_inc", 1), 0, lambda_inc_use));
                 }
-                current_statement_begin__ = 332;
+                current_statement_begin__ = 340;
                 for (int i = (K - 1); i <= K; ++i) {
-                    current_statement_begin__ = 333;
+                    current_statement_begin__ = 341;
                     lp_accum__.add(normal_log<propto__>(get_base1(beta_inc, i, "beta_inc", 1), 0, 100));
                 }
-                current_statement_begin__ = 335;
+                current_statement_begin__ = 343;
                 if (as_bool(logical_negation(sinc_isfixed))) {
-                    current_statement_begin__ = 336;
+                    current_statement_begin__ = 344;
                     lp_accum__.add(gamma_log<propto__>(get_base1(lambda_inc, 1, "lambda_inc", 1), 2, get_base1(sprior, 1, "sprior", 1)));
                 }
             } else {
-                current_statement_begin__ = 339;
+                current_statement_begin__ = 347;
                 for (int a = 1; a <= nage; ++a) {
-                    current_statement_begin__ = 340;
+                    current_statement_begin__ = 348;
                     lp_accum__.add(gamma_log<propto__>(get_base1(inc_par, a, "inc_par", 1), get_base1(inc_prior, 1, "inc_prior", 1), get_base1(inc_prior, 2, "inc_prior", 1)));
                 }
             }
-            current_statement_begin__ = 344;
+            current_statement_begin__ = 352;
             if (as_bool(remission)) {
-                current_statement_begin__ = 345;
+                current_statement_begin__ = 353;
                 if (as_bool(smooth_rem)) {
-                    current_statement_begin__ = 346;
+                    current_statement_begin__ = 354;
                     for (int i = 1; i <= (K - 2); ++i) {
-                        current_statement_begin__ = 347;
+                        current_statement_begin__ = 355;
                         lp_accum__.add(normal_log<propto__>(get_base1(beta_rem, i, "beta_rem", 1), 0, lambda_rem_use));
                     }
-                    current_statement_begin__ = 349;
+                    current_statement_begin__ = 357;
                     for (int i = (K - 1); i <= K; ++i) {
-                        current_statement_begin__ = 350;
+                        current_statement_begin__ = 358;
                         lp_accum__.add(normal_log<propto__>(get_base1(beta_rem, i, "beta_rem", 1), 0, 100));
                     }
-                    current_statement_begin__ = 352;
+                    current_statement_begin__ = 360;
                     if (as_bool(logical_negation(srem_isfixed))) {
-                        current_statement_begin__ = 353;
+                        current_statement_begin__ = 361;
                         lp_accum__.add(gamma_log<propto__>(get_base1(lambda_rem, 1, "lambda_rem", 1), 2, get_base1(sprior, 3, "sprior", 1)));
                     }
                 } else if (as_bool(const_rem)) {
-                    current_statement_begin__ = 354;
+                    current_statement_begin__ = 362;
                     lp_accum__.add(gamma_log<propto__>(get_base1(rem_par, 1, "rem_par", 1), get_base1(rem_prior, 1, "rem_prior", 1), get_base1(rem_prior, 2, "rem_prior", 1)));
                 } else {
-                    current_statement_begin__ = 356;
+                    current_statement_begin__ = 364;
                     for (int a = 1; a <= nage; ++a) {
-                        current_statement_begin__ = 357;
+                        current_statement_begin__ = 365;
                         lp_accum__.add(gamma_log<propto__>(get_base1(rem_par, a, "rem_par", 1), get_base1(rem_prior, 1, "rem_prior", 1), get_base1(rem_prior, 2, "rem_prior", 1)));
                     }
                 }
             }
-            current_statement_begin__ = 362;
+            current_statement_begin__ = 370;
             if (as_bool(logical_eq(nbias, 2))) {
-                current_statement_begin__ = 363;
+                current_statement_begin__ = 371;
                 lp_accum__.add(normal_log<propto__>(bias_loghr, 0, 1));
             }
-            current_statement_begin__ = 366;
+            current_statement_begin__ = 374;
             if (as_bool(prev_zero)) {
-                current_statement_begin__ = 367;
+                current_statement_begin__ = 375;
                 lp_accum__.add(beta_log<propto__>(get_base1(prevzero, 1, "prevzero", 1), 2, 2));
             }
         } catch (const std::exception& e) {
@@ -2002,8 +2035,8 @@ public:
         names__.push_back("state_probs");
         names__.push_back("tmp");
         names__.push_back("P");
-        names__.push_back("prev");
-        names__.push_back("mort");
+        names__.push_back("prev_prob");
+        names__.push_back("mort_prob");
         names__.push_back("cf_yr");
         names__.push_back("inc_yr");
         names__.push_back("state_probs_yr");
@@ -2014,6 +2047,7 @@ public:
         names__.push_back("ll_inc");
         names__.push_back("ll_prev");
         names__.push_back("ll_rem");
+        names__.push_back("ll_overall");
     }
     void get_dims(std::vector<std::vector<size_t> >& dimss__) const {
         dimss__.resize(0);
@@ -2126,6 +2160,9 @@ public:
         dims__.resize(0);
         dims__.push_back((nage * remission));
         dimss__.push_back(dims__);
+        dims__.resize(0);
+        dims__.push_back((nage * (3 + remission)));
+        dimss__.push_back(dims__);
     }
     template <typename RNG>
     void write_array(RNG& base_rng__,
@@ -2209,81 +2246,81 @@ public:
         if (!include_tparams__ && !include_gqs__) return;
         try {
             // declare and define transformed parameters
-            current_statement_begin__ = 164;
+            current_statement_begin__ = 173;
             validate_non_negative_index("cf", "nage", nage);
             Eigen::Matrix<double, Eigen::Dynamic, 1> cf(nage);
             stan::math::initialize(cf, DUMMY_VAR__);
             stan::math::fill(cf, DUMMY_VAR__);
-            current_statement_begin__ = 165;
+            current_statement_begin__ = 174;
             validate_non_negative_index("dcf", "(nage * increasing_cf)", (nage * increasing_cf));
             Eigen::Matrix<double, Eigen::Dynamic, 1> dcf((nage * increasing_cf));
             stan::math::initialize(dcf, DUMMY_VAR__);
             stan::math::fill(dcf, DUMMY_VAR__);
-            current_statement_begin__ = 166;
+            current_statement_begin__ = 175;
             validate_non_negative_index("inc", "nage", nage);
             validate_non_negative_index("inc", "nbias", nbias);
             Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> inc(nage, nbias);
             stan::math::initialize(inc, DUMMY_VAR__);
             stan::math::fill(inc, DUMMY_VAR__);
-            current_statement_begin__ = 167;
+            current_statement_begin__ = 176;
             validate_non_negative_index("inc_prob", "nage", nage);
             validate_non_negative_index("inc_prob", "nbias", nbias);
             Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> inc_prob(nage, nbias);
             stan::math::initialize(inc_prob, DUMMY_VAR__);
             stan::math::fill(inc_prob, DUMMY_VAR__);
-            current_statement_begin__ = 168;
+            current_statement_begin__ = 177;
             validate_non_negative_index("rem", "nage", nage);
             Eigen::Matrix<double, Eigen::Dynamic, 1> rem(nage);
             stan::math::initialize(rem, DUMMY_VAR__);
             stan::math::fill(rem, DUMMY_VAR__);
-            current_statement_begin__ = 169;
+            current_statement_begin__ = 178;
             validate_non_negative_index("rem_prob", "(nage * remission)", (nage * remission));
             Eigen::Matrix<double, Eigen::Dynamic, 1> rem_prob((nage * remission));
             stan::math::initialize(rem_prob, DUMMY_VAR__);
             stan::math::fill(rem_prob, DUMMY_VAR__);
-            current_statement_begin__ = 171;
+            current_statement_begin__ = 180;
             validate_non_negative_index("state_probs", "3", 3);
             validate_non_negative_index("state_probs", "((nage + 1) * (1 - trend))", ((nage + 1) * (1 - trend)));
             validate_non_negative_index("state_probs", "nbias", nbias);
             std::vector<std::vector<Eigen::Matrix<double, 1, Eigen::Dynamic> > > state_probs(((nage + 1) * (1 - trend)), std::vector<Eigen::Matrix<double, 1, Eigen::Dynamic> >(nbias, Eigen::Matrix<double, 1, Eigen::Dynamic>(3)));
             stan::math::initialize(state_probs, DUMMY_VAR__);
             stan::math::fill(state_probs, DUMMY_VAR__);
-            current_statement_begin__ = 172;
+            current_statement_begin__ = 181;
             validate_non_negative_index("tmp", "3", 3);
             Eigen::Matrix<double, 1, Eigen::Dynamic> tmp(3);
             stan::math::initialize(tmp, DUMMY_VAR__);
             stan::math::fill(tmp, DUMMY_VAR__);
-            current_statement_begin__ = 173;
+            current_statement_begin__ = 182;
             validate_non_negative_index("P", "3", 3);
             validate_non_negative_index("P", "3", 3);
             Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> P(3, 3);
             stan::math::initialize(P, DUMMY_VAR__);
             stan::math::fill(P, DUMMY_VAR__);
-            current_statement_begin__ = 174;
-            validate_non_negative_index("prev", "nage", nage);
-            validate_non_negative_index("prev", "nbias", nbias);
-            Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> prev(nage, nbias);
-            stan::math::initialize(prev, DUMMY_VAR__);
-            stan::math::fill(prev, DUMMY_VAR__);
-            current_statement_begin__ = 175;
-            validate_non_negative_index("mort", "nage", nage);
-            std::vector<double> mort(nage, double(0));
-            stan::math::initialize(mort, DUMMY_VAR__);
-            stan::math::fill(mort, DUMMY_VAR__);
-            current_statement_begin__ = 177;
+            current_statement_begin__ = 183;
+            validate_non_negative_index("prev_prob", "nage", nage);
+            validate_non_negative_index("prev_prob", "nbias", nbias);
+            Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> prev_prob(nage, nbias);
+            stan::math::initialize(prev_prob, DUMMY_VAR__);
+            stan::math::fill(prev_prob, DUMMY_VAR__);
+            current_statement_begin__ = 184;
+            validate_non_negative_index("mort_prob", "nage", nage);
+            std::vector<double> mort_prob(nage, double(0));
+            stan::math::initialize(mort_prob, DUMMY_VAR__);
+            stan::math::fill(mort_prob, DUMMY_VAR__);
+            current_statement_begin__ = 186;
             validate_non_negative_index("cf_yr", "(nage * trend)", (nage * trend));
             validate_non_negative_index("cf_yr", "(nyr * trend)", (nyr * trend));
             Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> cf_yr((nage * trend), (nyr * trend));
             stan::math::initialize(cf_yr, DUMMY_VAR__);
             stan::math::fill(cf_yr, DUMMY_VAR__);
-            current_statement_begin__ = 178;
+            current_statement_begin__ = 187;
             validate_non_negative_index("inc_yr", "(nage * trend)", (nage * trend));
             validate_non_negative_index("inc_yr", "(nyr * trend)", (nyr * trend));
             validate_non_negative_index("inc_yr", "nbias", nbias);
             std::vector<std::vector<std::vector<double> > > inc_yr((nage * trend), std::vector<std::vector<double> >((nyr * trend), std::vector<double>(nbias, double(0))));
             stan::math::initialize(inc_yr, DUMMY_VAR__);
             stan::math::fill(inc_yr, DUMMY_VAR__);
-            current_statement_begin__ = 179;
+            current_statement_begin__ = 188;
             validate_non_negative_index("state_probs_yr", "3", 3);
             validate_non_negative_index("state_probs_yr", "((nage + 1) * trend)", ((nage + 1) * trend));
             validate_non_negative_index("state_probs_yr", "(nyr * trend)", (nyr * trend));
@@ -2291,189 +2328,189 @@ public:
             std::vector<std::vector<std::vector<Eigen::Matrix<double, 1, Eigen::Dynamic> > > > state_probs_yr(((nage + 1) * trend), std::vector<std::vector<Eigen::Matrix<double, 1, Eigen::Dynamic> > >((nyr * trend), std::vector<Eigen::Matrix<double, 1, Eigen::Dynamic> >(nbias, Eigen::Matrix<double, 1, Eigen::Dynamic>(3))));
             stan::math::initialize(state_probs_yr, DUMMY_VAR__);
             stan::math::fill(state_probs_yr, DUMMY_VAR__);
-            current_statement_begin__ = 181;
+            current_statement_begin__ = 190;
             double lambda_cf_use;
             (void) lambda_cf_use;  // dummy to suppress unused var warning
             stan::math::initialize(lambda_cf_use, DUMMY_VAR__);
             stan::math::fill(lambda_cf_use, DUMMY_VAR__);
-            current_statement_begin__ = 182;
+            current_statement_begin__ = 191;
             double lambda_inc_use;
             (void) lambda_inc_use;  // dummy to suppress unused var warning
             stan::math::initialize(lambda_inc_use, DUMMY_VAR__);
             stan::math::fill(lambda_inc_use, DUMMY_VAR__);
-            current_statement_begin__ = 183;
+            current_statement_begin__ = 192;
             double lambda_rem_use;
             (void) lambda_rem_use;  // dummy to suppress unused var warning
             stan::math::initialize(lambda_rem_use, DUMMY_VAR__);
             stan::math::fill(lambda_rem_use, DUMMY_VAR__);
             // do transformed parameters statements
-            current_statement_begin__ = 184;
+            current_statement_begin__ = 193;
             if (as_bool((primitive_value(scf_isfixed) || primitive_value(logical_negation(smooth_cf))))) {
-                current_statement_begin__ = 184;
+                current_statement_begin__ = 193;
                 stan::math::assign(lambda_cf_use, lambda_cf_fixed);
             } else {
-                current_statement_begin__ = 184;
+                current_statement_begin__ = 193;
                 stan::math::assign(lambda_cf_use, get_base1(lambda_cf, 1, "lambda_cf", 1));
             }
-            current_statement_begin__ = 185;
+            current_statement_begin__ = 194;
             if (as_bool((primitive_value(sinc_isfixed) || primitive_value(logical_negation(smooth_inc))))) {
-                current_statement_begin__ = 185;
+                current_statement_begin__ = 194;
                 stan::math::assign(lambda_inc_use, lambda_inc_fixed);
             } else {
-                current_statement_begin__ = 185;
+                current_statement_begin__ = 194;
                 stan::math::assign(lambda_inc_use, get_base1(lambda_inc, 1, "lambda_inc", 1));
             }
-            current_statement_begin__ = 186;
+            current_statement_begin__ = 195;
             if (as_bool((primitive_value(srem_isfixed) || primitive_value(logical_negation(smooth_rem))))) {
-                current_statement_begin__ = 186;
+                current_statement_begin__ = 195;
                 stan::math::assign(lambda_rem_use, lambda_rem_fixed);
             } else {
-                current_statement_begin__ = 186;
+                current_statement_begin__ = 195;
                 stan::math::assign(lambda_rem_use, get_base1(lambda_rem, 1, "lambda_rem", 1));
             }
-            current_statement_begin__ = 190;
+            current_statement_begin__ = 199;
             if (as_bool(smooth_inc)) {
-                current_statement_begin__ = 190;
+                current_statement_begin__ = 199;
                 stan::model::assign(inc, 
                             stan::model::cons_list(stan::model::index_min_max(1, nage), stan::model::cons_list(stan::model::index_uni(1), stan::model::nil_index_list())), 
                             stan::math::exp(multiply(X, beta_inc)), 
                             "assigning variable inc");
             } else {
-                current_statement_begin__ = 190;
+                current_statement_begin__ = 199;
                 stan::model::assign(inc, 
                             stan::model::cons_list(stan::model::index_min_max(1, nage), stan::model::cons_list(stan::model::index_uni(1), stan::model::nil_index_list())), 
                             inc_par, 
                             "assigning variable inc");
             }
-            current_statement_begin__ = 191;
+            current_statement_begin__ = 200;
             if (as_bool(logical_gt(nbias, 1))) {
-                current_statement_begin__ = 192;
+                current_statement_begin__ = 201;
                 stan::model::assign(inc, 
                             stan::model::cons_list(stan::model::index_min_max(1, nage), stan::model::cons_list(stan::model::index_uni(2), stan::model::nil_index_list())), 
                             stan::model::deep_copy(stan::math::exp(add(stan::math::log(stan::model::rvalue(inc, stan::model::cons_list(stan::model::index_min_max(1, nage), stan::model::cons_list(stan::model::index_uni(1), stan::model::nil_index_list())), "inc")), get_base1(bias_loghr, 1, "bias_loghr", 1)))), 
                             "assigning variable inc");
             }
-            current_statement_begin__ = 194;
+            current_statement_begin__ = 203;
             if (as_bool(remission)) {
-                current_statement_begin__ = 195;
+                current_statement_begin__ = 204;
                 if (as_bool(const_rem)) {
-                    current_statement_begin__ = 196;
+                    current_statement_begin__ = 205;
                     for (int a = 1; a <= nage; ++a) {
-                        current_statement_begin__ = 197;
+                        current_statement_begin__ = 206;
                         stan::model::assign(rem, 
                                     stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
                                     get_base1(rem_par, 1, "rem_par", 1), 
                                     "assigning variable rem");
                     }
                 } else if (as_bool(smooth_rem)) {
-                    current_statement_begin__ = 199;
+                    current_statement_begin__ = 208;
                     stan::math::assign(rem, stan::math::exp(multiply(X, beta_rem)));
                 } else {
-                    current_statement_begin__ = 200;
+                    current_statement_begin__ = 209;
                     stan::math::assign(rem, rem_par);
                 }
             } else {
-                current_statement_begin__ = 201;
+                current_statement_begin__ = 210;
                 stan::math::assign(rem, rep_vector(0, nage));
             }
-            current_statement_begin__ = 204;
+            current_statement_begin__ = 213;
             for (int k = 1; k <= nbias; ++k) {
-                current_statement_begin__ = 205;
+                current_statement_begin__ = 214;
                 if (as_bool((primitive_value(logical_gt(get_base1(prev_denom, 1, "prev_denom", 1), 0)) && primitive_value((primitive_value(logical_gt(get_base1(prev_num, 1, "prev_num", 1), 0)) || primitive_value(prev_zero)))))) {
-                    current_statement_begin__ = 206;
-                    stan::model::assign(prev, 
+                    current_statement_begin__ = 215;
+                    stan::model::assign(prev_prob, 
                                 stan::model::cons_list(stan::model::index_uni(1), stan::model::cons_list(stan::model::index_uni(k), stan::model::nil_index_list())), 
                                 get_base1(prevzero, 1, "prevzero", 1), 
-                                "assigning variable prev");
+                                "assigning variable prev_prob");
                 } else {
-                    current_statement_begin__ = 207;
-                    stan::model::assign(prev, 
+                    current_statement_begin__ = 216;
+                    stan::model::assign(prev_prob, 
                                 stan::model::cons_list(stan::model::index_uni(1), stan::model::cons_list(stan::model::index_uni(k), stan::model::nil_index_list())), 
                                 0, 
-                                "assigning variable prev");
+                                "assigning variable prev_prob");
                 }
             }
-            current_statement_begin__ = 210;
+            current_statement_begin__ = 219;
             if (as_bool(increasing_cf)) {
-                current_statement_begin__ = 212;
+                current_statement_begin__ = 221;
                 for (int a = 1; a <= (eqage - 1); ++a) {
-                    current_statement_begin__ = 213;
+                    current_statement_begin__ = 222;
                     stan::model::assign(cf, 
                                 stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
                                 get_base1(cfbase, 1, "cfbase", 1), 
                                 "assigning variable cf");
                 }
-                current_statement_begin__ = 215;
+                current_statement_begin__ = 224;
                 if (as_bool(logical_negation(const_cf))) {
-                    current_statement_begin__ = 216;
+                    current_statement_begin__ = 225;
                     stan::math::assign(dcf, stan::math::exp(multiply(X, beta)));
                 } else {
-                    current_statement_begin__ = 217;
+                    current_statement_begin__ = 226;
                     stan::math::assign(dcf, rep_vector(0, nage));
                 }
-                current_statement_begin__ = 218;
+                current_statement_begin__ = 227;
                 for (int a = eqage; a <= nage; ++a) {
-                    current_statement_begin__ = 219;
+                    current_statement_begin__ = 228;
                     stan::model::assign(cf, 
                                 stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
                                 (get_base1(cf, (a - 1), "cf", 1) + get_base1(dcf, a, "dcf", 1)), 
                                 "assigning variable cf");
                 }
             } else {
-                current_statement_begin__ = 222;
+                current_statement_begin__ = 231;
                 if (as_bool(smooth_cf)) {
-                    current_statement_begin__ = 222;
+                    current_statement_begin__ = 231;
                     stan::math::assign(cf, stan::math::exp(multiply(X, beta)));
                 } else {
-                    current_statement_begin__ = 222;
+                    current_statement_begin__ = 231;
                     stan::math::assign(cf, cf_par);
                 }
             }
-            current_statement_begin__ = 225;
+            current_statement_begin__ = 234;
             if (as_bool(trend)) {
-                current_statement_begin__ = 227;
+                current_statement_begin__ = 236;
                 stan::math::assign(cf, stan::math::exp(multiply(X, beta)));
-                current_statement_begin__ = 228;
+                current_statement_begin__ = 237;
                 for (int b = 1; b <= nyr; ++b) {
-                    current_statement_begin__ = 229;
+                    current_statement_begin__ = 238;
                     stan::model::assign(cf_yr, 
                                 stan::model::cons_list(stan::model::index_min_max(1, nage), stan::model::cons_list(stan::model::index_uni(b), stan::model::nil_index_list())), 
                                 elt_multiply(cf, stan::model::rvalue(cf_trend, stan::model::cons_list(stan::model::index_omni(), stan::model::cons_list(stan::model::index_uni(b), stan::model::nil_index_list())), "cf_trend")), 
                                 "assigning variable cf_yr");
                 }
-                current_statement_begin__ = 231;
+                current_statement_begin__ = 240;
                 for (int k = 1; k <= nbias; ++k) {
-                    current_statement_begin__ = 232;
+                    current_statement_begin__ = 241;
                     for (int b = 1; b <= nyr; ++b) {
-                        current_statement_begin__ = 233;
+                        current_statement_begin__ = 242;
                         for (int a = 1; a <= nage; ++a) {
-                            current_statement_begin__ = 234;
+                            current_statement_begin__ = 243;
                             stan::model::assign(inc_yr, 
                                         stan::model::cons_list(stan::model::index_uni(a), stan::model::cons_list(stan::model::index_uni(b), stan::model::cons_list(stan::model::index_uni(k), stan::model::nil_index_list()))), 
                                         (get_base1(inc, a, k, "inc", 1) * get_base1(inc_trend, a, b, "inc_trend", 1)), 
                                         "assigning variable inc_yr");
                         }
                     }
-                    current_statement_begin__ = 238;
+                    current_statement_begin__ = 247;
                     for (int b = 1; b <= nyr; ++b) {
-                        current_statement_begin__ = 239;
+                        current_statement_begin__ = 248;
                         stan::model::assign(state_probs_yr, 
                                     stan::model::cons_list(stan::model::index_uni(1), stan::model::cons_list(stan::model::index_uni(b), stan::model::cons_list(stan::model::index_uni(k), stan::model::cons_list(stan::model::index_uni(1), stan::model::nil_index_list())))), 
                                     1, 
                                     "assigning variable state_probs_yr");
-                        current_statement_begin__ = 240;
+                        current_statement_begin__ = 249;
                         stan::model::assign(state_probs_yr, 
                                     stan::model::cons_list(stan::model::index_uni(1), stan::model::cons_list(stan::model::index_uni(b), stan::model::cons_list(stan::model::index_uni(k), stan::model::cons_list(stan::model::index_uni(2), stan::model::nil_index_list())))), 
                                     0, 
                                     "assigning variable state_probs_yr");
-                        current_statement_begin__ = 241;
+                        current_statement_begin__ = 250;
                         stan::model::assign(state_probs_yr, 
                                     stan::model::cons_list(stan::model::index_uni(1), stan::model::cons_list(stan::model::index_uni(b), stan::model::cons_list(stan::model::index_uni(k), stan::model::cons_list(stan::model::index_uni(3), stan::model::nil_index_list())))), 
                                     0, 
                                     "assigning variable state_probs_yr");
-                        current_statement_begin__ = 244;
+                        current_statement_begin__ = 253;
                         for (int a = 2; a <= (nage + 1); ++a) {
-                            current_statement_begin__ = 245;
+                            current_statement_begin__ = 254;
                             stan::model::assign(state_probs_yr, 
                                         stan::model::cons_list(stan::model::index_uni(a), stan::model::cons_list(stan::model::index_uni(b), stan::model::cons_list(stan::model::index_uni(k), stan::model::cons_list(stan::model::index_min_max(1, 3), stan::model::nil_index_list())))), 
                                         rep_row_vector(0, 3), 
@@ -2482,47 +2519,47 @@ public:
                     }
                 }
             } else {
-                current_statement_begin__ = 250;
+                current_statement_begin__ = 259;
                 for (int k = 1; k <= nbias; ++k) {
-                    current_statement_begin__ = 251;
+                    current_statement_begin__ = 260;
                     stan::model::assign(state_probs, 
                                 stan::model::cons_list(stan::model::index_uni(1), stan::model::cons_list(stan::model::index_uni(k), stan::model::cons_list(stan::model::index_uni(1), stan::model::nil_index_list()))), 
                                 1, 
                                 "assigning variable state_probs");
-                    current_statement_begin__ = 252;
+                    current_statement_begin__ = 261;
                     stan::model::assign(state_probs, 
                                 stan::model::cons_list(stan::model::index_uni(1), stan::model::cons_list(stan::model::index_uni(k), stan::model::cons_list(stan::model::index_uni(2), stan::model::nil_index_list()))), 
                                 0, 
                                 "assigning variable state_probs");
-                    current_statement_begin__ = 253;
+                    current_statement_begin__ = 262;
                     stan::model::assign(state_probs, 
                                 stan::model::cons_list(stan::model::index_uni(1), stan::model::cons_list(stan::model::index_uni(k), stan::model::cons_list(stan::model::index_uni(3), stan::model::nil_index_list()))), 
                                 0, 
                                 "assigning variable state_probs");
                 }
             }
-            current_statement_begin__ = 257;
+            current_statement_begin__ = 266;
             for (int a = 1; a <= nage; ++a) {
-                current_statement_begin__ = 258;
+                current_statement_begin__ = 267;
                 if (as_bool(trend)) {
-                    current_statement_begin__ = 259;
+                    current_statement_begin__ = 268;
                     for (int k = 1; k <= nbias; ++k) {
-                        current_statement_begin__ = 260;
+                        current_statement_begin__ = 269;
                         if (as_bool(logical_gt(a, 1))) {
                             {
-                            current_statement_begin__ = 261;
+                            current_statement_begin__ = 270;
                             int y(0);
                             (void) y;  // dummy to suppress unused var warning
                             stan::math::fill(y, std::numeric_limits<int>::min());
-                            current_statement_begin__ = 262;
+                            current_statement_begin__ = 271;
                             for (int b = 2; b <= a; ++b) {
-                                current_statement_begin__ = 263;
+                                current_statement_begin__ = 272;
                                 stan::math::assign(y, ((nyr - a) + b));
-                                current_statement_begin__ = 264;
+                                current_statement_begin__ = 273;
                                 stan::math::assign(P, trans_probs(get_base1(get_base1(get_base1(inc_yr, (b - 1), "inc_yr", 1), (y - 1), "inc_yr", 2), k, "inc_yr", 3), get_base1(cf_yr, (b - 1), (y - 1), "cf_yr", 1), get_base1(rem, (b - 1), "rem", 1), pstream__));
-                                current_statement_begin__ = 265;
+                                current_statement_begin__ = 274;
                                 stan::math::assign(tmp, multiply(stan::model::rvalue(state_probs_yr, stan::model::cons_list(stan::model::index_uni((b - 1)), stan::model::cons_list(stan::model::index_uni((y - 1)), stan::model::cons_list(stan::model::index_uni(k), stan::model::cons_list(stan::model::index_min_max(1, 3), stan::model::nil_index_list())))), "state_probs_yr"), P));
-                                current_statement_begin__ = 266;
+                                current_statement_begin__ = 275;
                                 stan::model::assign(state_probs_yr, 
                                             stan::model::cons_list(stan::model::index_uni(b), stan::model::cons_list(stan::model::index_uni(y), stan::model::cons_list(stan::model::index_uni(k), stan::model::cons_list(stan::model::index_min_max(1, 3), stan::model::nil_index_list())))), 
                                             tmp, 
@@ -2530,62 +2567,62 @@ public:
                             }
                             }
                         }
-                        current_statement_begin__ = 270;
-                        stan::math::assign(P, trans_probs(get_base1(get_base1(get_base1(inc_yr, a, "inc_yr", 1), nyr, "inc_yr", 2), k, "inc_yr", 3), get_base1(cf_yr, a, nyr, "cf_yr", 1), get_base1(rem, a, "rem", 1), pstream__));
-                        current_statement_begin__ = 271;
-                        stan::model::assign(inc_prob, 
-                                    stan::model::cons_list(stan::model::index_uni(a), stan::model::cons_list(stan::model::index_uni(k), stan::model::nil_index_list())), 
-                                    (get_base1(P, 1, 2, "P", 1) + get_base1(P, 1, 3, "P", 1)), 
-                                    "assigning variable inc_prob");
-                        current_statement_begin__ = 272;
-                        stan::model::assign(prev, 
-                                    stan::model::cons_list(stan::model::index_uni(a), stan::model::cons_list(stan::model::index_uni(k), stan::model::nil_index_list())), 
-                                    (get_base1(get_base1(get_base1(get_base1(state_probs_yr, a, "state_probs_yr", 1), nyr, "state_probs_yr", 2), k, "state_probs_yr", 3), 2, "state_probs_yr", 4) / (get_base1(get_base1(get_base1(get_base1(state_probs_yr, a, "state_probs_yr", 1), nyr, "state_probs_yr", 2), k, "state_probs_yr", 3), 1, "state_probs_yr", 4) + get_base1(get_base1(get_base1(get_base1(state_probs_yr, a, "state_probs_yr", 1), nyr, "state_probs_yr", 2), k, "state_probs_yr", 3), 2, "state_probs_yr", 4))), 
-                                    "assigning variable prev");
-                        current_statement_begin__ = 274;
-                        if (as_bool(logical_eq(k, 1))) {
-                            current_statement_begin__ = 274;
-                            stan::model::assign(mort, 
-                                        stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
-                                        ((get_base1(P, 1, 3, "P", 1) * (1 - get_base1(prev, a, 1, "prev", 1))) + (get_base1(P, 2, 3, "P", 1) * get_base1(prev, a, 1, "prev", 1))), 
-                                        "assigning variable mort");
-                        }
-                    }
-                } else {
-                    current_statement_begin__ = 278;
-                    for (int k = 1; k <= nbias; ++k) {
                         current_statement_begin__ = 279;
-                        stan::math::assign(P, trans_probs(get_base1(inc, a, k, "inc", 1), get_base1(cf, a, "cf", 1), get_base1(rem, a, "rem", 1), pstream__));
+                        stan::math::assign(P, trans_probs(get_base1(get_base1(get_base1(inc_yr, a, "inc_yr", 1), nyr, "inc_yr", 2), k, "inc_yr", 3), get_base1(cf_yr, a, nyr, "cf_yr", 1), get_base1(rem, a, "rem", 1), pstream__));
                         current_statement_begin__ = 280;
                         stan::model::assign(inc_prob, 
                                     stan::model::cons_list(stan::model::index_uni(a), stan::model::cons_list(stan::model::index_uni(k), stan::model::nil_index_list())), 
-                                    (get_base1(P, 1, 2, "P", 1) + get_base1(P, 1, 3, "P", 1)), 
+                                    bound_prob((get_base1(P, 1, 2, "P", 1) + get_base1(P, 1, 3, "P", 1)), pstream__), 
                                     "assigning variable inc_prob");
                         current_statement_begin__ = 281;
+                        stan::model::assign(prev_prob, 
+                                    stan::model::cons_list(stan::model::index_uni(a), stan::model::cons_list(stan::model::index_uni(k), stan::model::nil_index_list())), 
+                                    (get_base1(get_base1(get_base1(get_base1(state_probs_yr, a, "state_probs_yr", 1), nyr, "state_probs_yr", 2), k, "state_probs_yr", 3), 2, "state_probs_yr", 4) / (get_base1(get_base1(get_base1(get_base1(state_probs_yr, a, "state_probs_yr", 1), nyr, "state_probs_yr", 2), k, "state_probs_yr", 3), 1, "state_probs_yr", 4) + get_base1(get_base1(get_base1(get_base1(state_probs_yr, a, "state_probs_yr", 1), nyr, "state_probs_yr", 2), k, "state_probs_yr", 3), 2, "state_probs_yr", 4))), 
+                                    "assigning variable prev_prob");
+                        current_statement_begin__ = 283;
+                        if (as_bool(logical_eq(k, 1))) {
+                            current_statement_begin__ = 283;
+                            stan::model::assign(mort_prob, 
+                                        stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
+                                        ((get_base1(P, 1, 3, "P", 1) * (1 - get_base1(prev_prob, a, 1, "prev_prob", 1))) + (get_base1(P, 2, 3, "P", 1) * get_base1(prev_prob, a, 1, "prev_prob", 1))), 
+                                        "assigning variable mort_prob");
+                        }
+                    }
+                } else {
+                    current_statement_begin__ = 287;
+                    for (int k = 1; k <= nbias; ++k) {
+                        current_statement_begin__ = 288;
+                        stan::math::assign(P, trans_probs(get_base1(inc, a, k, "inc", 1), get_base1(cf, a, "cf", 1), get_base1(rem, a, "rem", 1), pstream__));
+                        current_statement_begin__ = 289;
+                        stan::model::assign(inc_prob, 
+                                    stan::model::cons_list(stan::model::index_uni(a), stan::model::cons_list(stan::model::index_uni(k), stan::model::nil_index_list())), 
+                                    bound_prob((get_base1(P, 1, 2, "P", 1) + get_base1(P, 1, 3, "P", 1)), pstream__), 
+                                    "assigning variable inc_prob");
+                        current_statement_begin__ = 290;
                         if (as_bool(logical_gt(a, 1))) {
-                            current_statement_begin__ = 282;
-                            stan::model::assign(prev, 
+                            current_statement_begin__ = 291;
+                            stan::model::assign(prev_prob, 
                                         stan::model::cons_list(stan::model::index_uni(a), stan::model::cons_list(stan::model::index_uni(k), stan::model::nil_index_list())), 
                                         (get_base1(get_base1(get_base1(state_probs, a, "state_probs", 1), k, "state_probs", 2), 2, "state_probs", 3) / (get_base1(get_base1(get_base1(state_probs, a, "state_probs", 1), k, "state_probs", 2), 1, "state_probs", 3) + get_base1(get_base1(get_base1(state_probs, a, "state_probs", 1), k, "state_probs", 2), 2, "state_probs", 3))), 
-                                        "assigning variable prev");
+                                        "assigning variable prev_prob");
                         }
-                        current_statement_begin__ = 283;
+                        current_statement_begin__ = 292;
                         stan::math::assign(tmp, multiply(stan::model::rvalue(state_probs, stan::model::cons_list(stan::model::index_uni(a), stan::model::cons_list(stan::model::index_uni(k), stan::model::cons_list(stan::model::index_min_max(1, 3), stan::model::nil_index_list()))), "state_probs"), P));
-                        current_statement_begin__ = 284;
+                        current_statement_begin__ = 293;
                         stan::model::assign(state_probs, 
                                     stan::model::cons_list(stan::model::index_uni((a + 1)), stan::model::cons_list(stan::model::index_uni(k), stan::model::cons_list(stan::model::index_min_max(1, 3), stan::model::nil_index_list()))), 
                                     tmp, 
                                     "assigning variable state_probs");
-                        current_statement_begin__ = 285;
+                        current_statement_begin__ = 294;
                         if (as_bool(logical_eq(k, 1))) {
-                            current_statement_begin__ = 286;
-                            stan::model::assign(mort, 
+                            current_statement_begin__ = 295;
+                            stan::model::assign(mort_prob, 
                                         stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
-                                        ((get_base1(P, 1, 3, "P", 1) * (1 - get_base1(prev, a, 1, "prev", 1))) + (get_base1(P, 2, 3, "P", 1) * get_base1(prev, a, 1, "prev", 1))), 
-                                        "assigning variable mort");
-                            current_statement_begin__ = 287;
+                                        ((get_base1(P, 1, 3, "P", 1) * (1 - get_base1(prev_prob, a, 1, "prev_prob", 1))) + (get_base1(P, 2, 3, "P", 1) * get_base1(prev_prob, a, 1, "prev_prob", 1))), 
+                                        "assigning variable mort_prob");
+                            current_statement_begin__ = 296;
                             if (as_bool(remission)) {
-                                current_statement_begin__ = 288;
+                                current_statement_begin__ = 297;
                                 stan::model::assign(rem_prob, 
                                             stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
                                             get_base1(P, 2, 1, "P", 1), 
@@ -2594,54 +2631,43 @@ public:
                         }
                     }
                 }
-                current_statement_begin__ = 294;
-                if (as_bool(logical_lt(get_base1(mort, a, "mort", 1), 0))) {
-                    current_statement_begin__ = 294;
-                    stan::model::assign(mort, 
-                                stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
-                                0, 
-                                "assigning variable mort");
-                }
-                current_statement_begin__ = 295;
-                if (as_bool(logical_gt(get_base1(mort, a, "mort", 1), 1))) {
-                    current_statement_begin__ = 295;
-                    stan::model::assign(mort, 
-                                stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
-                                1, 
-                                "assigning variable mort");
-                }
+                current_statement_begin__ = 303;
+                stan::model::assign(mort_prob, 
+                            stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
+                            bound_prob(get_base1(mort_prob, a, "mort_prob", 1), pstream__), 
+                            "assigning variable mort_prob");
             }
             if (!include_gqs__ && !include_tparams__) return;
             // validate transformed parameters
             const char* function__ = "validate transformed params";
             (void) function__;  // dummy to suppress unused var warning
-            current_statement_begin__ = 164;
+            current_statement_begin__ = 173;
             check_greater_or_equal(function__, "cf", cf, 0);
-            current_statement_begin__ = 165;
+            current_statement_begin__ = 174;
             check_greater_or_equal(function__, "dcf", dcf, 0);
-            current_statement_begin__ = 166;
+            current_statement_begin__ = 175;
             check_greater_or_equal(function__, "inc", inc, 0);
-            current_statement_begin__ = 167;
+            current_statement_begin__ = 176;
             check_greater_or_equal(function__, "inc_prob", inc_prob, 0);
             check_less_or_equal(function__, "inc_prob", inc_prob, 1);
-            current_statement_begin__ = 168;
+            current_statement_begin__ = 177;
             check_greater_or_equal(function__, "rem", rem, 0);
-            current_statement_begin__ = 169;
+            current_statement_begin__ = 178;
             check_greater_or_equal(function__, "rem_prob", rem_prob, 0);
             check_less_or_equal(function__, "rem_prob", rem_prob, 1);
-            current_statement_begin__ = 173;
+            current_statement_begin__ = 182;
             check_greater_or_equal(function__, "P", P, 0);
             check_less_or_equal(function__, "P", P, 1);
-            current_statement_begin__ = 174;
-            check_greater_or_equal(function__, "prev", prev, 0);
-            current_statement_begin__ = 175;
-            size_t mort_i_0_max__ = nage;
-            for (size_t i_0__ = 0; i_0__ < mort_i_0_max__; ++i_0__) {
-                check_greater_or_equal(function__, "mort[i_0__]", mort[i_0__], 0);
+            current_statement_begin__ = 183;
+            check_greater_or_equal(function__, "prev_prob", prev_prob, 0);
+            current_statement_begin__ = 184;
+            size_t mort_prob_i_0_max__ = nage;
+            for (size_t i_0__ = 0; i_0__ < mort_prob_i_0_max__; ++i_0__) {
+                check_greater_or_equal(function__, "mort_prob[i_0__]", mort_prob[i_0__], 0);
             }
-            current_statement_begin__ = 177;
+            current_statement_begin__ = 186;
             check_greater_or_equal(function__, "cf_yr", cf_yr, 0);
-            current_statement_begin__ = 178;
+            current_statement_begin__ = 187;
             size_t inc_yr_i_0_max__ = (nage * trend);
             size_t inc_yr_i_1_max__ = (nyr * trend);
             size_t inc_yr_i_2_max__ = nbias;
@@ -2652,11 +2678,11 @@ public:
                     }
                 }
             }
-            current_statement_begin__ = 181;
+            current_statement_begin__ = 190;
             check_greater_or_equal(function__, "lambda_cf_use", lambda_cf_use, 0);
-            current_statement_begin__ = 182;
+            current_statement_begin__ = 191;
             check_greater_or_equal(function__, "lambda_inc_use", lambda_inc_use, 0);
-            current_statement_begin__ = 183;
+            current_statement_begin__ = 192;
             check_greater_or_equal(function__, "lambda_rem_use", lambda_rem_use, 0);
             // write transformed parameters
             if (include_tparams__) {
@@ -2711,16 +2737,16 @@ public:
                         vars__.push_back(P(j_1__, j_2__));
                     }
                 }
-                size_t prev_j_2_max__ = nbias;
-                size_t prev_j_1_max__ = nage;
-                for (size_t j_2__ = 0; j_2__ < prev_j_2_max__; ++j_2__) {
-                    for (size_t j_1__ = 0; j_1__ < prev_j_1_max__; ++j_1__) {
-                        vars__.push_back(prev(j_1__, j_2__));
+                size_t prev_prob_j_2_max__ = nbias;
+                size_t prev_prob_j_1_max__ = nage;
+                for (size_t j_2__ = 0; j_2__ < prev_prob_j_2_max__; ++j_2__) {
+                    for (size_t j_1__ = 0; j_1__ < prev_prob_j_1_max__; ++j_1__) {
+                        vars__.push_back(prev_prob(j_1__, j_2__));
                     }
                 }
-                size_t mort_k_0_max__ = nage;
-                for (size_t k_0__ = 0; k_0__ < mort_k_0_max__; ++k_0__) {
-                    vars__.push_back(mort[k_0__]);
+                size_t mort_prob_k_0_max__ = nage;
+                for (size_t k_0__ = 0; k_0__ < mort_prob_k_0_max__; ++k_0__) {
+                    vars__.push_back(mort_prob[k_0__]);
                 }
                 size_t cf_yr_j_2_max__ = (nyr * trend);
                 size_t cf_yr_j_1_max__ = (nage * trend);
@@ -2758,73 +2784,85 @@ public:
             }
             if (!include_gqs__) return;
             // declare and define generated quantities
-            current_statement_begin__ = 373;
+            current_statement_begin__ = 381;
             validate_non_negative_index("ll_mort", "nage", nage);
             Eigen::Matrix<double, Eigen::Dynamic, 1> ll_mort(nage);
             stan::math::initialize(ll_mort, DUMMY_VAR__);
             stan::math::fill(ll_mort, DUMMY_VAR__);
-            current_statement_begin__ = 374;
+            current_statement_begin__ = 382;
             validate_non_negative_index("ll_inc", "nage", nage);
             Eigen::Matrix<double, Eigen::Dynamic, 1> ll_inc(nage);
             stan::math::initialize(ll_inc, DUMMY_VAR__);
             stan::math::fill(ll_inc, DUMMY_VAR__);
-            current_statement_begin__ = 375;
+            current_statement_begin__ = 383;
             validate_non_negative_index("ll_prev", "nage", nage);
             Eigen::Matrix<double, Eigen::Dynamic, 1> ll_prev(nage);
             stan::math::initialize(ll_prev, DUMMY_VAR__);
             stan::math::fill(ll_prev, DUMMY_VAR__);
-            current_statement_begin__ = 376;
+            current_statement_begin__ = 384;
             validate_non_negative_index("ll_rem", "(nage * remission)", (nage * remission));
             Eigen::Matrix<double, Eigen::Dynamic, 1> ll_rem((nage * remission));
             stan::math::initialize(ll_rem, DUMMY_VAR__);
             stan::math::fill(ll_rem, DUMMY_VAR__);
+            current_statement_begin__ = 385;
+            validate_non_negative_index("ll_overall", "(nage * (3 + remission))", (nage * (3 + remission)));
+            Eigen::Matrix<double, Eigen::Dynamic, 1> ll_overall((nage * (3 + remission)));
+            stan::math::initialize(ll_overall, DUMMY_VAR__);
+            stan::math::fill(ll_overall, DUMMY_VAR__);
             // generated quantities statements
-            current_statement_begin__ = 377;
+            current_statement_begin__ = 386;
             for (int a = 1; a <= nage; ++a) {
-                current_statement_begin__ = 378;
+                current_statement_begin__ = 387;
                 stan::model::assign(ll_mort, 
                             stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
-                            binomial_log(get_base1(mort_num, a, "mort_num", 1), get_base1(mort_denom, a, "mort_denom", 1), get_base1(mort, a, "mort", 1)), 
+                            binomial_log(get_base1(mort_num, a, "mort_num", 1), get_base1(mort_denom, a, "mort_denom", 1), get_base1(mort_prob, a, "mort_prob", 1)), 
                             "assigning variable ll_mort");
-                current_statement_begin__ = 379;
+                current_statement_begin__ = 388;
                 stan::model::assign(ll_inc, 
                             stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
                             binomial_log(get_base1(inc_num, a, "inc_num", 1), get_base1(inc_denom, a, "inc_denom", 1), get_base1(inc_prob, a, "inc_prob", 1)), 
                             "assigning variable ll_inc");
-                current_statement_begin__ = 380;
+                current_statement_begin__ = 389;
                 stan::model::assign(ll_prev, 
                             stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
-                            binomial_log(get_base1(prev_num, a, "prev_num", 1), get_base1(prev_denom, a, "prev_denom", 1), get_base1(prev, a, "prev", 1)), 
+                            binomial_log(get_base1(prev_num, a, "prev_num", 1), get_base1(prev_denom, a, "prev_denom", 1), get_base1(prev_prob, a, "prev_prob", 1)), 
                             "assigning variable ll_prev");
-                current_statement_begin__ = 381;
+                current_statement_begin__ = 390;
                 if (as_bool(remission)) {
-                    current_statement_begin__ = 382;
+                    current_statement_begin__ = 391;
                     stan::model::assign(ll_rem, 
                                 stan::model::cons_list(stan::model::index_uni(a), stan::model::nil_index_list()), 
                                 binomial_log(get_base1(rem_num, a, "rem_num", 1), get_base1(rem_denom, a, "rem_denom", 1), get_base1(rem_prob, a, "rem_prob", 1)), 
                                 "assigning variable ll_rem");
                 }
             }
+            current_statement_begin__ = 393;
+            stan::math::assign(ll_overall, append_row(ll_mort, append_row(ll_inc, append_row(ll_prev, ll_rem))));
             // validate, write generated quantities
-            current_statement_begin__ = 373;
+            current_statement_begin__ = 381;
             size_t ll_mort_j_1_max__ = nage;
             for (size_t j_1__ = 0; j_1__ < ll_mort_j_1_max__; ++j_1__) {
                 vars__.push_back(ll_mort(j_1__));
             }
-            current_statement_begin__ = 374;
+            current_statement_begin__ = 382;
             size_t ll_inc_j_1_max__ = nage;
             for (size_t j_1__ = 0; j_1__ < ll_inc_j_1_max__; ++j_1__) {
                 vars__.push_back(ll_inc(j_1__));
             }
-            current_statement_begin__ = 375;
+            current_statement_begin__ = 383;
             size_t ll_prev_j_1_max__ = nage;
             for (size_t j_1__ = 0; j_1__ < ll_prev_j_1_max__; ++j_1__) {
                 vars__.push_back(ll_prev(j_1__));
             }
-            current_statement_begin__ = 376;
+            current_statement_begin__ = 384;
             size_t ll_rem_j_1_max__ = (nage * remission);
             for (size_t j_1__ = 0; j_1__ < ll_rem_j_1_max__; ++j_1__) {
                 vars__.push_back(ll_rem(j_1__));
+            }
+            current_statement_begin__ = 385;
+            size_t ll_overall_j_1_max__ = (nage * (3 + remission));
+            for (size_t j_1__ = 0; j_1__ < ll_overall_j_1_max__; ++j_1__) {
+                vars__.push_back(ll_overall(j_1__));
             }
         } catch (const std::exception& e) {
             stan::lang::rethrow_located(e, current_statement_begin__, prog_reader__());
@@ -2999,19 +3037,19 @@ public:
                     param_names__.push_back(param_name_stream__.str());
                 }
             }
-            size_t prev_j_2_max__ = nbias;
-            size_t prev_j_1_max__ = nage;
-            for (size_t j_2__ = 0; j_2__ < prev_j_2_max__; ++j_2__) {
-                for (size_t j_1__ = 0; j_1__ < prev_j_1_max__; ++j_1__) {
+            size_t prev_prob_j_2_max__ = nbias;
+            size_t prev_prob_j_1_max__ = nage;
+            for (size_t j_2__ = 0; j_2__ < prev_prob_j_2_max__; ++j_2__) {
+                for (size_t j_1__ = 0; j_1__ < prev_prob_j_1_max__; ++j_1__) {
                     param_name_stream__.str(std::string());
-                    param_name_stream__ << "prev" << '.' << j_1__ + 1 << '.' << j_2__ + 1;
+                    param_name_stream__ << "prev_prob" << '.' << j_1__ + 1 << '.' << j_2__ + 1;
                     param_names__.push_back(param_name_stream__.str());
                 }
             }
-            size_t mort_k_0_max__ = nage;
-            for (size_t k_0__ = 0; k_0__ < mort_k_0_max__; ++k_0__) {
+            size_t mort_prob_k_0_max__ = nage;
+            for (size_t k_0__ = 0; k_0__ < mort_prob_k_0_max__; ++k_0__) {
                 param_name_stream__.str(std::string());
-                param_name_stream__ << "mort" << '.' << k_0__ + 1;
+                param_name_stream__ << "mort_prob" << '.' << k_0__ + 1;
                 param_names__.push_back(param_name_stream__.str());
             }
             size_t cf_yr_j_2_max__ = (nyr * trend);
@@ -3083,6 +3121,12 @@ public:
         for (size_t j_1__ = 0; j_1__ < ll_rem_j_1_max__; ++j_1__) {
             param_name_stream__.str(std::string());
             param_name_stream__ << "ll_rem" << '.' << j_1__ + 1;
+            param_names__.push_back(param_name_stream__.str());
+        }
+        size_t ll_overall_j_1_max__ = (nage * (3 + remission));
+        for (size_t j_1__ = 0; j_1__ < ll_overall_j_1_max__; ++j_1__) {
+            param_name_stream__.str(std::string());
+            param_name_stream__ << "ll_overall" << '.' << j_1__ + 1;
             param_names__.push_back(param_name_stream__.str());
         }
     }
@@ -3233,19 +3277,19 @@ public:
                     param_names__.push_back(param_name_stream__.str());
                 }
             }
-            size_t prev_j_2_max__ = nbias;
-            size_t prev_j_1_max__ = nage;
-            for (size_t j_2__ = 0; j_2__ < prev_j_2_max__; ++j_2__) {
-                for (size_t j_1__ = 0; j_1__ < prev_j_1_max__; ++j_1__) {
+            size_t prev_prob_j_2_max__ = nbias;
+            size_t prev_prob_j_1_max__ = nage;
+            for (size_t j_2__ = 0; j_2__ < prev_prob_j_2_max__; ++j_2__) {
+                for (size_t j_1__ = 0; j_1__ < prev_prob_j_1_max__; ++j_1__) {
                     param_name_stream__.str(std::string());
-                    param_name_stream__ << "prev" << '.' << j_1__ + 1 << '.' << j_2__ + 1;
+                    param_name_stream__ << "prev_prob" << '.' << j_1__ + 1 << '.' << j_2__ + 1;
                     param_names__.push_back(param_name_stream__.str());
                 }
             }
-            size_t mort_k_0_max__ = nage;
-            for (size_t k_0__ = 0; k_0__ < mort_k_0_max__; ++k_0__) {
+            size_t mort_prob_k_0_max__ = nage;
+            for (size_t k_0__ = 0; k_0__ < mort_prob_k_0_max__; ++k_0__) {
                 param_name_stream__.str(std::string());
-                param_name_stream__ << "mort" << '.' << k_0__ + 1;
+                param_name_stream__ << "mort_prob" << '.' << k_0__ + 1;
                 param_names__.push_back(param_name_stream__.str());
             }
             size_t cf_yr_j_2_max__ = (nyr * trend);
@@ -3317,6 +3361,12 @@ public:
         for (size_t j_1__ = 0; j_1__ < ll_rem_j_1_max__; ++j_1__) {
             param_name_stream__.str(std::string());
             param_name_stream__ << "ll_rem" << '.' << j_1__ + 1;
+            param_names__.push_back(param_name_stream__.str());
+        }
+        size_t ll_overall_j_1_max__ = (nage * (3 + remission));
+        for (size_t j_1__ = 0; j_1__ < ll_overall_j_1_max__; ++j_1__) {
+            param_name_stream__.str(std::string());
+            param_name_stream__ << "ll_overall" << '.' << j_1__ + 1;
             param_names__.push_back(param_name_stream__.str());
         }
     }

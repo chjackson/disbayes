@@ -11,22 +11,22 @@ disbayes_hier(
   gender = NULL,
   inc_num = NULL,
   inc_denom = NULL,
-  inc = NULL,
+  inc_prob = NULL,
   inc_lower = NULL,
   inc_upper = NULL,
   prev_num = NULL,
   prev_denom = NULL,
-  prev = NULL,
+  prev_prob = NULL,
   prev_lower = NULL,
   prev_upper = NULL,
   mort_num = NULL,
   mort_denom = NULL,
-  mort = NULL,
+  mort_prob = NULL,
   mort_lower = NULL,
   mort_upper = NULL,
   rem_num = NULL,
   rem_denom = NULL,
-  rem = NULL,
+  rem_prob = NULL,
   rem_lower = NULL,
   rem_upper = NULL,
   age = "age",
@@ -102,7 +102,7 @@ interval, the numerator and denominator could be multiplied by a constant,
 for example, multiplying both the numerator and denominator by 0.5 would
 give the data source half its original weight.}
 
-\item{inc}{Estimate of the incidence probability}
+\item{inc_prob}{Estimate of the incidence probability}
 
 \item{inc_lower}{Lower credible limit for the incidence estimate}
 
@@ -114,7 +114,7 @@ number of people currently with a disease.}
 \item{prev_denom}{Denominator for the estimate of prevalence (e.g. the size
 of the survey used to obtain the prevalence estimate)}
 
-\item{prev}{Estimate of the prevalence probability}
+\item{prev_prob}{Estimate of the prevalence probability}
 
 \item{prev_lower}{Lower credible limit for the prevalence estimate}
 
@@ -127,7 +127,7 @@ number of deaths attributed to the disease under study within a year}
 the population size, if the estimates were obtained from a comprehensive
 register)}
 
-\item{mort}{Estimate of the mortality probability}
+\item{mort_prob}{Estimate of the mortality probability}
 
 \item{mort_lower}{Lower credible limit for the mortality estimate}
 
@@ -146,7 +146,7 @@ weaker prior information.}
 
 \item{rem_denom}{Denominator for the estimate of the remission probability}
 
-\item{rem}{Estimate of the remission probability}
+\item{rem_prob}{Estimate of the remission probability}
 
 \item{rem_lower}{Lower credible limit for the remission estimate}
 

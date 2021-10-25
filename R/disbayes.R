@@ -42,7 +42,7 @@
 ##'   for example, multiplying both the numerator and denominator by 0.5 would
 ##'   give the data source half its original weight.
 ##'
-##' @param inc Estimate of the incidence probability
+##' @param inc_prob Estimate of the incidence probability
 ##' @param inc_lower Lower credible limit for the incidence estimate
 ##' @param inc_upper Upper credible limit for the incidence estimate
 ##'
@@ -51,7 +51,7 @@
 ##' 
 ##' @param prev_denom Denominator for the estimate of prevalence (e.g. the size
 ##'   of the survey used to obtain the prevalence estimate)
-##' @param prev Estimate of the prevalence probability
+##' @param prev_prob Estimate of the prevalence probability
 ##' @param prev_lower Lower credible limit for the prevalence estimate
 ##' @param prev_upper Upper credible limit for the prevalence estimate
 ##'
@@ -62,7 +62,7 @@
 ##'   the population size, if the estimates were obtained from a comprehensive
 ##'   register)
 ##' 
-##' @param mort  Estimate of the mortality probability
+##' @param mort_prob  Estimate of the mortality probability
 ##' @param mort_lower Lower credible limit for the mortality estimate
 ##' @param mort_upper Upper credible limit for the mortality estimate
 ##'
@@ -78,7 +78,7 @@
 ##'   weaker prior information. 
 ##'   
 ##' @param rem_denom Denominator for the estimate of the remission probability
-##' @param rem  Estimate of the remission probability
+##' @param rem_prob  Estimate of the remission probability
 ##' @param rem_lower Lower credible limit for the remission estimate
 ##' @param rem_upper Upper credible limit for the remission estimate
 ##'
@@ -298,10 +298,10 @@
 ##'
 ##' @export
 disbayes <- function(data,
-                     inc_num=NULL, inc_denom=NULL, inc=NULL, inc_lower=NULL, inc_upper=NULL,
-                     prev_num=NULL, prev_denom=NULL, prev=NULL, prev_lower=NULL, prev_upper=NULL,
-                     mort_num=NULL, mort_denom=NULL, mort=NULL, mort_lower=NULL, mort_upper=NULL,
-                     rem_num=NULL, rem_denom=NULL, rem=NULL, rem_lower=NULL, rem_upper=NULL,
+                     inc_num=NULL, inc_denom=NULL, inc_prob=NULL, inc_lower=NULL, inc_upper=NULL,
+                     prev_num=NULL, prev_denom=NULL, prev_prob=NULL, prev_lower=NULL, prev_upper=NULL,
+                     mort_num=NULL, mort_denom=NULL, mort_prob=NULL, mort_lower=NULL, mort_upper=NULL,
+                     rem_num=NULL, rem_denom=NULL, rem_prob=NULL, rem_lower=NULL, rem_upper=NULL,
                      age="age",
                      cf_model="smooth",
                      inc_model="smooth",
@@ -334,12 +334,12 @@ disbayes <- function(data,
   check_rate_prior(rem_prior, missing(rem_prior), rem_model %in% c("const","indep"), "\"const\" or \"indep\"", "rem")
   
   ## Convert all data to numerators and denominators 
-  inc_data <- process_data(data, "inc", inc_num, inc_denom, inc, inc_lower, inc_upper, nage)
-  prev_data <- process_data(data, "prev", prev_num, prev_denom, prev, prev_lower, prev_upper, nage)
+  inc_data <- process_data(data, "inc", inc_num, inc_denom, inc_prob, inc_lower, inc_upper, nage)
+  prev_data <- process_data(data, "prev", prev_num, prev_denom, prev_prob, prev_lower, prev_upper, nage)
   if (!inc_data$supplied && !prev_data$supplied)
     stop("At least one of incidence or prevalence should be supplied")
-  mort_data <- process_data(data, "mort", mort_num, mort_denom, mort, mort_lower, mort_upper, nage)
-  rem_data <- process_data(data, "rem", rem_num, rem_denom, rem, rem_lower, rem_upper, nage)
+  mort_data <- process_data(data, "mort", mort_num, mort_denom, mort_prob, mort_lower, mort_upper, nage)
+  rem_data <- process_data(data, "rem", rem_num, rem_denom, rem_prob, rem_lower, rem_upper, nage)
   remission <- rem_data$supplied
   dat <- c(inc_data, prev_data, mort_data, rem_data, nage=nage, remission=as.numeric(remission))
   dat$supplied <- NULL
@@ -607,7 +607,7 @@ check_interval <- function(x, lower, upper, prefix){
     }    
     badint <- which(x < lower | x > upper)
     if (length(badint) > 0) {
-        stop(sprintf("%s[%s]=%s should be inside the credible interval of (%s_lower[%s]=%s, %s_upper[%s]=%s)",
+        stop(sprintf("%s_prob[%s]=%s should be inside the credible interval of (%s_lower[%s]=%s, %s_upper[%s]=%s)",
                      prefix, badint[1], x[badint[1]], 
                      prefix, badint[1], lower[badint[1]], 
                      prefix, badint[1], upper[badint[1]]))
