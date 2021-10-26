@@ -155,8 +155,6 @@
 ##' @param eqagehi Case fatalities (and incidence and remission rates) are assumed to be equal for
 ##'   all ages above this age, inclusive, when using the smoothed model.
 ##'
-##' @param loo Compute leave-one-out cross validation statistics (for \code{method="mcmc"} only). 
-##'
 ##' @param sprior Rates of the exponential prior distributions used to penalise
 ##'   the coefficients of the spline model.   The default of 1 should adapt
 ##'   appropriately to the data, but Higher values give stronger smoothing, or
@@ -275,23 +273,28 @@
 ##'   control MCMC sampling, or \code{\link[rstan:stanmodel-method-optimizing]{rstan::optimizing()}} to control
 ##'   optimisation, in Stan.
 ##'
-##' @return A list with the following components
+##' @return A list including the following components
 ##'
-##'   \code{fit}: An object containing posterior samples from the fitted model,
+##'  \code{call}: Function call that was used. 
+##'
+##'  \code{fit}: An object containing posterior samples from the fitted model,
 ##'   in the \code{stanfit} format returned by the \code{\link[rstan]{stan}}
 ##'   function in the \pkg{rstan} package.
 ##'
-##'   \code{loo}: A list of objects containing leave-one-out cross-validation
-##'   statistics.  There is one list component for each of the observed outcomes
-##'   informing the model: incidence, prevalence, mortality and remission.   The
-##'   component for each outcome is an object in the form returned by the
-##'   \code{\link[loo]{loo}} function in the \pkg{loo} package. This can be used
-##'   to assess how well the model predicts the data for that outcome, compared
-##'   to other models.  The \code{\link{looi_disbayes}} function can be used to extract from this
-##'   list a single tidy data frame with one row per observation.
+##'  \code{dat}: A list containing the input data in the form of numerators
+##'   and denominators.
+##' 
+##'  \code{nage}: Number of years of age in the data
 ##'
-##'   \code{dat}: A list containing the input data in the form of numerators
-##'   and denominators. 
+##'  \code{stan_data}: Full list of data supplied to Stan
+##' 
+##'  \code{stan_inits}: Full list of parameter initial values supplied to Stan
+##'
+##'  \code{"method"}:  Optimisation method that was chosen
+##'
+##'  \code{"trend"}: Whether a time trend was modelled
+##'
+##'  \code{"hp_fixed"} Values of any hyperparameters that are fixed during the main model fit. 
 ##'
 ##'   Use the \code{\link{tidy.disbayes}} method to return summary statistics
 ##'   from the fitted models, simply by calling \code{tidy()} on the fitted model. 
@@ -312,7 +315,6 @@ disbayes <- function(data,
                      cf_init = 0.01,
                      eqage = 30,
                      eqagehi = NULL,
-                     loo = TRUE, 
                      sprior = c(1,1,1),
                      hp_fixed = NULL, 
                      rem_prior = c(1.1, 1), 
@@ -450,18 +452,16 @@ disbayes <- function(data,
                               hp["scf","isfixed"], hp["sinc","isfixed"], hp["srem","isfixed"])
     if (method=="opt") { 
       opts <- rstan::optimizing(stanmodels$disbayes, data=datstans, init=initsc, draws=draws,
-                                iter=iter,  ...)
+                                iter=iter,  importance_resampling=TRUE, ...)
       res <- list(fit=opts, fitu=initrates, method="opt")
     } else if (method=="vb"){ 
       fits <- rstan::vb(stanmodels$disbayes, data=datstans, init=initsr, ...)
-      loos <- if (loo) get_loo(fits, remission=remission) else NULL 
-      res <- list(fit=fits, fitu=initrates, loo=loos, method="vb")
+      res <- list(fit=fits, fitu=initrates, method="vb")
     }
     else if (method=="mcmc") {
       fits <- rstan::sampling(stanmodels$disbayes, data=datstans, init=initsr, 
                               iter=iter, control=stan_control, ...)
-      loos <- if (loo) get_loo(fits, remission=remission) else NULL 
-      res <- list(fit=fits, fitu=initrates, loo=loos, method="mcmc")
+      res <- list(fit=fits, fitu=initrates, method="mcmc")
     } else stop(sprintf("Unknown method: `%s`", method))
   } else {
     if (method=="opt") { 
@@ -472,8 +472,7 @@ disbayes <- function(data,
                                method = method,
                                iter = iter, stan_control = stan_control, 
                                ...)
-      loou <- if (loo) get_loo(fitu, remission=remission) else NULL 
-      res <- list(fit=fitu, loo=loou, method="mcmc")
+      res <- list(fit=fitu, method="mcmc")
     }
   }
   res <- c(list(call=dbcall),
@@ -483,56 +482,6 @@ disbayes <- function(data,
   res$hp_fixed <- setNames(hp$vals, hp$pars)[hp$include & hp$isfixed]
   class(res) <- "disbayes"
   res
-}
-
-get_loo <- function(fits, remission=FALSE) { 
-  outcomes <- c("mort","inc","prev")
-  if (remission) outcomes <- c(outcomes, "rem")
-  loores <- vector(length(outcomes), mode="list")
-  names(loores) <- outcomes 
-  for (outcome in outcomes) {
-    ll <- loo::extract_log_lik(fits, sprintf("ll_%s",outcome), merge_chains=FALSE)
-    r_eff <- loo::relative_eff(exp(ll))
-    loores[[outcome]] <- loo::loo(ll, r_eff = r_eff)
-  }
-  loores
-}
-
-##' Observation-level leave-one-out cross-validatory statistics from a disbayes fit
-##' 
-##' Return observation-level leave-one-out cross-validatory statistics from a disbayes fit
-##' as a tidy data frame. 
-##'
-##' The data frame has one row per observed age-specific mortality, incidence, prevalence and/or
-##' remission data-point, containing leave-one-out cross validation statistics representing how
-##' well the model would predict that observation if it were left out of the fit. 
-##' 
-##' These are computed with the \pkg{loo} package.
-##'
-##' @param x Object returned by \code{\link{disbayes}}.
-##'
-##' @export
-looi_disbayes <- function(x) {
-  outcome <- age <- NULL
-  inds <- array_indvecs(age = x$nage)
-  loodf <- get_loodf(x, inds) %>%
-    arrange(outcome, age) %>%
-    relocate(outcome) %>%
-    remove_rownames()
-}
-
-get_loodf <- function(x, inds){
-  age <- var <- NULL 
-  outcomes <- names(x[["loo"]])
-  looi <- vector(length(outcomes), mode="list")
-  names(looi) <- outcomes 
-  for (out in outcomes) {
-    looi[[out]] <- 
-      as.data.frame(x[["loo"]][[out]]$pointwise) %>%
-      mutate(outcome = out) %>%
-      cbind(inds)
-  }
-  loodf <- do.call("rbind", looi) %>% remove_rownames()
 }
 
 get_column <- function(data, str){

@@ -389,6 +389,7 @@ generated quantities {
   vector[nage*narea*ng] ll_inc;
   vector[nage*narea*ng] ll_prev;
   vector[nage*narea*ng*remission] ll_rem;
+  vector[nage*narea*ng*(3 + remission)] ll_overall;
   int i = 1;
   for (a in 1:nage) {
     for (j in 1:narea) {
@@ -402,4 +403,5 @@ generated quantities {
       }
     }
   }
+  ll_overall = append_row(ll_mort, append_row(ll_inc, append_row(ll_prev, ll_rem)));
 }

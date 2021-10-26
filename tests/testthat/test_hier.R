@@ -4,7 +4,7 @@ db <- disbayes_hier(ihdmale, age="age", group="area",
                              inc_num = "inc_num", inc_denom = "inc_denom",
                            prev_num = "prev_num", prev_denom = "prev_denom",
                            mort_num = "mort_num", mort_denom = "mort_denom",
-                    iter=10, chains=1, loo=FALSE, algorithm="Fixed_param")
+                    iter=10, chains=1, method="mcmc", algorithm="Fixed_param")
 expect_s3_class(db, "disbayes_hier")
 
 test_that("errors in specifying hierarchical model", {
@@ -63,7 +63,7 @@ test_that("fixed hyperparameters",{
                       prev_num = "prev_num", prev_denom = "prev_denom",
                       mort_num = "mort_num", mort_denom = "mort_denom",
                       hp_fixed = list(scf = 1), 
-                      iter=10, chains=1, loo=FALSE, algorithm="Fixed_param")
+                      iter=10, chains=1, method="mcmc", algorithm="Fixed_param")
   expect_equivalent(db$hp_fixed["scf"], 1)
 
   db <- disbayes_hier(ihdmale, age="age", group="area", 
@@ -71,7 +71,7 @@ test_that("fixed hyperparameters",{
                       prev_num = "prev_num", prev_denom = "prev_denom",
                       mort_num = "mort_num", mort_denom = "mort_denom",
                       hp_fixed = list(scf = 1, sd_int = 1), 
-                      iter=10, chains=1, loo=FALSE, algorithm="Fixed_param")
+                      iter=10, chains=1, method="mcmc", algorithm="Fixed_param")
   expect_equivalent(db$hp_fixed["sd_int"], 1)
 
   db <- disbayes_hier(ihdmale, age="age", group="area", 
@@ -79,7 +79,7 @@ test_that("fixed hyperparameters",{
                       prev_num = "prev_num", prev_denom = "prev_denom",
                       mort_num = "mort_num", mort_denom = "mort_denom",
                       hp_fixed = list(scf = TRUE, sinc = 1.234, sd_int = TRUE), 
-                      iter=10, chains=1, loo=FALSE, algorithm="Fixed_param")
+                      iter=10, chains=1, method="mcmc", algorithm="Fixed_param")
   expect_equivalent(db$hp_fixed["sinc"], 1.234)
   expect_type(db$hp_fixed["scf"], "double")
   
@@ -90,7 +90,7 @@ test_that("fixed hyperparameters",{
                   mort_num = "mort_num", mort_denom = "mort_denom",
                   cf_model = "interceptonly",
                   hp_fixed = list(sd_slope = 1), 
-                  chains=1, loo=FALSE, iter=10, algorithm="Fixed_param"),
+                  chains=1, iter=10, method="mcmc", algorithm="Fixed_param"),
     "Ignoring hp_fixed")
   
 })

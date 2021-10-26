@@ -36,7 +36,6 @@ disbayes(
   cf_init = 0.01,
   eqage = 30,
   eqagehi = NULL,
-  loo = TRUE,
   sprior = c(1, 1, 1),
   hp_fixed = NULL,
   rem_prior = c(1.1, 1),
@@ -207,8 +206,6 @@ all ages below this age, inclusive, when using the smoothed model.}
 \item{eqagehi}{Case fatalities (and incidence and remission rates) are assumed to be equal for
 all ages above this age, inclusive, when using the smoothed model.}
 
-\item{loo}{Compute leave-one-out cross validation statistics (for \code{method="mcmc"} only).}
-
 \item{sprior}{Rates of the exponential prior distributions used to penalise
 the coefficients of the spline model.   The default of 1 should adapt
 appropriately to the data, but Higher values give stronger smoothing, or
@@ -325,23 +322,28 @@ control MCMC sampling, or \code{\link[rstan:stanmodel-method-optimizing]{rstan::
 optimisation, in Stan.}
 }
 \value{
-A list with the following components
+A list including the following components
+
+\code{call}: Function call that was used.
 
 \code{fit}: An object containing posterior samples from the fitted model,
 in the \code{stanfit} format returned by the \code{\link[rstan]{stan}}
 function in the \pkg{rstan} package.
 
-\code{loo}: A list of objects containing leave-one-out cross-validation
-statistics.  There is one list component for each of the observed outcomes
-informing the model: incidence, prevalence, mortality and remission.   The
-component for each outcome is an object in the form returned by the
-\code{\link[loo]{loo}} function in the \pkg{loo} package. This can be used
-to assess how well the model predicts the data for that outcome, compared
-to other models.  The \code{\link{looi_disbayes}} function can be used to extract from this
-list a single tidy data frame with one row per observation.
-
 \code{dat}: A list containing the input data in the form of numerators
 and denominators.
+
+\code{nage}: Number of years of age in the data
+
+\code{stan_data}: Full list of data supplied to Stan
+
+\code{stan_inits}: Full list of parameter initial values supplied to Stan
+
+\code{"method"}:  Optimisation method that was chosen
+
+\code{"trend"}: Whether a time trend was modelled
+
+\code{"hp_fixed"} Values of any hyperparameters that are fixed during the main model fit.
 
 Use the \code{\link{tidy.disbayes}} method to return summary statistics
 from the fitted models, simply by calling \code{tidy()} on the fitted model.

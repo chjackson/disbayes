@@ -7,8 +7,7 @@
 #' @useDynLib disbayes, .registration = TRUE
 #' @import methods
 #' @import Rcpp
-#' @importFrom stats coef lm qbeta qexp qnorm quantile rlnorm rnorm
-#' @importFrom generics tidy
+#' @importFrom stats coef lm qbeta qexp qnorm quantile rlnorm rnorm dbinom na.omit
 #' @importFrom rstan sampling
 #' @importFrom mgcv smoothCon jagam s
 #' @importFrom matrixStats colQuantiles
@@ -25,6 +24,10 @@ NULL
 #' @importFrom generics tidy
 #' @export
 generics::tidy
+
+#' @importFrom loo loo
+#' @export
+loo::loo
 
 ##' Ischemic heart disease in England 
 ##'

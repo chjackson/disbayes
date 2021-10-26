@@ -139,7 +139,6 @@ disbayes_hier <- function(data,
                           inc_model = "smooth",
                           rem_model = "const",
                           prev_zero = FALSE, 
-                          loo = TRUE, 
                           sprior = c(1, 1, 1),
                           hp_fixed = NULL,
                           nfold_int_guess = 5,  nfold_int_upper = 100,
@@ -148,7 +147,7 @@ disbayes_hier <- function(data,
                           gender_int_priorsd = 0.82, gender_slope_priorsd = 0.82, 
                           inc_prior = c(1.1, 0.1), 
                           rem_prior = c(1.1, 1), 
-                          method = "mcmc",
+                          method = "opt",
                           draws = 1000,
                           iter = 10000,
                           stan_control = NULL, 
@@ -324,49 +323,22 @@ disbayes_hier <- function(data,
 
         if (method=="opt") { 
             opts <- rstan::optimizing(stanmodels$disbayes_hier, data=datstans, init=inits_hier_fn, iter=iter, 
-                                      draws=draws, ...)
+                                      draws=draws, importance_resampling=TRUE, ...)
           res <- list(fit=opts, method="opt")
         } else if (method=="vb"){
             fits <- rstan::vb(stanmodels$disbayes_hier, data=datstans, init=inits_hier_fn, iter=iter, ...)
-            loo <- if (loo) get_loo(fits, remission=remission) else NULL
-            res <- list(fit=fits, loo=loo, method="vb")
+            res <- list(fit=fits, method="vb")
         } else if (method=="mcmc"){
             fits <- rstan::sampling(stanmodels$disbayes_hier, data=datstans, init=inits_hier_fn, iter=iter, control=stan_control, ...)
-            loo <- if (loo) get_loo(fits, remission=remission) else NULL
-            res <- list(fit=fits, loo=loo, method="mcmc")
+            res <- list(fit=fits, method="mcmc")
         } else stop(sprintf("Unknown method: `%s`", method))
-    res <- c(res, list(nage=nage, narea=narea, ng=ng, groups=glevs, genders=genlevs))
+    res <- c(list(call=dbcall),
+             res,
+             list(nage=nage, narea=narea, ng=ng, groups=glevs, genders=genlevs,
+                  stan_data=datstans, stan_inits=inits_hier_fn()))
     res$hp_fixed <- setNames(hp$vals, hp$pars)[hp$include & hp$isfixed]
     class(res) <- c("disbayes_hier","disbayes")
     res
-}
-
-##' Observation-level leave-one-out cross-validatory statistics from a disbayes_hier fit
-##'
-##' Return observation-level leave-one-out cross-validatory statistics from a disbayes_hier fit
-##' as a tidy data frame.
-##' 
-##' The data frame has one row per observed age-specific mortality, incidence, prevalence and/or
-##' remission data-point, and per area and gender, containing leave-one-out cross validation 
-##' statistics representing how well the model would predict that observation if it were left 
-##' out of the fit. 
-##' 
-##' These are computed with the \pkg{loo} package.
-##'
-##'
-##' @param x Object returned by \code{\link{disbayes_hier}}
-##'
-##'
-##' @export
-looi_disbayes_hier <- function(x) {
-  # gender index varies fastest in Stan code
-  outcome <- gender <- area <- age <- NULL
-  inds <- array_indvecs(gender = x$ng, area=x$narea, age = x$nage)
-  loodf <- get_loodf(x, inds) %>%
-    arrange(outcome, gender, area, age) %>%
-    relocate(outcome, gender, area, age)
-  if (x$ng==1) loodf$gender <- NULL 
-  loodf
 }
 
 hierdata_to_agg <- function(dat, groups){

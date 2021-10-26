@@ -37,7 +37,6 @@ disbayes_hier(
   inc_model = "smooth",
   rem_model = "const",
   prev_zero = FALSE,
-  loo = TRUE,
   sprior = c(1, 1, 1),
   hp_fixed = NULL,
   nfold_int_guess = 5,
@@ -50,7 +49,7 @@ disbayes_hier(
   gender_slope_priorsd = 0.82,
   inc_prior = c(1.1, 0.1),
   rem_prior = c(1.1, 1),
-  method = "mcmc",
+  method = "opt",
   draws = 1000,
   iter = 10000,
   stan_control = NULL,
@@ -211,8 +210,6 @@ independently for each age with no smoothing.}
 from the data, as part of the Bayesian model, even if the observed prevalence is zero.
 Otherwise (the default) this is assumed to be zero if the count is zero, and estimated
 otherwise.}
-
-\item{loo}{Compute leave-one-out cross validation statistics (for \code{method="mcmc"} only).}
 
 \item{sprior}{Rates of the exponential prior distributions used to penalise
 the coefficients of the spline model.   The default of 1 should adapt

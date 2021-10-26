@@ -5,7 +5,7 @@ test_that("standard disbayes model, MCMC",{
                     inc_num = "inc_num", inc_denom = "inc_denom",
                     prev_num = "prev_num", prev_denom = "prev_denom",
                     mort_num = "mort_num", mort_denom = "mort_denom",
-                    eqage = 40, loo=FALSE, method="mcmc", algorithm="Fixed_param", 
+                    eqage = 40, method="mcmc", algorithm="Fixed_param", 
                     chains=1, iter=100)
   expect_s3_class(dbres, "disbayes")
 })
@@ -15,7 +15,7 @@ test_that("data supplied as estimate and denominator",{
                     inc_num = "inc_num", inc_denom = "inc_denom",
                     prev_num = "prev_num", prev_denom = "prev_denom",
                     mort_prob = "mort_prob", mort_denom = "mort_denom",
-                    eqage = 40, loo=FALSE, method="mcmc", algorithm="Fixed_param", 
+                    eqage = 40, method="mcmc", algorithm="Fixed_param", 
                     chains=1, iter=100)
   expect_s3_class(dbres, "disbayes")
 })
@@ -25,7 +25,7 @@ test_that("data supplied as estimate and credible limits",{
                     inc_num = "inc_num", inc_denom = "inc_denom",
                     prev_num = "prev_num", prev_denom = "prev_denom",
                     mort_prob = "mort_prob", mort_lower = "mort_lower", mort_upper="mort_upper",
-                    eqage = 40, loo=FALSE, method="mcmc", algorithm="Fixed_param", chains=1, iter=100)
+                    eqage = 40, method="mcmc", algorithm="Fixed_param", chains=1, iter=100)
   expect_s3_class(dbres, "disbayes")
 })
 
@@ -35,7 +35,7 @@ test_that("errors when insufficient data supplied",{
                         inc_num = "inc_num", inc_denom = "inc_denom",
                         prev_num = "prev_num", prev_denom = "prev_denom",
                         mort_prob = "mort_prob", 
-                        eqage = 40, loo=FALSE, algorithm="Fixed_param"),
+                        eqage = 40, algorithm="Fixed_param"),
    "Not enough information"
   )
 })
@@ -47,7 +47,7 @@ test_that("increasing case fatality",{
                     mort_num = "mort_num", mort_denom = "mort_denom",
                     cf_model = "increasing", 
                     eqage = 40,
-                    chains = 1, iter=100, loo=FALSE, 
+                    chains = 1, iter=100, 
                     method="mcmc", algorithm="Fixed_param")
   expect_s3_class(dbres, "disbayes")
 })
@@ -59,7 +59,7 @@ test_that("constant case fatality",{
                     mort_num = "mort_num", mort_denom = "mort_denom",
                     cf_model = "const", 
                     eqage = 40,
-                    chains = 1, iter=100, loo=FALSE, 
+                    chains = 1, iter=100, 
                     method="mcmc", algorithm="Fixed_param")
   expect_s3_class(dbres, "disbayes")
 })
@@ -70,7 +70,7 @@ test_that("unsmooth incidence", {
                     prev_num = "prev_num", prev_denom = "prev_denom",
                     mort_num = "mort_num", mort_denom = "mort_denom",
                     inc_model = "indep", 
-                    chains = 1, iter=100, loo=FALSE, 
+                    chains = 1, iter=100, 
                     method="mcmc", algorithm="Fixed_param")
   expect_s3_class(dbres, "disbayes")
 })
@@ -127,7 +127,7 @@ test_that("disbayes model with trends",{
                     inc_num = "inc_num", inc_denom = "inc_denom",
                     prev_num = "prev_num", prev_denom = "prev_denom",
                     mort_num = "mort_num", mort_denom = "mort_denom",
-                    eqage = 40, loo=FALSE, method="mcmc", algorithm="Fixed_param", 
+                    eqage = 40, method="mcmc", algorithm="Fixed_param", 
                     inc_trend = trends_inc, 
                     cf_trend = trends_cf, 
                     chains=1, iter=10)

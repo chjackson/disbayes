@@ -4,7 +4,7 @@ test_that("hierarchical model with additive area and gender effects",{
                       inc_num = "inc_num", inc_denom = "inc_denom",
                       prev_num = "prev_num", prev_denom = "prev_denom",
                       mort_num = "mort_num", mort_denom = "mort_denom",
-                      iter=10, chains=1, loo=FALSE, algorithm="Fixed_param")
+                      iter=10, chains=1, method="mcmc", algorithm="Fixed_param")
   expect_s3_class(db, "disbayes_hier")
 })
 
@@ -15,7 +15,7 @@ test_that("fixed smoothness for gender effect",{
                       prev_num = "prev_num", prev_denom = "prev_denom",
                       mort_num = "mort_num", mort_denom = "mort_denom",
                       hp_fixed = list(scfmale = TRUE),
-                      iter=10, chains=1, loo=FALSE, algorithm="Fixed_param")
+                      iter=10, chains=1, method="mcmc", algorithm="Fixed_param")
   expect_equal(db$hp_fixed[["scfmale"]],  0.5026838, tol=1e-03)
 })
 
