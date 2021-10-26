@@ -477,7 +477,7 @@ disbayes <- function(data,
   }
   res <- c(list(call=dbcall),
            res,
-           list(nage=nage, dat=dat, stan_data=datstans, stan_inits=initsc,
+           list(nage=nage, narea=1, ng=1, dat=dat, stan_data=datstans, stan_inits=initsc,
                 trend=trend))
   res$hp_fixed <- setNames(hp$vals, hp$pars)[hp$include & hp$isfixed]
   class(res) <- "disbayes"
@@ -667,7 +667,7 @@ check_hp_fixed <- function(hp_fixed, parlist, inc_model, cf_model, rem_model, ng
         for (i in seq_along(hp_fixed)){
             if (!(names(hp_fixed)[i] %in% parlist$pars))
                 warning(sprintf("Ignoring hp_fixed[[\"%s\"]] which is not a parameter in the model", names(hp_fixed)[i]))
-            if (!is.logical(hp_fixed[[i]]) && (!is.numeric(hp_fixed[[i]]) || (length(hp_fixed[[i]]) > 1)))
+            if (!is.null(hp_fixed[[i]]) && !is.logical(hp_fixed[[i]]) && (!is.numeric(hp_fixed[[i]]) || (length(hp_fixed[[i]]) > 1)))
                 stop(sprintf("hp_fixed[[\"%s\"]] should be TRUE, FALSE or a single number", names(hp_fixed)[i]))
         }
         if ((inc_model %in% c("indep")) && is.numeric(hp_fixed[["sinc"]]))

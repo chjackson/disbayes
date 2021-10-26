@@ -334,7 +334,7 @@ disbayes_hier <- function(data,
         } else stop(sprintf("Unknown method: `%s`", method))
     res <- c(list(call=dbcall),
              res,
-             list(nage=nage, narea=narea, ng=ng, groups=glevs, genders=genlevs,
+             list(nage=nage, narea=narea, ng=ng, groups=glevs, genders=genlevs, 
                   stan_data=datstans, stan_inits=inits_hier_fn()))
     res$hp_fixed <- setNames(hp$vals, hp$pars)[hp$include & hp$isfixed]
     class(res) <- c("disbayes_hier","disbayes")

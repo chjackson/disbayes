@@ -17,16 +17,25 @@
 ##' @export
 loo.disbayes <- function(x, outcome="overall", ...){
   if (x$method=="opt"){
-    loo_disbayes_opt(x, outcome=outcome)    
+    res <- loo_disbayes_opt(x, outcome=outcome)    
   } else {
-    loo_disbayes_mcmc(x, outcome=outcome)    
+    res <- loo_disbayes_mcmc(x, outcome=outcome)    
   }
+  attr(res, "disbayes_info") <- list(hier = inherits(x, "disbayes_hier"))
+  res
 }
 
 loo_disbayes_mcmc <- function(x, outcome="overall") { 
   ll <- loo::extract_log_lik(x$fit, sprintf("ll_%s",outcome), merge_chains=FALSE)
   r_eff <- loo::relative_eff(exp(ll))
-  loo::loo(ll, r_eff = r_eff)
+  res <- loo::loo(ll, r_eff = r_eff)
+  ## name the rows of the indiv-level contributions to match the outcome probs
+  ## note in same order as Stan generated_quantities
+  inames <- list()
+  for (i in c("mort","inc","prev","rem"))
+      inames[[i]] <- grep(sprintf("%s_prob",i), names(x$fit), value=TRUE)
+  rownames(res$pointwise) <- as.vector(unlist(inames))
+  res
 }
 
 loo_disbayes_opt <- function(x, outcome="overall") { 
@@ -69,7 +78,7 @@ loo_disbayes_opt <- function(x, outcome="overall") {
   loo_ap
 }
 
-##' Observation-specific contribution to leave-one-out cross validation statistics for disbayes models
+##' Extract observation-specific contributions from a disbayes leave-one-out cross validation
 ##' 
 ##' @param x For \code{loo_indiv}, an object returned by \code{\link{loo.disbayes}}.   For \code{looi_disbayes}, an object returned by \code{\link{disbayes}}. 
 ##'
@@ -90,40 +99,40 @@ loo_disbayes_opt <- function(x, outcome="overall") {
 ##'
 ##' @export
 loo_indiv <- function(x, agg=FALSE){
-    varorig <- var <- age <- bias <- NULL
-  if (grepl("^.+\\[.+,.+,.+\\]$", rownames(x$pointwise)[1])){
-    dat <- loo_indiv_hier(x)
+    varorig <- outcome <- age <- bias <- NULL
+    if (attr(x, "disbayes_info")[["hier"]]) {
+        dat <- loo_indiv_hier(x)
   } else { 
     dat <- as.data.frame(x$pointwise) %>%
       tibble::rownames_to_column("varorig") %>% 
-      tidyr::extract(varorig, c("var", "age"), 
+      tidyr::extract(varorig, c("outcome", "age"), 
                      "^(.+)_prob\\[([[:digit:]]+),?[[:digit:]]?\\]$", 
                      convert=TRUE, remove = FALSE) %>%
       tidyr::extract(varorig, "bias",  
                      "^.+_prob\\[[[:digit:]]+,([[:digit:]])\\]$", 
                      convert=TRUE) %>%
-      relocate(var, age, bias)
+      relocate(outcome, age, bias)
   }
   if (length(unique(na.omit(dat$bias)))==1) dat$bias <- NULL
   if (agg) {
     dat <- dat  %>% 
-      group_by(var) %>% 
+      group_by(outcome) %>% 
       summarise_at(c("elpd_loo","p_loo","looic"), sum)
   }
   dat
 }
 
 loo_indiv_hier <- function(x){
-    varorig <- var <- age <- area <- gender <- NULL
+    varorig <- outcome <- age <- area <- gender <- NULL
     index_re <- paste(rep("([[:digit:]]+)",3),collapse=",")
     as.data.frame(x$pointwise) %>%
         tibble::rownames_to_column("varorig") %>% 
-        tidyr::extract(varorig, c("var", "age", "area", "gender"), 
+        tidyr::extract(varorig, c("outcome", "age", "area", "gender"), 
                        sprintf("^(.+)_prob\\[%s\\]$", index_re), 
                        convert=TRUE, remove = TRUE)
 }
 
-##' @describeIn loo_indiv
+##' @describeIn loo_indiv Observation-level leave-one-out cross validation statistics for a disbayes model
 ##' @export
 looi_disbayes <- function(x, agg=FALSE){
     loo_indiv(loo(x), agg=agg)

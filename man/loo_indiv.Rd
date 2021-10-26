@@ -2,9 +2,12 @@
 % Please edit documentation in R/loo.R
 \name{loo_indiv}
 \alias{loo_indiv}
-\title{Observation-specific contribution to leave-one-out cross validation statistics for disbayes models}
+\alias{looi_disbayes}
+\title{Extract observation-specific contributions from a disbayes leave-one-out cross validation}
 \usage{
 loo_indiv(x, agg = FALSE)
+
+looi_disbayes(x, agg = FALSE)
 }
 \arguments{
 \item{x}{For \code{loo_indiv}, an object returned by \code{\link{loo.disbayes}}.   For \code{looi_disbayes}, an object returned by \code{\link{disbayes}}.}
@@ -26,5 +29,10 @@ objects.  \code{\link{looi_disbayes}} acts directly on  \code{\link{disbayes}}
 objects.  Both of those functions return a data frame with LOO contributions for each data point.
 }
 \description{
-Observation-specific contribution to leave-one-out cross validation statistics for disbayes models
+Extract observation-specific contributions from a disbayes leave-one-out cross validation
 }
+\section{Functions}{
+\itemize{
+\item \code{looi_disbayes}: Observation-level leave-one-out cross validation statistics for a disbayes model
+}}
+
