@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Observation-specific contribution to leave-one-out cross validation statistics for disbayes models — loo_indiv • disbayes</title>
+<title>Extract observation-specific contributions from a disbayes leave-one-out cross validation — loo_indiv • disbayes</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Observation-specific contribution to leave-one-out cross validation statistics for disbayes models — loo_indiv" />
-<meta property="og:description" content="Observation-specific contribution to leave-one-out cross validation statistics for disbayes models" />
+<meta property="og:title" content="Extract observation-specific contributions from a disbayes leave-one-out cross validation — loo_indiv" />
+<meta property="og:description" content="Extract observation-specific contributions from a disbayes leave-one-out cross validation" />
 
 
 
@@ -111,16 +111,18 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Observation-specific contribution to leave-one-out cross validation statistics for disbayes models</h1>
+    <h1>Extract observation-specific contributions from a disbayes leave-one-out cross validation</h1>
     <small class="dont-index">Source: <a href='https://github.com/chjackson/disbayes/blob/master/R/loo.R'><code>R/loo.R</code></a></small>
     <div class="hidden name"><code>loo_indiv.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Observation-specific contribution to leave-one-out cross validation statistics for disbayes models</p>
+    <p>Extract observation-specific contributions from a disbayes leave-one-out cross validation</p>
     </div>
 
-    <pre class="usage"><span class='fu'>loo_indiv</span><span class='op'>(</span><span class='va'>x</span>, agg <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>loo_indiv</span><span class='op'>(</span><span class='va'>x</span>, agg <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
+
+<span class='fu'>looi_disbayes</span><span class='op'>(</span><span class='va'>x</span>, agg <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -147,6 +149,12 @@ well the model would predict that observation if it were left out of the fit.</p
 <p><code>loo_indiv</code> acts on the objects that are returned by running <code><a href='https://mc-stan.org/loo/reference/loo.html'>loo</a></code> on <code><a href='disbayes.html'>disbayes</a></code>
 objects.  <code>looi_disbayes</code> acts directly on  <code><a href='disbayes.html'>disbayes</a></code>
 objects.  Both of those functions return a data frame with LOO contributions for each data point.</p>
+    <h2 class="hasAnchor" id="functions"><a class="anchor" href="#functions"></a>Functions</h2>
+
+    
+<ul>
+<li><p><code>looi_disbayes</code>: Observation-level leave-one-out cross validation statistics for a disbayes model</p></li>
+</ul>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
