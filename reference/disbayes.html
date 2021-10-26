@@ -158,7 +158,6 @@ Remission may also be included in the data and modelled.</p>
   cf_init <span class='op'>=</span> <span class='fl'>0.01</span>,
   eqage <span class='op'>=</span> <span class='fl'>30</span>,
   eqagehi <span class='op'>=</span> <span class='cn'>NULL</span>,
-  loo <span class='op'>=</span> <span class='cn'>TRUE</span>,
   sprior <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>1</span>, <span class='fl'>1</span><span class='op'>)</span>,
   hp_fixed <span class='op'>=</span> <span class='cn'>NULL</span>,
   rem_prior <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1.1</span>, <span class='fl'>1</span><span class='op'>)</span>,
@@ -376,10 +375,6 @@ all ages below this age, inclusive, when using the smoothed model.</p></td>
 all ages above this age, inclusive, when using the smoothed model.</p></td>
     </tr>
     <tr>
-      <th>loo</th>
-      <td><p>Compute leave-one-out cross validation statistics (for <code>method="mcmc"</code> only).</p></td>
-    </tr>
-    <tr>
       <th>sprior</th>
       <td><p>Rates of the exponential prior distributions used to penalise
 the coefficients of the spline model.   The default of 1 should adapt
@@ -506,20 +501,19 @@ optimisation, in Stan.</p></td>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A list with the following components</p>
+    <p>A list including the following components</p>
+<p><code>call</code>: Function call that was used.</p>
 <p><code>fit</code>: An object containing posterior samples from the fitted model,
 in the <code>stanfit</code> format returned by the <code><a href='https://mc-stan.org/rstan/reference/stan.html'>stan</a></code>
 function in the <span class="pkg">rstan</span> package.</p>
-<p><code>loo</code>: A list of objects containing leave-one-out cross-validation
-statistics.  There is one list component for each of the observed outcomes
-informing the model: incidence, prevalence, mortality and remission.   The
-component for each outcome is an object in the form returned by the
-<code><a href='https://mc-stan.org/loo/reference/loo.html'>loo</a></code> function in the <span class="pkg">loo</span> package. This can be used
-to assess how well the model predicts the data for that outcome, compared
-to other models.  The <code><a href='looi_disbayes.html'>looi_disbayes</a></code> function can be used to extract from this
-list a single tidy data frame with one row per observation.</p>
 <p><code>dat</code>: A list containing the input data in the form of numerators
 and denominators.</p>
+<p><code>nage</code>: Number of years of age in the data</p>
+<p><code>stan_data</code>: Full list of data supplied to Stan</p>
+<p><code>stan_inits</code>: Full list of parameter initial values supplied to Stan</p>
+<p><code>"method"</code>:  Optimisation method that was chosen</p>
+<p><code>"trend"</code>: Whether a time trend was modelled</p>
+<p><code>"hp_fixed"</code> Values of any hyperparameters that are fixed during the main model fit.</p>
 <p>Use the <code><a href='tidy.disbayes.html'>tidy.disbayes</a></code> method to return summary statistics
 from the fitted models, simply by calling <code><a href='https://generics.r-lib.org/reference/tidy.html'>tidy()</a></code> on the fitted model.</p>
 

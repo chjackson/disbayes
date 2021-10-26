@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Objects exported from other packages — reexports • disbayes</title>
+<title>Observation-specific contribution to leave-one-out cross validation statistics for disbayes models — loo_indiv • disbayes</title>
 
 
 <!-- jquery -->
@@ -39,15 +39,8 @@
 
 
 
-<meta property="og:title" content="Objects exported from other packages — reexports" />
-<meta property="og:description" content="These objects are imported from other packages. Follow the links
-below to see their documentation.
-
-  genericstidy
-
-  looloo
-
-" />
+<meta property="og:title" content="Observation-specific contribution to leave-one-out cross validation statistics for disbayes models — loo_indiv" />
+<meta property="og:description" content="Observation-specific contribution to leave-one-out cross validation statistics for disbayes models" />
 
 
 
@@ -118,24 +111,42 @@ below to see their documentation.
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Objects exported from other packages</h1>
-    <small class="dont-index">Source: <a href='https://github.com/chjackson/disbayes/blob/master/R/disbayes-package.R'><code>R/disbayes-package.R</code></a></small>
-    <div class="hidden name"><code>reexports.Rd</code></div>
+    <h1>Observation-specific contribution to leave-one-out cross validation statistics for disbayes models</h1>
+    <small class="dont-index">Source: <a href='https://github.com/chjackson/disbayes/blob/master/R/loo.R'><code>R/loo.R</code></a></small>
+    <div class="hidden name"><code>loo_indiv.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>These objects are imported from other packages. Follow the links
-below to see their documentation.</p>
-<dl>
-  <dt>generics</dt><dd><p><code><a href='https://generics.r-lib.org/reference/tidy.html'>tidy</a></code></p></dd>
-
-  <dt>loo</dt><dd><p><code><a href='https://mc-stan.org/loo/reference/loo.html'>loo</a></code></p></dd>
-
-</dl>
+    <p>Observation-specific contribution to leave-one-out cross validation statistics for disbayes models</p>
     </div>
 
+    <pre class="usage"><span class='fu'>loo_indiv</span><span class='op'>(</span><span class='va'>x</span>, agg <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span></pre>
 
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>x</th>
+      <td><p>For <code>loo_indiv</code>, an object returned by <code><a href='loo.disbayes.html'>loo.disbayes</a></code>.   For <code>looi_disbayes</code>, an object returned by <code><a href='disbayes.html'>disbayes</a></code>.</p></td>
+    </tr>
+    <tr>
+      <th>agg</th>
+      <td><p>If <code>TRUE</code> then the observation-specific contributions are aggregated over
+outcome type, returning a data frame with one row for each of incidence, prevalence, mortality
+and remission (if remission is included in the model), and one column for each of <code>"elpd_loo"</code>,
+<code>"p_loo"</code> and <code>"looic"</code>.</p></td>
+    </tr>
+    </table>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>A data frame with one row per observed age-specific mortality, incidence, prevalence and/or
+remission age-specific data-point, containing leave-one-out cross validation statistics representing how
+well the model would predict that observation if it were left out of the fit.</p>
+<p>These are computed with the <span class="pkg">loo</span> package.</p>
+<p><code>loo_indiv</code> acts on the objects that are returned by running <code><a href='https://mc-stan.org/loo/reference/loo.html'>loo</a></code> on <code><a href='disbayes.html'>disbayes</a></code>
+objects.  <code>looi_disbayes</code> acts directly on  <code><a href='disbayes.html'>disbayes</a></code>
+objects.  Both of those functions return a data frame with LOO contributions for each data point.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

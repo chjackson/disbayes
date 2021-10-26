@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Objects exported from other packages — reexports • disbayes</title>
+<title>Leave-one-out cross validation for disbayes models — loo.disbayes • disbayes</title>
 
 
 <!-- jquery -->
@@ -39,15 +39,8 @@
 
 
 
-<meta property="og:title" content="Objects exported from other packages — reexports" />
-<meta property="og:description" content="These objects are imported from other packages. Follow the links
-below to see their documentation.
-
-  genericstidy
-
-  looloo
-
-" />
+<meta property="og:title" content="Leave-one-out cross validation for disbayes models — loo.disbayes" />
+<meta property="og:description" content="Leave-one-out cross validation for disbayes models" />
 
 
 
@@ -118,24 +111,45 @@ below to see their documentation.
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Objects exported from other packages</h1>
-    <small class="dont-index">Source: <a href='https://github.com/chjackson/disbayes/blob/master/R/disbayes-package.R'><code>R/disbayes-package.R</code></a></small>
-    <div class="hidden name"><code>reexports.Rd</code></div>
+    <h1>Leave-one-out cross validation for disbayes models</h1>
+    <small class="dont-index">Source: <a href='https://github.com/chjackson/disbayes/blob/master/R/loo.R'><code>R/loo.R</code></a></small>
+    <div class="hidden name"><code>loo.disbayes.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>These objects are imported from other packages. Follow the links
-below to see their documentation.</p>
-<dl>
-  <dt>generics</dt><dd><p><code><a href='https://generics.r-lib.org/reference/tidy.html'>tidy</a></code></p></dd>
-
-  <dt>loo</dt><dd><p><code><a href='https://mc-stan.org/loo/reference/loo.html'>loo</a></code></p></dd>
-
-</dl>
+    <p>Leave-one-out cross validation for disbayes models</p>
     </div>
 
+    <pre class="usage"><span class='co'># S3 method for disbayes</span>
+<span class='fu'><a href='https://mc-stan.org/loo/reference/loo.html'>loo</a></span><span class='op'>(</span><span class='va'>x</span>, outcome <span class='op'>=</span> <span class='st'>"overall"</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>x</th>
+      <td><p>A model fitted by <code><a href='disbayes.html'>disbayes</a></code>.  Any of the computation methods
+are supported.</p></td>
+    </tr>
+    <tr>
+      <th>outcome</th>
+      <td><p>Either <code>"overall"</code>, to assess the fit to all data, or 
+one of <code>"inc"</code>, <code>"prev"</code>, <code>"mort"</code> or <code>"rem"</code>, to assess the fit
+to the incidence data, prevalence data, mortalidy data or remission data, respectively.</p></td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td><p>Other arguments (currently unused).</p></td>
+    </tr>
+    </table>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>An object of class <code>"loo"</code> as defined by the <span class="pkg">loo</span> package.</p>
+    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
+
+    <div class='dont-index'><p><code><a href='loo_indiv.html'>loo_indiv</a></code> to return tidied observation-specific contributions
+to the overall model fit computed here.</p></div>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
