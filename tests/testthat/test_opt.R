@@ -10,6 +10,12 @@ test_that("standard disbayes model, optimisation",{
   res <- tidy(db) %>% filter(var=="cf")
   expect_equal(res$mode[60], 0.0172128687091707, tol=1e-03)
   expect_equal(res$`50%`[60], 0.0173084702459764, tol=1e-03)
+  
+  tidy_obsdat(db)
+  if (interactive()){
+    plotfit_data_disbayes(db)
+    plotfit_disbayes(db)
+  }
 })
 
 
