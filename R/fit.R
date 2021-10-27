@@ -47,10 +47,10 @@ plotfit_data_disbayes <- function(x){
         dplyr::select(var, age, prob, lower, upper) %>% 
         dplyr::mutate(source="Fitted",
                       var = gsub("_prob","",var)) %>%
-        dplyr::full_join(datobs, by = c("var", "age", "prob", "lower", "upper", "source")) %>%
-        dplyr::mutate(var = fct_recode(var, "Incidence"="inc",
-                                       "Prevalence"="prev",
-                                       "Mortality"="mort"))
+        dplyr::full_join(datobs, by = c("var", "age", "prob", "lower", "upper", "source"))
+    res$var[res$var=="inc"] <- "Incidence"
+    res$var[res$var=="prev"] <- "Prevalence"
+    res$var[res$var=="mort"] <- "Mortality"
     if (any(res$var=="rem")) res$var[res$var=="rem"] <- "Remission"
     res
 }
