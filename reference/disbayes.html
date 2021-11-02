@@ -448,7 +448,7 @@ reported optimum is wrong.  If you are willing to believe
 the optimum and live without credible intervals, then set <code>draws=0</code> to skip
 computation of the Hessian.   To examine the problematic Hessian, set
 <code>hessian=TRUE,draws=0</code>, then look at the <code>$fit$hessian</code> component of the
-<code>disbayes</code> return object.   If it can be inverted, do <code><a href='https://rdrr.io/r/base/MathFun.html'>sqrt(diag(solve()))</a></code> on the Hessian, and
+<code>disbayes</code> return object.   If it can be inverted, do <code>sqrt(diag(solve()))</code> on the Hessian, and
 check for <code>NaN</code>s, indicating the problematic parameters.
 Otherwise, diagonal entries of the Hessian matrix that are very small
 may indicate parameters that are poorly identified from the data, leading to computational

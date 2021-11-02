@@ -485,7 +485,7 @@ accurate but the slowest method.</p>
 A sample from a normal approximation to the (real-line-transformed)
 posterior distribution is drawn in order to obtain credible intervals.</p>
 <p>If the optimisation fails to converge (non-zero return code), try increasing the
-number of iterations from the default 1000, e.g. <code><a href='disbayes.html'>disbayes(..., iter=10000, ...)</a></code>, or changing the algorithm to <code><a href='disbayes.html'>disbayes(..., algorithm="Newton", ...)</a></code>.</p>
+number of iterations from the default 1000, e.g. <code>disbayes(..., iter=10000, ...)</code>, or changing the algorithm to <code>disbayes(..., algorithm="Newton", ...)</code>.</p>
 <p>If there is an error message that mentions <code>chol</code>, then
 the computed Hessian matrix is not positive definite at the reported optimum, hence credible intervals
 cannot be computed.
@@ -494,7 +494,7 @@ reported optimum is wrong.  If you are willing to believe
 the optimum and live without credible intervals, then set <code>draws=0</code> to skip
 computation of the Hessian.   To examine the problematic Hessian, set
 <code>hessian=TRUE,draws=0</code>, then look at the <code>$fit$hessian</code> component of the
-<code>disbayes</code> return object.   If it can be inverted, do <code><a href='https://rdrr.io/r/base/MathFun.html'>sqrt(diag(solve()))</a></code> on the Hessian, and
+<code>disbayes</code> return object.   If it can be inverted, do <code>sqrt(diag(solve()))</code> on the Hessian, and
 check for <code>NaN</code>s, indicating the problematic parameters.
 Otherwise, diagonal entries of the Hessian matrix that are very small
 may indicate parameters that are poorly identified from the data, leading to computational

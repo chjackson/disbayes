@@ -74,7 +74,7 @@
                         <h4 class="author">Chris Jackson <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk" class="email">chris.jackson@mrc-bsu.cam.ac.uk</a>
 </h4>
             
-            <h4 class="date">2021-10-27</h4>
+            <h4 class="date">2021-11-02</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/chjackson/disbayes/blob/master/vignettes/disbayes.Rmd"><code>vignettes/disbayes.Rmd</code></a></small>
       <div class="hidden name"><code>disbayes.Rmd</code></div>
@@ -155,8 +155,8 @@
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/chjackson/disbayes">disbayes</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span>,quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
-<span class="va">ihdbristol</span> <span class="op">&lt;-</span> <span class="va">ihdengland</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">area</span><span class="op">==</span><span class="st">"Bristol"</span>, <span class="va">gender</span><span class="op">==</span><span class="st">"Male"</span><span class="op">)</span>
-<span class="va">ihdbristol</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/between.html">between</a></span><span class="op">(</span><span class="va">age</span>, <span class="fl">50</span>, <span class="fl">55</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<span class="va">ihdbristol</span> <span class="op">&lt;-</span> <span class="va">ihdengland</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">area</span><span class="op">==</span><span class="st">"Bristol"</span>, <span class="va">gender</span><span class="op">==</span><span class="st">"Male"</span><span class="op">)</span>
+<span class="va">ihdbristol</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/between.html">between</a></span><span class="op">(</span><span class="va">age</span>, <span class="fl">50</span>, <span class="fl">55</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code>## # A tibble: 6 × 9
 ##     age gender area    inc_num inc_denom prev_num prev_denom mort_num mort_denom
 ##   &lt;dbl&gt; &lt;chr&gt;  &lt;fct&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;      &lt;dbl&gt;    &lt;dbl&gt;      &lt;dbl&gt;
@@ -177,7 +177,7 @@
 <p>Secondly, estimates for five-year age groups were converted to one-year groups. Most simply this could be done by assuming the counts are equal for each year of age, but a more sophisticated method was used based on “temporal disaggregation” using one of the methods implemented by Sax and Steiner in the <code>tempdisagg</code> R package (<span class="citation">Sax and Steiner (2013)</span>). This ensures that the disaggregated counts vary smoothly with age, while preserving the aggregate totals.</p>
 <p>Thirdly, counts from smaller geographical areas were simply added up to obtain the corresponding counts for the larger areas (English city regions) required in this analysis.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">ihdbristol</span><span class="op">[</span><span class="va">ihdbristol</span><span class="op">$</span><span class="va">age</span> <span class="op">%in%</span> <span class="fl">50</span><span class="op">:</span><span class="fl">55</span>, <span class="op">]</span></code></pre></div>
+<code class="sourceCode R"><span class="va">ihdbristol</span><span class="op">[</span><span class="va">ihdbristol</span><span class="op">$</span><span class="va">age</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="fl">50</span><span class="op">:</span><span class="fl">55</span>, <span class="op">]</span></code></pre></div>
 <pre><code>## # A tibble: 6 × 9
 ##     age gender area    inc_num inc_denom prev_num prev_denom mort_num mort_denom
 ##   &lt;dbl&gt; &lt;chr&gt;  &lt;fct&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;      &lt;dbl&gt;    &lt;dbl&gt;      &lt;dbl&gt;
@@ -305,7 +305,7 @@
                  cf_model <span class="op">=</span> <span class="st">"indep"</span>, 
                  eqage <span class="op">=</span> <span class="fl">40</span><span class="op">)</span></code></pre></div>
 <p>The optimisation method produces accurate point estimates (defined by the posterior mode), and approximate credible intervals.</p>
-<p>Occasionally the optimisation may produce an error message that mentions <code><a href="https://rdrr.io/r/base/chol.html">chol(H)</a></code>, but still produce a point estimate. This indicates that the level of uncertainty cannot be determined, and casts doubt on the validity of the point estimate. In these cases it may work if the model is simplified, e.g. by fixing the level of smoothness for the age-dependence of the rates by using the <a href="https://chjackson.github.io/disbayes/reference/disbayes.html"><code>hp_fixed</code></a> option to <code>disbayes</code></p>
+<p>Occasionally the optimisation may produce an error message that mentions <code>chol(H)</code>, but still produce a point estimate. This indicates that the level of uncertainty cannot be determined, and casts doubt on the validity of the point estimate. In these cases it may work if the model is simplified, e.g. by fixing the level of smoothness for the age-dependence of the rates by using the <a href="https://chjackson.github.io/disbayes/reference/disbayes.html"><code>hp_fixed</code></a> option to <code>disbayes</code></p>
 </div>
 <div id="running-disbayes-mcmc-method" class="section level2">
 <h2 class="hasAnchor">
@@ -335,25 +335,25 @@
 <p>To extract results for a specific variable and model, it is convenient to use standard <a href="https://www.tidyverse.org/">tidyverse</a> functions, e.g. to get the median and interquartile range of case fatality for people aged between 60 and 65:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span>,quietly<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span>
-<span class="va">summ</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">var</span><span class="op">==</span><span class="st">"cf"</span>, <span class="fu"><a href="https://dplyr.tidyverse.org/reference/between.html">between</a></span><span class="op">(</span><span class="va">age</span>,<span class="fl">60</span>,<span class="fl">65</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
+<span class="va">summ</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> 
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">var</span><span class="op">==</span><span class="st">"cf"</span>, <span class="fu"><a href="https://dplyr.tidyverse.org/reference/between.html">between</a></span><span class="op">(</span><span class="va">age</span>,<span class="fl">60</span>,<span class="fl">65</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">age</span>, <span class="va">`25%`</span>, <span class="va">`50%`</span>, <span class="va">`75%`</span><span class="op">)</span></code></pre></div>
 <pre><code>##   age        25%        50%        75%
-## 1  60 0.01625855 0.01745663 0.01868278
-## 2  61 0.01644759 0.01758811 0.01882126
-## 3  62 0.01665627 0.01776087 0.01890921
-## 4  63 0.01681733 0.01785494 0.01902581
-## 5  64 0.01699834 0.01803567 0.01922061
-## 6  65 0.01727688 0.01828264 0.01936171</code></pre>
-<p>The default <code>plot</code> method for objects returned by <code>disbayes</code> plots the posterior summaries for case fatality, allowing a quick check of the model results. Or do <code><a href="https://rdrr.io/r/graphics/plot.default.html">plot(..., variable="inc")</a></code> for incidence. The function returns a <code>ggplot2</code> object that can be modified with <code>ggplot2</code> functions, e.g. to add axis labels.</p>
+## 1  60 0.01628969 0.01745783 0.01867891
+## 2  61 0.01641941 0.01758158 0.01879428
+## 3  62 0.01659347 0.01772099 0.01891497
+## 4  63 0.01676894 0.01785054 0.01905713
+## 5  64 0.01700270 0.01795693 0.01925106
+## 6  65 0.01718564 0.01823203 0.01938821</code></pre>
+<p>The default <code>plot</code> method for objects returned by <code>disbayes</code> plots the posterior summaries for case fatality, allowing a quick check of the model results. Or do <code>plot(..., variable="inc")</code> for incidence. The function returns a <code>ggplot2</code> object that can be modified with <code>ggplot2</code> functions, e.g. to add axis labels.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">dbres</span><span class="op">)</span> <span class="op">+</span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ylab</a></span><span class="op">(</span><span class="st">"Case fatality"</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">xlab</a></span><span class="op">(</span><span class="st">"Age"</span><span class="op">)</span> </code></pre></div>
 <p><img src="disbayes_files/figure-html/unnamed-chunk-12-1.png" width="672"></p>
 <p>More flexible plots can be built by using <code>ggplot</code> directly on the tidied estimates. The following shows the estimates of case fatality from the unsmoothed model in blue, with the estimates from the smoothed model superimposed in black.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">summs</span> <span class="op">&lt;-</span> <span class="va">summ</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">var</span><span class="op">==</span><span class="st">"cf"</span><span class="op">)</span>
-<span class="va">summu</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html">tidy</a></span><span class="op">(</span><span class="va">dbresu</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">var</span><span class="op">==</span><span class="st">"cf"</span><span class="op">)</span>
+<code class="sourceCode R"><span class="va">summs</span> <span class="op">&lt;-</span> <span class="va">summ</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">var</span><span class="op">==</span><span class="st">"cf"</span><span class="op">)</span>
+<span class="va">summu</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html">tidy</a></span><span class="op">(</span><span class="va">dbresu</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">var</span><span class="op">==</span><span class="st">"cf"</span><span class="op">)</span>
 <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">summu</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">age</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> 
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_linerange.html">geom_pointrange</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>y<span class="op">=</span><span class="va">`50%`</span>, ymin<span class="op">=</span><span class="va">`2.5%`</span>, ymax<span class="op">=</span><span class="va">`97.5%`</span><span class="op">)</span>,
                   data<span class="op">=</span><span class="va">summu</span>, col<span class="op">=</span><span class="st">"blue"</span>, alpha<span class="op">=</span><span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span>
