@@ -32,8 +32,11 @@ loo_disbayes_mcmc <- function(x, outcome="overall") {
   ## name the rows of the indiv-level contributions to match the outcome probs
   ## note in same order as Stan generated_quantities
   inames <- list()
-  for (i in c("mort","inc","prev","rem"))
-      inames[[i]] <- grep(sprintf("%s_prob",i), names(x$fit), value=TRUE)
+  for (i in c("mort","inc","prev","rem")){
+      supp <- x$dat[[sprintf("%s_supplied",i)]]
+      if (is.null(supp) || isTRUE(supp))
+          inames[[i]] <- grep(sprintf("%s_prob",i), names(x$fit), value=TRUE)
+  }
   rownames(res$pointwise) <- as.vector(unlist(inames))
   res
 }
@@ -42,8 +45,11 @@ loo_disbayes_opt <- function(x, outcome="overall") {
   log_p <- x$fit$log_p # log density of the posterior.
   log_g <- x$fit$log_g # log density of the approximation
   draws <- x$fit$theta_tilde
-  outs <- c("inc", "prev", "mort") 
-  if (x$stan_data$remission) outs <- c(outs, "rem")
+  outs <- character()
+  if (x$dat$inc_supplied) outs <- c(outs, "inc")
+  if (x$dat$prev_supplied) outs <- c(outs, "prev")
+  outs <- c(outs, "mort")
+  if (x$dat$rem_supplied) outs <- c(outs, "rem")
   if (outcome=="overall") {
     outcome_names <- paste(rep(outs,each=2), rep(c("num","denom"), length(outs)), sep="_")
     datlist <- parlist <- vector(length(outs), mode="list")

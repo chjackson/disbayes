@@ -17,5 +17,3 @@ test_that("standard disbayes model, optimisation",{
     plotfit_disbayes(db)
   }
 })
-
-

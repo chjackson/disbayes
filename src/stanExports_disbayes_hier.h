@@ -37,7 +37,7 @@ stan::io::program_reader prog_reader__() {
     reader.add_event(0, 0, "start", "/include/trans_probs.stan");
     reader.add_event(100, 100, "end", "/include/trans_probs.stan");
     reader.add_event(100, 1, "restart", "model_disbayes_hier");
-    reader.add_event(506, 405, "end", "model_disbayes_hier");
+    reader.add_event(508, 407, "end", "model_disbayes_hier");
     return reader;
 }
 template <typename T0__, typename T1__, typename T2__>
@@ -2802,6 +2802,7 @@ public:
         names__.push_back("ll_inc");
         names__.push_back("ll_prev");
         names__.push_back("ll_rem");
+        names__.push_back("ll_overall");
         names__.push_back("i");
     }
     void get_dims(std::vector<std::vector<size_t> >& dimss__) const {
@@ -2957,6 +2958,9 @@ public:
         dimss__.push_back(dims__);
         dims__.resize(0);
         dims__.push_back((((nage * narea) * ng) * remission));
+        dimss__.push_back(dims__);
+        dims__.resize(0);
+        dims__.push_back((((nage * narea) * ng) * (3 + remission)));
         dimss__.push_back(dims__);
         dims__.resize(0);
         dimss__.push_back(dims__);
@@ -3901,45 +3905,52 @@ public:
             stan::math::initialize(ll_rem, DUMMY_VAR__);
             stan::math::fill(ll_rem, DUMMY_VAR__);
             current_statement_begin__ = 491;
+            validate_non_negative_index("ll_overall", "(((nage * narea) * ng) * (3 + remission))", (((nage * narea) * ng) * (3 + remission)));
+            Eigen::Matrix<double, Eigen::Dynamic, 1> ll_overall((((nage * narea) * ng) * (3 + remission)));
+            stan::math::initialize(ll_overall, DUMMY_VAR__);
+            stan::math::fill(ll_overall, DUMMY_VAR__);
+            current_statement_begin__ = 492;
             int i;
             (void) i;  // dummy to suppress unused var warning
             stan::math::fill(i, std::numeric_limits<int>::min());
             stan::math::assign(i,1);
             // generated quantities statements
-            current_statement_begin__ = 492;
+            current_statement_begin__ = 493;
             for (int a = 1; a <= nage; ++a) {
-                current_statement_begin__ = 493;
+                current_statement_begin__ = 494;
                 for (int j = 1; j <= narea; ++j) {
-                    current_statement_begin__ = 494;
+                    current_statement_begin__ = 495;
                     for (int g = 1; g <= ng; ++g) {
-                        current_statement_begin__ = 495;
+                        current_statement_begin__ = 496;
                         stan::model::assign(ll_mort, 
                                     stan::model::cons_list(stan::model::index_uni(i), stan::model::nil_index_list()), 
                                     binomial_log(get_base1(get_base1(get_base1(mort_num, a, "mort_num", 1), j, "mort_num", 2), g, "mort_num", 3), get_base1(get_base1(get_base1(mort_denom, a, "mort_denom", 1), j, "mort_denom", 2), g, "mort_denom", 3), get_base1(get_base1(get_base1(mort_prob, a, "mort_prob", 1), j, "mort_prob", 2), g, "mort_prob", 3)), 
                                     "assigning variable ll_mort");
-                        current_statement_begin__ = 496;
+                        current_statement_begin__ = 497;
                         stan::model::assign(ll_inc, 
                                     stan::model::cons_list(stan::model::index_uni(i), stan::model::nil_index_list()), 
                                     binomial_log(get_base1(get_base1(get_base1(inc_num, a, "inc_num", 1), j, "inc_num", 2), g, "inc_num", 3), get_base1(get_base1(get_base1(inc_denom, a, "inc_denom", 1), j, "inc_denom", 2), g, "inc_denom", 3), get_base1(get_base1(get_base1(inc_prob, a, "inc_prob", 1), j, "inc_prob", 2), g, "inc_prob", 3)), 
                                     "assigning variable ll_inc");
-                        current_statement_begin__ = 497;
+                        current_statement_begin__ = 498;
                         stan::model::assign(ll_prev, 
                                     stan::model::cons_list(stan::model::index_uni(i), stan::model::nil_index_list()), 
                                     binomial_log(get_base1(get_base1(get_base1(prev_num, a, "prev_num", 1), j, "prev_num", 2), g, "prev_num", 3), get_base1(get_base1(get_base1(prev_denom, a, "prev_denom", 1), j, "prev_denom", 2), g, "prev_denom", 3), get_base1(get_base1(get_base1(prev_prob, a, "prev_prob", 1), j, "prev_prob", 2), g, "prev_prob", 3)), 
                                     "assigning variable ll_prev");
-                        current_statement_begin__ = 498;
+                        current_statement_begin__ = 499;
                         if (as_bool(remission)) {
-                            current_statement_begin__ = 499;
+                            current_statement_begin__ = 500;
                             stan::model::assign(ll_rem, 
                                         stan::model::cons_list(stan::model::index_uni(i), stan::model::nil_index_list()), 
                                         binomial_log(get_base1(get_base1(get_base1(rem_num, a, "rem_num", 1), j, "rem_num", 2), g, "rem_num", 3), get_base1(get_base1(get_base1(rem_denom, a, "rem_denom", 1), j, "rem_denom", 2), g, "rem_denom", 3), get_base1(get_base1(get_base1(rem_prob, a, "rem_prob", 1), j, "rem_prob", 2), g, "rem_prob", 3)), 
                                         "assigning variable ll_rem");
                         }
-                        current_statement_begin__ = 500;
+                        current_statement_begin__ = 501;
                         stan::math::assign(i, (i + 1));
                     }
                 }
             }
+            current_statement_begin__ = 505;
+            stan::math::assign(ll_overall, append_row(ll_mort, append_row(ll_inc, append_row(ll_prev, ll_rem))));
             // validate, write generated quantities
             current_statement_begin__ = 487;
             size_t ll_mort_j_1_max__ = ((nage * narea) * ng);
@@ -3962,6 +3973,11 @@ public:
                 vars__.push_back(ll_rem(j_1__));
             }
             current_statement_begin__ = 491;
+            size_t ll_overall_j_1_max__ = (((nage * narea) * ng) * (3 + remission));
+            for (size_t j_1__ = 0; j_1__ < ll_overall_j_1_max__; ++j_1__) {
+                vars__.push_back(ll_overall(j_1__));
+            }
+            current_statement_begin__ = 492;
             vars__.push_back(i);
         } catch (const std::exception& e) {
             stan::lang::rethrow_located(e, current_statement_begin__, prog_reader__());
@@ -4324,6 +4340,12 @@ public:
             param_name_stream__ << "ll_rem" << '.' << j_1__ + 1;
             param_names__.push_back(param_name_stream__.str());
         }
+        size_t ll_overall_j_1_max__ = (((nage * narea) * ng) * (3 + remission));
+        for (size_t j_1__ = 0; j_1__ < ll_overall_j_1_max__; ++j_1__) {
+            param_name_stream__.str(std::string());
+            param_name_stream__ << "ll_overall" << '.' << j_1__ + 1;
+            param_names__.push_back(param_name_stream__.str());
+        }
         param_name_stream__.str(std::string());
         param_name_stream__ << "i";
         param_names__.push_back(param_name_stream__.str());
@@ -4661,6 +4683,12 @@ public:
         for (size_t j_1__ = 0; j_1__ < ll_rem_j_1_max__; ++j_1__) {
             param_name_stream__.str(std::string());
             param_name_stream__ << "ll_rem" << '.' << j_1__ + 1;
+            param_names__.push_back(param_name_stream__.str());
+        }
+        size_t ll_overall_j_1_max__ = (((nage * narea) * ng) * (3 + remission));
+        for (size_t j_1__ = 0; j_1__ < ll_overall_j_1_max__; ++j_1__) {
+            param_name_stream__.str(std::string());
+            param_name_stream__ << "ll_overall" << '.' << j_1__ + 1;
             param_names__.push_back(param_name_stream__.str());
         }
         param_name_stream__.str(std::string());

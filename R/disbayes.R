@@ -338,13 +338,14 @@ disbayes <- function(data,
   ## Convert all data to numerators and denominators 
   inc_data <- process_data(data, "inc", inc_num, inc_denom, inc_prob, inc_lower, inc_upper, nage)
   prev_data <- process_data(data, "prev", prev_num, prev_denom, prev_prob, prev_lower, prev_upper, nage)
-  if (!inc_data$supplied && !prev_data$supplied)
+  if (!inc_data$inc_supplied && !prev_data$prev_supplied)
     stop("At least one of incidence or prevalence should be supplied")
   mort_data <- process_data(data, "mort", mort_num, mort_denom, mort_prob, mort_lower, mort_upper, nage)
+  if (!mort_data$mort_supplied)
+    stop("Mortality data should be supplied")
   rem_data <- process_data(data, "rem", rem_num, rem_denom, rem_prob, rem_lower, rem_upper, nage)
-  remission <- rem_data$supplied
+  remission <- rem_data$rem_supplied
   dat <- c(inc_data, prev_data, mort_data, rem_data, nage=nage, remission=as.numeric(remission))
-  dat$supplied <- NULL
   
   cf_model <- match.arg(cf_model, c("smooth", "indep", "increasing", "const"))
   inc_model <- match.arg(inc_model, c("smooth", "indep"))
@@ -406,7 +407,8 @@ disbayes <- function(data,
     if (is.null(X)) X <- if (is.null(inc_smooth$X)) rem_smooth$X else inc_smooth$X
 
 
-        datstans <- c(dat, list(smooth_cf=as.numeric(smooth_cf),
+    datstans <- c(dat, list(
+                           smooth_cf=as.numeric(smooth_cf),
                             increasing_cf=as.numeric(increasing_cf),
                             const_cf=as.numeric(const_cf),
                             const_rem=as.numeric(const_rem),
@@ -599,16 +601,18 @@ process_data <- function(data, prefix, num_str, denom_str, est_str, lower_str, u
   }
   else {
     pnames <- list(inc="incidence", prev="prevalence", mort="mortality", rem="remission")
-    if (prefix %in% c("prev","rem","inc"))
-      res <- list(num=rep(0,nage), denom=rep(0,nage), supplied=FALSE)
+    if (prefix %in% c("prev","rem","inc")){
+        res <- list(num=rep(0,nage), denom=rep(0,nage))
+        supplied <- FALSE
+    }
     else stop(sprintf("Not enough information supplied to obtain numerator and denominator for %s.\nNeed either numerator and denominator, estimate and denominator, or estimate with lower and upper credible limit", pnames[[prefix]]))
   }
   if (prefix=="prev") res$num[1] <- 0  # prevalence at age zero assumed exactly 0
   if (hier)  # for hierarchical models
     for (i in c("num","denom"))
       res[[i]] <- array(res[[i]], dim=c(nage, ngroup, ngender))
-  names(res) <- paste(prefix, names(res), sep="_")
   res$supplied <- supplied
+  names(res) <- paste(prefix, names(res), sep="_")
   res
 }
 

@@ -31,13 +31,18 @@ test_that("data supplied as estimate and credible limits",{
 
 test_that("errors when insufficient data supplied",{
   expect_error(
-   disbayes(dat = ihdbristol,
-                        inc_num = "inc_num", inc_denom = "inc_denom",
-                        prev_num = "prev_num", prev_denom = "prev_denom",
-                        mort_prob = "mort_prob", 
-                        eqage = 40, algorithm="Fixed_param"),
-   "Not enough information"
+    disbayes(dat = ihdbristol,
+             inc_num = "inc_num", inc_denom = "inc_denom",
+             prev_num = "prev_num", prev_denom = "prev_denom",
+             mort_prob = "mort_prob", 
+             eqage = 40, algorithm="Fixed_param"),
+    "Not enough information"
   )
+  expect_error(disbayes(dat = ihdbristol,
+           inc_num = "inc_num", inc_denom = "inc_denom",
+           prev_num = "prev_num", prev_denom = "prev_denom",
+           eqage = 40, algorithm="Fixed_param"),
+           "Not enough information")
 })
 
 test_that("increasing case fatality",{

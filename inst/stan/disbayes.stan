@@ -1,6 +1,8 @@
 #include /include/trans_probs.stan
 
 data {
+  int inc_supplied;
+  int prev_supplied;
   int smooth_cf;
   int smooth_inc;
   int smooth_rem;
@@ -280,14 +282,16 @@ model {
 
 generated quantities {
   vector[nage] ll_mort;
-  vector[nage] ll_inc;
-  vector[nage] ll_prev;
+  vector[nage*inc_supplied] ll_inc;
+  vector[nage*prev_supplied] ll_prev;
   vector[nage*remission] ll_rem;
-  vector[nage*(3 + remission)] ll_overall;
+  vector[nage*(1 + inc_supplied + prev_supplied + remission)] ll_overall;
   for (a in 1:nage) {
       ll_mort[a] = binomial_lpmf(mort_num[a] | mort_denom[a], mort_prob[a]);
-      ll_inc[a] = binomial_lpmf(inc_num[a] | inc_denom[a], inc_prob[a]);
-      ll_prev[a] = binomial_lpmf(prev_num[a] | prev_denom[a], prev_prob[a]);
+      if (inc_supplied)
+	ll_inc[a] = binomial_lpmf(inc_num[a] | inc_denom[a], inc_prob[a]);
+      if (prev_supplied)
+	ll_prev[a] = binomial_lpmf(prev_num[a] | prev_denom[a], prev_prob[a]);
       if (remission) 
 	  ll_rem[a] = binomial_lpmf(rem_num[a] | rem_denom[a], rem_prob[a]);
   }
