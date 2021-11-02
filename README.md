@@ -1,7 +1,7 @@
 disbayes
 ======
 
-The development repository for the [disbayes](http://cran.r-project.org/package=disbayes) R package for chronic disease epidemiology estimation with incomplete data. 
+The development repository for the `disbayes` R package for chronic disease epidemiology estimation with incomplete data. 
 
 * `disbayes` can estimate age-specific case fatality for a disease, given:
 
