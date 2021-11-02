@@ -596,7 +596,7 @@ process_data <- function(data, prefix, num_str, denom_str, est_str, lower_str, u
   }
   else if (!is.null(est) && !is.null(lower) && !is.null(upper)) {
     check_interval(est, lower, upper, prefix)
-    res <- ci2num(est, lower, upper)
+    res <- as.list(ci2num(est, lower, upper))
     supplied <- TRUE
   }
   else {

@@ -188,12 +188,13 @@ disbayes_hier <- function(data,
 
     inc_data <- process_data(data, "inc", inc_num, inc_denom, inc_prob, inc_lower, inc_upper, nage, narea, ng, hier=TRUE)
     prev_data <- process_data(data, "prev", prev_num, prev_denom, prev_prob, prev_lower, prev_upper, nage, narea, ng, hier=TRUE)
-    if (!inc_data$supplied && !prev_data$supplied)
+    if (!inc_data$inc_supplied && !prev_data$prev_supplied)
         stop("At least one of incidence or prevalence should be supplied")
     mort_data <- process_data(data, "mort", mort_num, mort_denom, mort_prob, mort_lower, mort_upper, nage, narea, ng, hier=TRUE)
-
+    if (!mort_data$mort_supplied)
+        stop("Mortality data should be supplied")
     rem_data <- process_data(data, "rem", rem_num, rem_denom, rem_prob, rem_lower, rem_upper, nage, narea, ng, hier=TRUE)
-    remission <- rem_data$supplied
+    remission <- rem_data$rem_supplied
     smooth_rem <- (remission && rem_model=="smooth")
 
     dat <- c(inc_data, prev_data, mort_data, rem_data, nage=nage, remission=as.numeric(remission))

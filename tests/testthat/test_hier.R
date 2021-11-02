@@ -1,11 +1,13 @@
 source("data.r")
 
-db <- disbayes_hier(ihdmale, age="age", group="area", 
+test_that("hierarchical model", {
+  db <- disbayes_hier(ihdmale, age="age", group="area", 
                              inc_num = "inc_num", inc_denom = "inc_denom",
                            prev_num = "prev_num", prev_denom = "prev_denom",
                            mort_num = "mort_num", mort_denom = "mort_denom",
                     iter=10, chains=1, method="mcmc", algorithm="Fixed_param")
-expect_s3_class(db, "disbayes_hier")
+  expect_s3_class(db, "disbayes_hier")
+})
 
 test_that("errors in specifying hierarchical model", {
   expect_error(disbayes_hier(ihdengland, age="age", group="area", 

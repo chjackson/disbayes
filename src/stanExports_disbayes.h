@@ -37,7 +37,7 @@ stan::io::program_reader prog_reader__() {
     reader.add_event(0, 0, "start", "/include/trans_probs.stan");
     reader.add_event(100, 100, "end", "/include/trans_probs.stan");
     reader.add_event(100, 1, "restart", "model_disbayes");
-    reader.add_event(405, 304, "end", "model_disbayes");
+    reader.add_event(400, 299, "end", "model_disbayes");
     return reader;
 }
 template <typename T0__, typename T1__, typename T2__>
@@ -2857,31 +2857,6 @@ public:
                 }
             }
             current_statement_begin__ = 397;
-            if (pstream__) {
-                stan_print(pstream__,inc_supplied);
-                *pstream__ << std::endl;
-            }
-            current_statement_begin__ = 398;
-            if (pstream__) {
-                stan_print(pstream__,prev_supplied);
-                *pstream__ << std::endl;
-            }
-            current_statement_begin__ = 399;
-            if (pstream__) {
-                stan_print(pstream__,ll_inc);
-                *pstream__ << std::endl;
-            }
-            current_statement_begin__ = 400;
-            if (pstream__) {
-                stan_print(pstream__,ll_prev);
-                *pstream__ << std::endl;
-            }
-            current_statement_begin__ = 401;
-            if (pstream__) {
-                stan_print(pstream__,ll_mort);
-                *pstream__ << std::endl;
-            }
-            current_statement_begin__ = 402;
             stan::math::assign(ll_overall, append_row(ll_mort, append_row(ll_inc, append_row(ll_prev, ll_rem))));
             // validate, write generated quantities
             current_statement_begin__ = 383;
