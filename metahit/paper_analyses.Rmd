@@ -14,36 +14,72 @@ source("read_model_results.r")
 ```
 
 
-
-
-
-
 # Data summary 
 
-Raw point estimates of mort, inc and prev.   Just women for now.  Curves compared between areas, faceted by disease.   Shows diseases where prevalence and incidence are very low.  Mild differences between areas.    
+Raw point estimates of mort, inc and prev.  Curves compared between areas, faceted by disease.   Shows diseases where prevalence and incidence are very low.  Mild differences between areas.    
+
+15 diseases in the plot, nice round number. Not including rheumatic heart disease and head and neck cancer, the two with the lowest mortality.  
 
 ```{r,eval=FALSE}
+gbd %>% group_by(disease) %>% 
+  summarise(mort_num=sum(mort_num), inc_num=sum(inc_num), 
+            prev_num=sum(prev_num), rem_num=sum(rem_num),
+            mort_denom=sum(mort_denom), inc_denom=sum(inc_denom), 
+            prev_denom=sum(prev_denom), rem_denom=sum(rem_denom),
+            .groups = "drop") %>% arrange(desc(mort_num))
 
-source("paper_analyses_header.r")
-ymax_mort <- enframe(c("Ischemic heart disease"=0.2,"Stroke"=0.1,"Dementia"=0.2,
+ymax_mort <- enframe(c("Ischemic heart disease"=0.2,"Stroke"=0.1,"Dementia"=0.1,
                        "COPD"=0.1, "Breast cancer"=0.03, "Lung cancer"=0.02,
                        "Colon and rectum cancer"=0.02, "Stomach cancer"=0.01, 
-                       "Uterine cancer"=0.002), name="disease", value="ymax_mort")
+                       "Uterine cancer"=0.002,
+                       "Liver cancer"=0.002, 
+                       "Type 2 diabetes"=0.01, 
+                       "Parkinson's disease"=0.01, 
+                       "Cardiomyopathy and myocarditis" = 0.005,
+                       "Non-rheumatic valvular heart disease" = 0.01,
+                       "Multiple myeloma" = 0.002
+                       ), name="disease", value="ymax_mort")
 
-ymax_inc <- enframe(c("Ischemic heart disease"=0.1, "Stroke"=0.1,"Dementia"=0.1,
+ymax_inc <- enframe(c("Ischemic heart disease"=0.05, "Stroke"=0.05,"Dementia"=0.1,
                       "COPD"=0.1, "Breast cancer"=0.03, "Lung cancer"=0.03,
+                       "Type 2 diabetes"=0.02, 
+                       "Parkinson's disease"=0.01, 
                       "Colon and rectum cancer"=0.03, "Stomach cancer"=0.01,
-                      "Uterine cancer"=0.002), name="disease", value="ymax_inc")
+                      "Uterine cancer"=0.002,
+                       "Liver cancer"=0.002, 
+                       "Cardiomyopathy and myocarditis" = 0.003,
+                       "Non-rheumatic valvular heart disease" = 0.01,
+                       "Multiple myeloma" = 0.002
+                      ), name="disease", value="ymax_inc")
 
+ymax_prev <- enframe(c("Ischemic heart disease"=0.25, "Stroke"=0.1,"Dementia"=0.4,
+                      "COPD"=1, "Breast cancer"=0.09, "Lung cancer"=0.03,
+                       "Type 2 diabetes"=1, 
+                       "Parkinson's disease"=0.07, 
+                      "Colon and rectum cancer"=0.1, "Stomach cancer"=0.02,
+                      "Uterine cancer"=0.02,
+                       "Liver cancer"=0.003, 
+                       "Cardiomyopathy and myocarditis" = 0.02,
+                       "Non-rheumatic valvular heart disease" = 0.1,
+                       "Multiple myeloma" = 0.005
+                      ), name="disease", value="ymax_prev")
+
+
+source("paper_analyses_header.r")
 gbdplot <- gbdplot %>%
     left_join(ymax_mort, by="disease") %>%
     left_join(ymax_inc, by="disease") %>%
+    left_join(ymax_prev, by="disease") %>%
     mutate(mort_upper = pmin(mort_upper, ymax_mort),
            inc_upper = pmin(inc_upper, ymax_inc),
-           disease = factor(disease, levels=disease_order))
+           prev_upper = pmin(prev_upper, ymax_prev),
+           disease = factor(disease, levels=disease_order),
+           areagender = interaction(area, gender)) %>%
+    filter(disease %in% diseases_paper)
 ht <- 3
+
 pdf("../../write/mort_data.pdf", height=ht)
-gbdplot$areagender <- interaction(gbdplot$area, gbdplot$gender)
+
 ggplot(gbdplot, aes(x=age, y=mort_prob, col=area, lty=gender, group=areagender)) + 
   facet_wrap(~disease, ncol=3, scales="free_y") + 
   coord_cartesian(xlim = c(50,100)) +
@@ -85,7 +121,6 @@ ggplot(gbdplot, aes(x=age, y=prev_prob, col=area, lty=gender, group=areagender))
         legend.spacing.y = unit(0.1, "cm"))
 dev.off()
 
-
 ```
 
 
@@ -94,13 +129,44 @@ dev.off()
 
 * Results from fitting disbayes model by disease, gender and area separately
 
-* Stomach cancer and uterine cancer are done using national data. 
+* 2017: Stomach cancer and uterine cancer are done using national data. 
+
+* 2019: Cardiomyopathy, liver cancer, multiple myeloma with national data due to non convergence.  Uterine and stomach cancers have noisy area-specific estimates, suggesting info drawn mostly from prior. 
+
 
 ```{r,eval=FALSE}
 
-## MCMC convergence checks.   All OK with 5000 samples and the occasional model simplification
+## MCMC convergence checks
 resnc <- resnh %>% filter(Rhat > 1.05)
-table(resnc$disease, resnc$area, resnc$gender)
+resnc <- resnh %>% filter(Rhat > 1.1)
+table(resnc$disease, resnc$gender)
+
+resnc <- resnh %>% filter(Rhat > 2)
+table(resnc$disease, resnc$gender)
+table(resnc$disease, resnc$gender, resnc$area)["Multiple myeloma",,]
+table(resnc$disease, resnc$gender, resnc$area)["Liver cancer",,]
+## CM, LC, MM not worked for particular areas 
+
+resnc <- resnat %>% filter(Rhat > 1.05)
+resnc <- resnat %>% filter(Rhat > 1.1)
+resnc <- resnat %>% filter(Rhat > 2)
+table(resnc$disease, resnc$gender)
+## all converges with national data 
+
+## National results. Nice.
+resnat %>% filter(var=="cf") %>% 
+    ggplot(aes(x=`age`,y=`50%`,col=gender)) + 
+    geom_line() + 
+    geom_ribbon(aes(ymin=`2.5%`,ymax=`97.5%`,fill=gender)) +
+    facet_wrap(~disease, nrow=2, scales="free_y")
+
+resnh %>% filter(grepl("Liver",disease), var=="cf", 
+                 area=="Liverpool", gender=="Female") %>% 
+    ggplot(aes(x=age, y=`50%`)) + 
+    geom_ribbon(aes(ymin=`2.5%`,ymax=`97.5%`), fill="gray80") + 
+    coord_cartesian(ylim=c(0,0.1), xlim=c(50,90)) +
+    geom_line() 
+gbd %>% group_by(disease) %>% summarise(mort_num=sum(mort_num), inc_num=sum(inc_num)) %>% as.data.frame()
 
 
 ## Compare modal approximation with posterior 
@@ -109,7 +175,7 @@ table(resnc$disease, resnc$area, resnc$gender)
 ## stmc, utrc use national point estimates 
 
 resopt <- readRDS("resopt_nonhier.rds") %>% 
-  filter(!disease %in% c("Stomach cancer","Uterine cancer"))
+  filter(!disease %in% diseases_nat)
 resoptnat <- readRDS("resopt_nat.rds")
 resoptcf <- resopt %>%
   full_join(resoptnat) %>% 
@@ -127,11 +193,14 @@ pdf("../../write/opt_compare.pdf")
 
 resp <- resall %>% 
   dplyr::filter(model %in% c("Independent areas","National"), var=="cf") %>%
-  dplyr::filter(area=="Bristol" | (area=="England" & model=="National"), gender=="Female") %>%
+  dplyr::filter((area=="Bristol" & (!(disease %in% diseases_nat))) |
+                    (area=="England" & model=="National"), 
+                gender=="Female") %>%
   mutate(Algorithm="MCMC") %>%
   full_join(resoptcf)
 resp %>%
-  filter(age %in% c(70, 75, 80, 85, 90)) %>%
+  filter(disease %in% diseases_paper, 
+         age %in% c(70, 75, 80, 85, 90)) %>%
   mutate(par = 1 - exp(-`50%`),
          plow = 1 - exp(-`2.5%`),
          pupp = 1 - exp(-`97.5%`)) %>%
@@ -150,15 +219,18 @@ dev.off()
 
 pdf("../../write/all_cf_indep.pdf",width=6,height=6)
 
-gg <- resall %>% 
+resplotnh <- resnh %>% 
     dplyr::filter(model %in% c("Independent areas","National"), 
                   var=="cf",
                 area %in% c(cityregions,"England")) %>%
     mutate(area = forcats::fct_relevel(area, "England", after=Inf)) %>%
-    dplyr::filter(! (disease=="Uterine cancer" & age > 90)) %>%
+    dplyr::filter(! (disease=="Uterine cancer" & age > 90),
+                  disease %in% diseases_paper) %>%
     mutate(p50 = 1 - exp(-`50%`),
          plow = 1 - exp(-`2.5%`),
-         pupp = 1 - exp(-`97.5%`)) %>%
+         pupp = 1 - exp(-`97.5%`)) 
+
+resplotnh %>%
   ggplot(aes(x=age, y=p50, group=area, col=area)) + 
   geom_ribbon(aes(ymin=plow, ymax=pupp), 
               fill="gray80", col="gray80") +
@@ -175,7 +247,7 @@ gg <- resall %>%
 
 grob <- ggplotGrob(gg)
 # gtable::gtable_show_layout(grob)
-idx <- which(grob$layout$name %in% c("panel-5-2","panel-9-2"))
+idx <- which(grob$layout$name %in% c("panel-2-2","panel-8-2"))
 for (i in idx) grob$grobs[[i]] <- grid::nullGrob()
 grid::grid.draw(grob)
 
@@ -183,7 +255,16 @@ dev.off()
 
 ```
 
+# Runs omitting incidence
 
+```{r}
+# Stroke NE (region) needs more runs, but we don't need this for city regions analysis
+resnc <- resnhi %>% 
+    filter(var=="cf", Rhat > 1.2, 
+           disease %in% diseases_paper) %>% 
+    droplevels()
+table(resnc$disease, resnc$gender, resnc$area)
+```
 
 
 # Hierarchical model
@@ -196,42 +277,63 @@ resnc <- resh %>% filter(Rhat > 1.1)
 resnc <- resh %>% filter(Rhat > 1.05) 
 table(resnc$disease, resnc$gender)
 
-## Look at precision of CRC estimates as exemplar. 
+## Look at precision of CRC estimates as exemplar for computational cost. 
 ## Effective sample size of 1000 after a few hours
 resh %>% filter(gender=="Male", disease=="Ischemic heart disease", age==60, var=="cf") %>% head
 resh %>% filter(gender=="Male", disease=="Colon and rectum cancer", age==60, var=="cf") %>% head
 
 
-
 ## Between area variability in age curves, point ests.  All diseases 
-
-pdf("../../write/hier.pdf", width=6, height=4)
-
-resall %>% 
-    filter(var=="cf", !(disease %in% c("Uterine cancer" , "Stomach cancer")),
-           area %in% cityregions, 
-           gender=="Female",
-           model %in% c("Independent areas","Hierarchical")) %>%
-    mutate(disease = fct_recode(disease, 
-                                "Colorectal cancer"="Colon and rectum cancer",
-                                "IHD" = "Ischemic heart disease")) %>%
-    mutate(p50 = 1 - exp(-`50%`),
+rescfplot <- resall %>% 
+    filter(var=="cf", 
+           disease %in% diseases_paper_short, 
+           area %in% c(cityregions, "England"),
+           (model %in% c("Independent areas","National")) | 
+               (model %in% "Hierarchical" & !(disease %in% diseases_nat))
+    ) %>%
+        mutate(disease = fct_recode(disease, 
+                                    "Colorectal cancer"="Colon and rectum cancer",
+                                    "IHD" = "Ischemic heart disease")) %>%
+    mutate(model = ifelse(model=="National","Independent areas",model),
+           p50 = 1 - exp(-`50%`),
            plow = 1 - exp(-`2.5%`),
-           pupp = 1 - exp(-`97.5%`)) %>%
-    mutate(model = relevel(factor(model), "Independent areas")) %>%
+           pupp = 1 - exp(-`97.5%`),
+           gender_model = paste(gender, model, sep="\n")) %>%
+    mutate(gender_model = factor(gender_model, 
+                                 levels=c("Female\nIndependent areas",
+                                          "Male\nIndependent areas",
+                                          "Female\nHierarchical",
+                                          "Male\nHierarchical"))) 
+gg <- rescfplot %>%
     ggplot(aes(x=age, col=area, group=area)) +
     geom_ribbon(aes(ymin=plow, ymax=pupp), fill="gray80", col="gray80") +
     geom_line(aes(y=p50)) + 
     coord_cartesian(xlim=c(70,  100), ylim=c(0,NA)) +
     scale_x_continuous(breaks=seq(0,100,10)) + 
     ylab("Annual case fatality probability")  +
-    facet_grid(cols=vars(model), rows=vars(disease),
+    facet_grid(cols=vars(gender_model), rows=vars(disease),
                scales="free_y", switch = "y") + 
     xlab("Age (years)") + 
     labs(col="") +
     theme(strip.text.y.left = element_text(angle = 0),
+          strip.text.x = element_text(size = 5),
+          axis.text.x = element_text(size = 5.5),
+          axis.text.y = element_text(size = 5),
+          axis.title.x = element_text(size = 7),
+          axis.title.y = element_text(size = 7),
           strip.text.y = element_text(size = 6.5),
           legend.text = element_text(size = 6.5))
+gg
+
+pdf("../../write/cf.pdf", width=6, height=4)
+
+grob <- ggplotGrob(gg)
+# gtable::gtable_show_layout(grob)
+idx <- which(grob$layout$name %in% c("panel-5-2","panel-9-2",
+                                     "panel-8-3","panel-9-3",
+                                     "panel-5-4","panel-8-4","panel-9-4"))
+for (i in idx) grob$grobs[[i]] <- grid::nullGrob()
+grid::grid.draw(grob)
 
 dev.off()
 
@@ -245,14 +347,11 @@ dev.off()
 
 ```{r}
 
-resg <- resg %>% filter(disease != "Stomach cancer") # only national estimates
-# convergence check
 summary(resg$Rhat)  # 
 resnc <- resg %>% filter(Rhat > 2) 
-resnc <- resg %>% filter(Rhat > 1.1) 
-resnc <- resg %>% filter(Rhat > 1.01) 
+resnc <- resg %>% filter(Rhat > 1.1) # DM and NRVHD didn't converge for all areas   
 table(resnc$disease)
-table(resnc$disease, resnc$area)
+table(resnc$disease, resnc$area)[c(4,6),]
 
 ## Point est curves compared between areas 
 ## Not shown in paper
@@ -270,12 +369,11 @@ ggplot(rescf, aes(x=age, col=area)) +
 ## Get curves of m/f CF risk ratios by age and area, from the hier model with 
 ## different gender effect for each area 
 reshi <- resh %>%  
-  mutate(disease = fct_recode(disease, !!!disease_shorten)) %>%
-  filter(! disease %in% c("Breast cancer", 
-                          "Stomach cancer", 
-                          "Uterine cancer"), 
+  filter(! disease %in% c("Breast cancer", "Stomach cancer", "Uterine cancer"),
+         disease %in% diseases_paper,
          area %in% cityregions, 
          var=="cf") %>%
+  mutate(disease = fct_recode(disease, !!!disease_shorten)) %>%
   mutate(est = log(`50%`), se=(log(`97.5%`)-log(`2.5%`))/4) 
 reshie <- reshi %>%
   select(age, gender, area, disease, est) %>% 
@@ -294,9 +392,8 @@ reshis <- reshi %>%
 
 ## Superimpose the equivalent common curve from the common effect model
 resgi <- resg %>%  
-  filter(! disease %in% c("Breast cancer", 
-                          "Stomach cancer", 
-                          "Uterine cancer"), 
+  filter(! disease %in% c("Breast cancer", "Stomach cancer", "Uterine cancer"),
+         disease %in% diseases_paper, 
          area %in% cityregions, 
          var=="cf") %>%
   mutate(disease = fct_recode(disease, !!!disease_shorten)) %>%
@@ -337,8 +434,7 @@ ggplot(reshis %>% filter(age > 60),
           strip.text = element_text(size = 6.5))
 
 dev.off()
-
-
+    
 ```
 
 
@@ -349,8 +445,6 @@ dev.off()
 
 Full table of model comparison statistics for all 4 relevant models for the paper 
 
-No-incidence model is best for all diseases
-
 
 ```{r}
 looall2 <- looall %>% 
@@ -358,6 +452,7 @@ looall2 <- looall %>%
                       "Independent areas, no incidence data",
                       "Hierarchical",
                       "Hierarchical joint gender"),
+         disease %in% diseases_paper_short,
          !(disease %in% c("Uterine cancer","Stomach cancer")),
          outcome %in% c("inc","prev","mort"))
 
@@ -372,25 +467,257 @@ looallsum3 <- looall2 %>%
   mutate(outcome = "total")
 
 lootab <- looall2 %>%
-  full_join(looallsum2) %>%
-  full_join(looallsum3) %>%
-  select(outcome, area, age, gender, disease, model, looic) %>%
-  pivot_wider(names_from=model, values_from=looic) %>%
-  group_by(disease, outcome) %>%
-  summarise(enh = sum(`Independent areas`),
-            enhi = sum(`Independent areas, no incidence data`),
-            eh = sum(`Hierarchical`),
-            ehg = sum(`Hierarchical joint gender`), .groups=c("drop")) %>%
-  mutate(enhi = ifelse(outcome %in% c("inc","total"), NA, enhi),
-         disease = ifelse(outcome=="total", "", as.character(disease)),
-         outcome = fct_recode(outcome, "Incidence"="inc", "Prevalence"="prev", 
-                              "Mortality"="mort", "Prevalence and mortality" = "prevmort",
-                              "Incidence, prevalence and mortality" ="total")) %>% 
-  filter(outcome %in% c("Prevalence and mortality","Incidence, prevalence and mortality")) %>%
-  mutate(across(3:6, ~ replace_na(as.character(round(.x)),"")))
-
+    full_join(looallsum2) %>%
+    full_join(looallsum3) %>%
+    filter(age >=50, age < 90) %>%
+    select(outcome, area, age, gender, disease, model, looic) %>%
+    pivot_wider(names_from=model, values_from=looic) %>%
+    group_by(disease, outcome) %>%
+    summarise(enh = sum(`Independent areas`, na.rm = TRUE),
+              enhi = sum(`Independent areas, no incidence data`),
+              eh = sum(`Hierarchical`),
+              ehg = sum(`Hierarchical joint gender`), 
+              .groups=c("drop")) %>%
+    mutate(across(3:6, ~.x - enh)) %>%
+    mutate(
+        enhi = ifelse(outcome %in% c("inc","total"), NA, enhi),
+        disease = ifelse(outcome=="total", "", as.character(disease)),
+        outcome = fct_recode(outcome, "Incidence"="inc", "Prevalence"="prev", 
+                             "Mortality"="mort", "Prevalence and mortality" = "prevmort",
+                             "Incidence, prevalence and mortality" ="total")) %>% 
+    filter(outcome %in% c("Mortality"
+        #"Prevalence and mortality","Incidence, prevalence and mortality"
+        )) %>%
+    #  mutate(across(3:4, ~ replace_na(as.character(round(.x)),"")))
+    mutate(across(3:6, ~ replace_na(as.character(round(.x)),""))) %>%
+    select(-enhi, -outcome)
 lootab
 write.table(lootab, row.names = FALSE, sep="  &  ", eol="\\\\\n", quote=FALSE)
+
+## DIAGNOSTICS
+loonc <- looall %>% 
+    filter(age >= 0, age <110, 
+           influence_pareto_k>0.7) %>% 
+    mutate(agegroup = cut(age, seq(0,100,10)))
+table(loonc$agegroup, loonc$model, loonc$outcome)
+
+looall %>% 
+    filter(influence_pareto_k>1) %>% 
+    select(outcome, age, gender, disease, area, model, influence_pareto_k) %>% 
+    head 
+
+## Effective number of parameters 
+loop <- looall2 %>%
+    full_join(looallsum2) %>%
+    full_join(looallsum3) %>%
+    filter(age >=50, age < 90, disease=="Ischemic heart disease") %>%
+    select(outcome, area, age, gender, disease, model, p_loo) %>%
+    pivot_wider(names_from=model, values_from=p_loo) %>%
+    group_by(disease, outcome) %>%
+    summarise(enh = sum(`Independent areas`, na.rm = TRUE),
+              enhi = sum(`Independent areas, no incidence data`),
+              eh = sum(`Hierarchical`),
+              ehg = sum(`Hierarchical joint gender`), 
+              .groups=c("drop"))
+loop
+
+```
+
+How much difference does model choice make to the results? 
+
+Estimated CF probs differ by 0.01 in most cases. 
+
+```{r}
+rescomp <- resall %>% 
+    filter(disease=="Ischemic heart disease",
+           model %in% c("Independent areas", "Hierarchical"),
+           var == "cf", between(age, 50, 90)) %>%
+    select(area, gender, age, med=`50%`, model) %>%
+    mutate(med = 1 - exp(-med)) %>%
+    pivot_wider(names_from = model, values_from=med) %>%
+    mutate(hir = (Hierarchical - `Independent areas`))
+table(abs(rescomp$hir) < 0.01)
+```
+
+
+Comparing mortality predictions for diseases other than IHD
+
+Compare how well mortality probabilities fit the data, and check if case fatality probabilities agree between models that include vs exclude incidence data. 
+
+```{r}
+
+obsdat <- gbd %>% 
+    mutate(mort_prob = mort_num/mort_denom, 
+           model = "Observed")
+fitdat <- resall %>% filter(
+           var %in% c("mort","mort_prob"), 
+           model %in% c("Independent areas", 
+                        "Independent areas, no incidence data")) %>%
+    mutate(var = "mort_prob", 
+           mort_prob = `50%`) %>%
+    full_join(obsdat)
+
+dis <- "Colon and rectum cancer"
+are <- "Bristol"
+gend <- "Female"
+fitdat %>%
+    filter(disease==dis, area==are, gender==gend, between(age, 50, 90)) %>%
+ggplot(aes(x=age, y=mort_prob, col=model)) + 
+    geom_line()
+
+mortcompdat <- fitdat %>%
+    select(disease, area, gender, age, mort_prob, model) %>%
+    pivot_wider(names_from=model, values_from=mort_prob) %>%
+    filter(!is.na(Observed), 
+           !is.na(`Independent areas`)) %>%
+    mutate(mdiff0 = `Independent areas` - `Observed`,
+           mdiff1 = `Independent areas, no incidence data` - `Observed`) %>%
+    mutate(mdiff0 = abs(mdiff0), 
+           mdiff1 = abs(mdiff1))
+mean(mortcompdat$mdiff0)    
+mean(mortcompdat$mdiff1)    
+
+cfcompdat <- resall %>% 
+    filter(var %in% c("cf"), 
+           model %in% c("Independent areas", 
+                        "Independent areas, no incidence data")) %>%
+    mutate(cf_prob = 1 - exp(-`50%`)) %>%
+    select(disease, area, gender, age, cf_prob, model) %>%
+    filter(between(age, 50, 90)) %>%
+    pivot_wider(names_from=model, values_from=cf_prob) %>%
+    mutate(mdiff = `Independent areas, no incidence data` - `Independent areas`) %>%
+    group_by(disease, area, gender)
+
+summary(compdat$mdiff)    
+prop.table(table(abs(compdat$mdiff<0.01))) # 99% of estimates are within 0.01 of each other
+
+```
+
+
+
+# Plots for the Armitage talk 
+
+```{r}
+pdf("~/work/uncertainty/pres/armitage/mort_data.pdf", height=3)
+gbdplot %>% 
+    filter(disease %in% c("Ischemic heart disease","Dementia",
+                          "Lung cancer","Breast cancer")) %>%
+ggplot(aes(x=age, y=mort_prob, col=area, lty=gender, group=areagender)) + 
+    facet_wrap(~disease, ncol=2, scales="free_y") + 
+    coord_cartesian(xlim = c(50,100)) +
+    ylab("Annual mortality probability") + 
+    xlab("Year of age") +
+    geom_ribbon(aes(ymin=mort_lower, ymax=mort_upper), fill="gray80", col="gray80") +
+    geom_line() + 
+    labs(col = "", lty="") +
+    theme_bw() + 
+    guides(lty=guide_legend(override.aes=list(fill=NA))) +
+    theme(legend.spacing.y = unit(-0.1, "cm"))
+dev.off()
+
+```
+
+
+Array of diseases 
+
+Basic one for IHD 
+
+```{r}
+
+armitage_width <- 6
+armitage_height <- 2.5
+    
+pdf("~/work/uncertainty/pres/armitage/cf_indep.pdf",width=armitage_width, height=armitage_height)
+
+diseases_armitage <- "Ischemic heart disease"
+gg <- resnh %>% 
+    dplyr::filter(disease %in% diseases_armitage, 
+                  model %in% c("Independent areas","National"), 
+                  var=="cf",
+                area %in% c(cityregions,"England")) %>%
+    mutate(p50 = 1 - exp(-`50%`),
+           plow = 1 - exp(-`2.5%`),
+           pupp = 1 - exp(-`97.5%`)) %>%
+    ggplot(aes(x=age, y=p50, group=area, col=area)) + 
+  geom_ribbon(aes(ymin=plow, ymax=pupp), 
+              fill="gray80", col="gray80") +
+  geom_line() + 
+  facet_grid(cols=vars(gender), rows=vars(disease), scales = "free_y", switch = "y") + 
+  xlab("Age (years)") + 
+  ylab("Annual case fatality probability") + 
+  xlim(60,100) + 
+  theme(strip.text.y.left = element_text(angle = 0),
+        strip.text.y = element_text(size=6),
+        axis.text = element_text(size=8),
+        legend.text = element_text(size=6)) + 
+    labs(col="")
+gg
+
+dev.off()
+```
+
+A hier model - also discuss national estimates 
+
+```{r}
+resall <- full_join(resnh, resh)
+
+diseases_armitage_hier <- c("Parkinson's disease")
+
+pdf("~/work/uncertainty/pres/armitage/cf_hier.pdf",width=armitage_width, height=armitage_height)
+
+resall %>% 
+    filter(var=="cf", disease %in% diseases_armitage_hier,
+           area %in% cityregions, 
+           gender=="Female",
+           model %in% c("Independent areas","Hierarchical")) %>%
+    mutate(p50 = 1 - exp(-`50%`),
+           plow = 1 - exp(-`2.5%`),
+           pupp = 1 - exp(-`97.5%`)) %>%
+    mutate(model = relevel(factor(model), "Independent areas")) %>%
+    ggplot(aes(x=age, col=area, group=area)) +
+    geom_ribbon(aes(ymin=plow, ymax=pupp), fill="gray80", col="gray80") +
+    geom_line(aes(y=p50)) + 
+    coord_cartesian(xlim=c(70,  100), ylim=c(0,NA)) +
+    scale_x_continuous(breaks=seq(0,100,10)) + 
+    ylab("Annual case fatality probability")  +
+    facet_grid(cols=vars(model), rows=vars(disease),
+               scales="free_y", switch = "y") + 
+    xlab("Age (years)") + 
+    labs(col="") +
+    theme(strip.text.y.left = element_text(angle = 0),
+          strip.text.y = element_text(size = 6.5),
+          legend.text = element_text(size = 6.5))
+
+dev.off()
+```
+
+Gender effects
+
+
+```{r}
+pdf("~/work/uncertainty/pres/armitage/cf_gender.pdf", width=armitage_width, height=armitage_height)
+
+diseases_armitage_gender <- c("COPD", "Colon and rectum cancer")
+
+ggplot(reshis %>% 
+           filter(age > 60, 
+                  disease %in% diseases_armitage_gender), 
+       aes(x=age, y=est, group=area, col=area)) + 
+  geom_ribbon(aes(ymin=lower, ymax=upper), fill="gray", col=NA, alpha=0.2) + 
+  geom_hline(yintercept = 1) +
+  geom_line(lwd=0.8) +
+  geom_line(data=resgis %>% filter(age>60,
+                                   disease %in% diseases_armitage_gender), 
+            col="black", lty=2) +
+  facet_wrap(~disease) +
+  labs(col="Area") +
+  coord_cartesian(ylim=c(0, 3)) + 
+  ylab("Case fatality rate ratio (men/women)") +
+  xlab("Age (years)") + 
+    theme(legend.text = element_text(size = 6.5),
+          strip.text = element_text(size = 6.5))
+
+dev.off()
 
 ```
 

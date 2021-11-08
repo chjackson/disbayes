@@ -13,10 +13,12 @@ db <- disbayes(data = gbdeng %>% filter(disease==natrundf$disease[i],
                prev_num = "prev_num", prev_denom = "prev_denom",
                rem_num = if (natrundf$remission[i]) "rem_num" else NULL, 
                rem_denom = if (natrundf$remission[i]) "rem_denom" else NULL,
-               eqage= natrundf$eqage[i], 
-               cf_model = if (natrundf$increasing[i]) "increasing" else "smooth",
-               #method="mcmc", chains=nchains, iter=3000
-               )
+               eqage = natrundf$eqage[i], 
+               cf_model = if (natrundf$increasing[i]) "increasing" else if (natrundf$const[i]) "const" else "smooth",
+               rem_model = if (natrundf$remission[i]) natrundf$rem_model[i] else NULL,
+               method="mcmc", chains=nchains, iter=2000,
+               stan_control=list(max_treedepth=15)
+)
 
 res <- tidy(db) %>%
   mutate(gender=natrundf$gender[i], disease=natrundf$disease[i], area=natrundf$area[i])

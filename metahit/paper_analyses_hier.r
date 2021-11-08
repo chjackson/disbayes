@@ -6,20 +6,12 @@ task_id <- as.numeric(Sys.getenv("SLURM_ARRAY_TASK_ID"))
 runs_todo <- 1:nrow(hierrundf) 
 i <- runs_todo[task_id]
 
-if (0) { 
-  setwd("metahit")
-  source("paper_analyses_header.r")
-  i <- 1
-  nchains <-1
-  mhi <- gbd %>%
-    filter(gender==hierrundf$gender[i], disease==hierrundf$disease[i]) %>%
-    droplevels 
-}
-
 mhi <- gbd %>%
   filter(gender==hierrundf$gender[i], disease==hierrundf$disease[i]) %>%
   droplevels 
 hpfixed <- if (hierrundf$model[i]=="const") list(sd_int=TRUE,sinc=1) else list(scf=2.5,sinc=5)
+if (hierrundf$disease[i]=="Diabetes mellitus type 2" && hierrundf$gender[i]=="Female") hpfixed$sd_int <- TRUE
+if (hierrundf$disease[i]=="Non-rheumatic valvular heart disease" && hierrundf$gender[i]=="Female") hpfixed$sd_int <- TRUE
 
 db <- disbayes_hier(data=mhi,
                     group = "area",
@@ -30,16 +22,14 @@ db <- disbayes_hier(data=mhi,
                     rem_denom = if (hierrundf$remission[i]) "rem_denom" else NULL,
                     cf_model = hierrundf$model[i],
                     inc_model = "smooth",
-                    rem_prior = c(1.1, 1),
+                    rem_model = if (hierrundf$remission[i]) "smooth" else NULL,
                     eqage = hierrundf$eqage[i],
                     hp_fixed = hpfixed, 
                     nfold_int_guess = 5, nfold_int_upper =  50,
-                    # method="opt", hessian=TRUE, draws=1000
-                    method="mcmc", refresh = 1, chains=nchains, iter=1000,
+#                     method="opt", hessian=TRUE, draws=1000, verbose = TRUE
+                   method="mcmc", refresh = 1, chains=nchains, iter=1000,
                     stan_control=list(max_treedepth=15)
                     )
-
-# saveRDS(db, file="~/scratch/chronic/db_hier_test.rds")
 
 if (0){
   library(bayesplot) 

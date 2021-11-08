@@ -1,9 +1,13 @@
+if (0) { 
+  setwd("metahit")
+  i <- 3
+}
 source("paper_analyses_header.r")
 nchains <- 2
 options(mc.cores = nchains)
 
 task_id <- as.numeric(Sys.getenv("SLURM_ARRAY_TASK_ID"))
-runs_todo <- 1:nrow(rundf)  # 211, run in groups of 8. 
+runs_todo <- 1:nrow(rundf)
 i <- runs_todo[task_id]
 
 mhi <- gbd %>%
@@ -20,17 +24,18 @@ db <- disbayes(data=mhi,
                rem_denom = if (rundf$remission[i]) "rem_denom" else NULL,
                eqage = rundf$eqage[i],
                cf_model = if (rundf$increasing[i]) "increasing" else "smooth",
-               hp_fixed = hpfixed, 
+               rem_model = if (rundf$remission[i]) rundf$rem_model[i] else NULL,
+               hp_fixed = hpfixed,
                method = "mcmc", chains=nchains, iter=100, refresh=10,
                stan_control=list(max_treedepth=15)
                )
+
 
 res <- tidy(db) %>%
   mutate(gender=rundf$gender[i], disease=rundf$disease[i], area=rundf$area[i])
 loo <- looi_disbayes(db) %>%
     mutate(gender=rundf$gender[i], disease=rundf$disease[i], area=rundf$area[i])
 saveRDS(list(res=res, loo=loo), file= paste0("results_nonhier_noinc/res", i, ".rds"))
-
 
 if (0){
   res %>% filter(var=="cf") %>% select(age, Rhat)

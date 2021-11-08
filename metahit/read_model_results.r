@@ -1,15 +1,19 @@
 ### Read, tidy and combine all results obtained from running MCMC simulations (parallelised for different cases) on a HPC cluster
 
+loo_names <- c("outcome", "elpd_loo", "mcse_elpd_loo", "p_loo", "looic", "influence_pareto_k", 
+               "age", "gender", "disease", "area") 
 
 ## Non-hierarchical models with areas fitted independently 
 
 reslist <- loolist <- vector(nrow(rundf), mode="list")
 for (i in 1:nrow(rundf)){
-  fname <- sprintf("results_nonhier/res%s.rds",i)
+    fname <- sprintf("results_nonhier/res%s.rds",i)
   if (file.exists(fname)) {
     resi <- readRDS(fname)
     reslist[[i]] <- resi$res
-    loolist[[i]] <- resi$loo
+    loolist[[i]] <- resi$loo 
+    names(loolist[[i]])[names(loolist[[i]])=="var"] <- "outcome" # this changed in between runs
+    loolist[[i]] <- loolist[[i]][,loo_names]
   }
 }
 dput(as.numeric(which(sapply(reslist, is.null)))) # check if any runs failed 
@@ -20,24 +24,29 @@ loonh <- do.call("rbind", loolist) %>%
   mutate(model="Independent areas")
 
 
-## National estimates for stomach/uterine cancers
+## National estimates 
+reslist <- loolist <- vector(nrow(natrundf), mode="list")
+for (i in 1:nrow(natrundf)){
+  fname <- sprintf("results_nonhier/res_eng_%s.rds",natrundf$runlabel[i])
+  if (file.exists(fname)) {
+    resi <- readRDS(fname)
+    reslist[[i]] <- resi$res
+    loolist[[i]] <- resi$loo
+  }
+}
+resnat <- do.call("rbind", reslist) %>%
+  mutate(model="National") %>% droplevels
+loonat <- do.call("rbind", loolist) %>%
+  mutate(model="National") %>% droplevels
 
-resi <- readRDS("results_nonhier/res_eng_utrc_female.rds")
-res_utrc <- resi$res; loo_utrc <- resi$loo
-resi <- readRDS("results_nonhier/res_eng_stmc_male.rds")
-res_stmc_m <- resi$res; loo_stmc_m <- resi$loo
-resi <- readRDS("results_nonhier/res_eng_stmc_female.rds")
-res_stmc_f <- resi$res; loo_stmc_f <- resi$loo
-resnat <- rbind(res_utrc, res_stmc_m, res_stmc_f) %>%
-  mutate(model="National")
+diseases_nat <- as.character(unique(resnat$disease))
+
 resnh <- resnh %>% 
-  dplyr::filter(!(disease %in% c("Stomach cancer", "Uterine cancer"))) %>%
+  dplyr::filter(!(disease %in% diseases_nat)) %>%
   full_join(resnat)
 
-loonat <- rbind(loo_utrc, loo_stmc_m, loo_stmc_f) %>%
-  mutate(model="National")
 loonh <- loonh %>% 
-  dplyr::filter(!(disease %in% c("Stomach cancer", "Uterine cancer"))) %>%
+  dplyr::filter(!(disease %in% diseases_nat)) %>%
   full_join(loonat)
 
 
@@ -45,21 +54,21 @@ loonh <- loonh %>%
 
 reslist <- loolist <- vector(nrow(hierrundf), mode="list")
 for (i in setdiff(1:nrow(hierrundf), c())){
-  try(resi <- readRDS(sprintf("results_hier/res%s.rds",i)))
-  reslist[[i]] <- resi[[1]]
-  loolist[[i]] <- resi[[2]]
+  fname <- sprintf("results_hier/res%s.rds",i)
+  if (file.exists(fname)) {
+    resi <- readRDS(fname)
+    reslist[[i]] <- resi[[1]]
+    loolist[[i]] <- resi[[2]]
+  }
 }
-loolist[[16]] <- loolist[[16]] %>%
-mutate(gender=hierrundf$gender[16], disease=hierrundf$disease[16])
-
-
-## Hierarchical models with additive gender effects
 
 resh <- do.call("rbind", reslist)
 resh$model <- "Hierarchical"
 looh <- do.call("rbind", loolist) %>%
   mutate(area = factor(area, labels=areas),
          model = "Hierarchical")
+
+## Hierarchical models with additive gender effects
 
 reslist <- loolist <- vector(nrow(hierrungdf), mode="list")
 for (i in setdiff(1:nrow(hierrungdf), c())){ # previously excluded stomach cancer
@@ -91,29 +100,57 @@ dput(as.numeric(which(sapply(reslist, is.null)))) # check if any runs failed
 resnhi <- do.call("rbind", reslist) %>%
   mutate(model="Independent areas, no incidence data")
 loonhi <- do.call("rbind", loolist) %>%
-  mutate(model="Independent areas, no incidence data")
-
+  mutate(model="Independent areas, no incidence data") %>%
+    filter(outcome!="inc")
 
 ### Collate all results
-
-disease_shorten <- c("Dementia" = "Alzheimer's disease and other dementias",
-                     "Lung cancer" = "Tracheal, bronchus, and lung cancer",
-                     "COPD" = "Chronic obstructive pulmonary disease")
-disease_order <- c("Ischemic heart disease", "Stroke", "Dementia", "COPD", "Breast cancer", "Lung cancer", 
-                   "Colon and rectum cancer","Stomach cancer","Uterine cancer")
 
 resall <- full_join(resnh, resh) %>% 
   full_join(resg) %>%  
   full_join(resnhi) %>%
   mutate(disease = fct_recode(disease, !!!disease_shorten),
-         disease = factor(disease, levels = disease_order))
+         disease = factor(disease, levels = disease_order)) %>%
+    filter(!(var %in% c("rem_par", "inc_par", "cf_par", "state_probs"))) %>%
+    ## these variable names changed in disbayes after the run  
+    ## state_probs wasn't recorded by area in hier model, and _par variables weren't excluded
+    mutate(var = as.character(fct_recode(factor(var), 
+                                         "mort_prob" = "mort",
+                                         "prev_prob" = "prev"
+                                         )))
 
 looall <- full_join(loonh, looh) %>%
   full_join(loog) %>%
   full_join(loonhi) %>%
   mutate(disease = fct_recode(disease, !!!disease_shorten),
-         disease = factor(disease, levels = disease_order),
-         var = ifelse(is.na(var), outcome, var),
-         outcome = ifelse(is.na(outcome), var, outcome))
+         disease = factor(disease, levels = disease_order)) %>%
+    filter(outcome != "rem")
+
+## Identify selected model for each disease
+selected_model <- enframe(
+    c("Dementia" = "Independent areas", 
+      "Breast cancer" = "Hierarchical", 
+      "Cardiomyopathy and myocarditis" = "National",
+      "COPD" = "Hierarchical joint gender", 
+      "Colon and rectum cancer" = "Independent areas",
+      "Diabetes" = "Independent areas",
+      "Ischemic heart disease" = "Hierarchical", 
+      "Liver cancer" = "National", 
+      "Multiple myeloma" = "National",
+      "Non-rheumatic valvular heart disease" = "Independent areas", 
+      "Parkinson's disease" = "Independent areas", 
+      "Rheumatic heart disease" = "National",
+      "Stomach cancer" = "National", 
+      "Stroke" = "Independent areas",
+      "Lung cancer" = "Independent areas",
+      "Uterine cancer" = "National", 
+      "Head and neck cancer" = "National"),
+    name="disease", value="selected_model"
+)
+
+resall_selected <- resall %>%
+    left_join(selected_model, by="disease") %>%
+    filter(model == selected_model) %>%
+    select(-selected_model) 
 
 saveRDS(resall, "resall.rds")
+saveRDS(resall_selected, "resall_selected.rds")
