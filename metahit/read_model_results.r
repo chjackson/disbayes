@@ -148,6 +148,8 @@ selected_model <- enframe(
       "Head and neck cancer" = "National"),
     name="disease", value="selected_model"
 )
+#Extent of uncertainty for CM differs between MCMC and opt.  Others match 
+#Diabetes, NV hier models didn't converge, PD hier gender didn't converge 
 
 resall_selected <- resall %>%
     left_join(selected_model, by="disease") %>%

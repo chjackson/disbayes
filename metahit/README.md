@@ -3,8 +3,6 @@
 
 ## Data preparation scripts
 
-These are in the `data-raw` subdirectory of the `disbayes` package. 
-
 * `gbd_process_2019.Rmd`:  Processes data downloaded from the Global Burden of Disease, and produces a data frame that is saved in the object `gbddb.rds`.  This is the dataset used in the analyses in the paper.  This refers to outcomes for multiple diseases, for different areas (city regions and regions) in England.   The dataset `ihdengland` in the `disbayes` package is the subset of this data corresponding to outcomes for ischemic heart disease.
 
 * `trends2019.r`: Processes published data on past trends through time in incidence and case fatality for myocardial infarction in England.  Produces the dataset `ihdtrends`, available in the file `ihdtrends2019.rda`.
