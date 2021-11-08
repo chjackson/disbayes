@@ -230,7 +230,7 @@ resplotnh <- resnh %>%
          plow = 1 - exp(-`2.5%`),
          pupp = 1 - exp(-`97.5%`)) 
 
-resplotnh %>%
+gg <- resplotnh %>%
   ggplot(aes(x=age, y=p50, group=area, col=area)) + 
   geom_ribbon(aes(ymin=plow, ymax=pupp), 
               fill="gray80", col="gray80") +
@@ -247,7 +247,7 @@ resplotnh %>%
 
 grob <- ggplotGrob(gg)
 # gtable::gtable_show_layout(grob)
-idx <- which(grob$layout$name %in% c("panel-2-2","panel-8-2"))
+idx <- which(grob$layout$name %in% c("panel-2-2","panel-9-2"))
 for (i in idx) grob$grobs[[i]] <- grid::nullGrob()
 grid::grid.draw(grob)
 
