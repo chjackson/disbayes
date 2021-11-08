@@ -1,9 +1,15 @@
+hpc_results_hier/
+hpc_results_hier_gender/
 results_hier/
 results_nonhier/
 results_hier_gender/
+results_hier_noinc/
+results_nonhier_noinc/
 results_trend/
 gbddb*.rds
 resall.rda
 metahit-hpc-log.txt
-res*.rds
+resopt*
+res_trend*
+res_checkfit*
 hpc.sh
