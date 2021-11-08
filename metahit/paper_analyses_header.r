@@ -62,9 +62,8 @@ disease_order <- c("Ischemic heart disease", "Stroke", "Dementia",
 
 disease_shorten <- c("Dementia" = "Alzheimer's disease and other dementias",
                      "Lung cancer" = "Tracheal, bronchus, and lung cancer",
-                     "COPD" = "Chronic obstructive pulmonary disease"
-                     #,
-                     #"Type 2 diabetes" = "Diabetes mellitus type 2"
+                     "COPD" = "Chronic obstructive pulmonary disease",
+                     "Type 2 diabetes" = "Diabetes mellitus type 2"
                      )
 
 diseases_paper <- c("Ischemic heart disease", "Stroke", "Alzheimer's disease and other dementias",

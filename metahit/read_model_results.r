@@ -116,7 +116,9 @@ resall <- full_join(resnh, resh) %>%
     mutate(var = as.character(fct_recode(factor(var), 
                                          "mort_prob" = "mort",
                                          "prev_prob" = "prev"
-                                         )))
+                                         ))) %>%
+    ## This was an off-by-one bug in disbayes that has now been fixed 
+    mutate(age = ifelse(model=="Independent areas, no incidence data", age, age-1))
 
 looall <- full_join(loonh, looh) %>%
   full_join(loog) %>%
@@ -132,7 +134,7 @@ selected_model <- enframe(
       "Cardiomyopathy and myocarditis" = "National",
       "COPD" = "Hierarchical joint gender", 
       "Colon and rectum cancer" = "Independent areas",
-      "Diabetes" = "Independent areas",
+      "Type 2 diabetes" = "Independent areas",
       "Ischemic heart disease" = "Hierarchical", 
       "Liver cancer" = "National", 
       "Multiple myeloma" = "National",
@@ -154,3 +156,7 @@ resall_selected <- resall %>%
 
 saveRDS(resall, "resall.rds")
 saveRDS(resall_selected, "resall_selected.rds")
+
+rs <- resall %>% filter(var=="cf", area=="Bristol", disease=="Dementia", age %in% 0:2)
+rs <- resall %>% filter(var=="cf", area=="Bristol", disease=="Dementia", age %in% 98:101)
+table(rs$age, rs$disease)
