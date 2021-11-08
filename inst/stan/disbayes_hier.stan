@@ -98,7 +98,7 @@ transformed parameters {
   real<lower=0> mort_prob[nage,narea,ng];
   real<lower=0> rem[nage,narea,ng];
   real<lower=0> rem_prob[nage*remission,narea,ng];
-  matrix[nage+1,3] state_probs; 
+  row_vector[3] state_probs[nage+1,narea,ng]; 
   row_vector[3] tmp;
   matrix[3,3] P;
   real<lower=0> sdint_use;
@@ -191,9 +191,9 @@ transformed parameters {
       if (prev_denom[1,j,g] > 0 && (prev_num[1,j,g] > 0 || prev_zero))
 	prev_prob[1,j,g] = prevzero[j,g];
       else prev_prob[1,j,g] = 0; 
-      state_probs[1,1] = 1;
-      state_probs[1,2] = 0;
-      state_probs[1,3] = 0;
+      state_probs[1,j,g,1] = 1;
+      state_probs[1,j,g,2] = 0;
+      state_probs[1,j,g,3] = 0;
     
       if (increasing){
 	/// Annual increments in case fatality as smooth spline function of age
@@ -235,9 +235,9 @@ transformed parameters {
 	if (remission) 
 	  rem_prob[a,j,g] = P[2,1];
 	if (a > 1)
-	  prev_prob[a,j,g] = state_probs[a,2] / (state_probs[a,1] + state_probs[a,2]);
-	tmp = state_probs[a,1:3] * P;  // temp variable to avoid warning
-	state_probs[a+1,1:3] = tmp;
+	  prev_prob[a,j,g] = state_probs[a,j,g,2] / (state_probs[a,j,g,1] + state_probs[a,j,g,2]);
+	tmp = state_probs[a,j,g,1:3] * P;  // temp variable to avoid warning
+	state_probs[a+1,j,g,1:3] = tmp;
 	mort_prob[a,j,g] = P[1,3]*(1 - prev_prob[a,j,g]) + P[2,3]*prev_prob[a,j,g];
 	//// work around floating point fuzz
 	mort_prob[a,j,g] = bound_prob(mort_prob[a,j,g]);

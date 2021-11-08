@@ -1813,9 +1813,11 @@ public:
             stan::math::initialize(rem_prob, DUMMY_VAR__);
             stan::math::fill(rem_prob, DUMMY_VAR__);
             current_statement_begin__ = 200;
-            validate_non_negative_index("state_probs", "(nage + 1)", (nage + 1));
             validate_non_negative_index("state_probs", "3", 3);
-            Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, Eigen::Dynamic> state_probs((nage + 1), 3);
+            validate_non_negative_index("state_probs", "(nage + 1)", (nage + 1));
+            validate_non_negative_index("state_probs", "narea", narea);
+            validate_non_negative_index("state_probs", "ng", ng);
+            std::vector<std::vector<std::vector<Eigen::Matrix<local_scalar_t__, 1, Eigen::Dynamic> > > > state_probs((nage + 1), std::vector<std::vector<Eigen::Matrix<local_scalar_t__, 1, Eigen::Dynamic> > >(narea, std::vector<Eigen::Matrix<local_scalar_t__, 1, Eigen::Dynamic> >(ng, Eigen::Matrix<local_scalar_t__, 1, Eigen::Dynamic>(3))));
             stan::math::initialize(state_probs, DUMMY_VAR__);
             stan::math::fill(state_probs, DUMMY_VAR__);
             current_statement_begin__ = 201;
@@ -2105,17 +2107,17 @@ public:
                     }
                     current_statement_begin__ = 293;
                     stan::model::assign(state_probs, 
-                                stan::model::cons_list(stan::model::index_uni(1), stan::model::cons_list(stan::model::index_uni(1), stan::model::nil_index_list())), 
+                                stan::model::cons_list(stan::model::index_uni(1), stan::model::cons_list(stan::model::index_uni(j), stan::model::cons_list(stan::model::index_uni(g), stan::model::cons_list(stan::model::index_uni(1), stan::model::nil_index_list())))), 
                                 1, 
                                 "assigning variable state_probs");
                     current_statement_begin__ = 294;
                     stan::model::assign(state_probs, 
-                                stan::model::cons_list(stan::model::index_uni(1), stan::model::cons_list(stan::model::index_uni(2), stan::model::nil_index_list())), 
+                                stan::model::cons_list(stan::model::index_uni(1), stan::model::cons_list(stan::model::index_uni(j), stan::model::cons_list(stan::model::index_uni(g), stan::model::cons_list(stan::model::index_uni(2), stan::model::nil_index_list())))), 
                                 0, 
                                 "assigning variable state_probs");
                     current_statement_begin__ = 295;
                     stan::model::assign(state_probs, 
-                                stan::model::cons_list(stan::model::index_uni(1), stan::model::cons_list(stan::model::index_uni(3), stan::model::nil_index_list())), 
+                                stan::model::cons_list(stan::model::index_uni(1), stan::model::cons_list(stan::model::index_uni(j), stan::model::cons_list(stan::model::index_uni(g), stan::model::cons_list(stan::model::index_uni(3), stan::model::nil_index_list())))), 
                                 0, 
                                 "assigning variable state_probs");
                     current_statement_begin__ = 297;
@@ -2214,14 +2216,14 @@ public:
                             current_statement_begin__ = 337;
                             stan::model::assign(prev_prob, 
                                         stan::model::cons_list(stan::model::index_uni(a), stan::model::cons_list(stan::model::index_uni(j), stan::model::cons_list(stan::model::index_uni(g), stan::model::nil_index_list()))), 
-                                        (get_base1(state_probs, a, 2, "state_probs", 1) / (get_base1(state_probs, a, 1, "state_probs", 1) + get_base1(state_probs, a, 2, "state_probs", 1))), 
+                                        (get_base1(get_base1(get_base1(get_base1(state_probs, a, "state_probs", 1), j, "state_probs", 2), g, "state_probs", 3), 2, "state_probs", 4) / (get_base1(get_base1(get_base1(get_base1(state_probs, a, "state_probs", 1), j, "state_probs", 2), g, "state_probs", 3), 1, "state_probs", 4) + get_base1(get_base1(get_base1(get_base1(state_probs, a, "state_probs", 1), j, "state_probs", 2), g, "state_probs", 3), 2, "state_probs", 4))), 
                                         "assigning variable prev_prob");
                         }
                         current_statement_begin__ = 338;
-                        stan::math::assign(tmp, multiply(stan::model::rvalue(state_probs, stan::model::cons_list(stan::model::index_uni(a), stan::model::cons_list(stan::model::index_min_max(1, 3), stan::model::nil_index_list())), "state_probs"), P));
+                        stan::math::assign(tmp, multiply(stan::model::rvalue(state_probs, stan::model::cons_list(stan::model::index_uni(a), stan::model::cons_list(stan::model::index_uni(j), stan::model::cons_list(stan::model::index_uni(g), stan::model::cons_list(stan::model::index_min_max(1, 3), stan::model::nil_index_list())))), "state_probs"), P));
                         current_statement_begin__ = 339;
                         stan::model::assign(state_probs, 
-                                    stan::model::cons_list(stan::model::index_uni((a + 1)), stan::model::cons_list(stan::model::index_min_max(1, 3), stan::model::nil_index_list())), 
+                                    stan::model::cons_list(stan::model::index_uni((a + 1)), stan::model::cons_list(stan::model::index_uni(j), stan::model::cons_list(stan::model::index_uni(g), stan::model::cons_list(stan::model::index_min_max(1, 3), stan::model::nil_index_list())))), 
                                     tmp, 
                                     "assigning variable state_probs");
                         current_statement_begin__ = 340;
@@ -2446,14 +2448,20 @@ public:
                 }
             }
             current_statement_begin__ = 200;
-            size_t state_probs_j_1_max__ = (nage + 1);
-            size_t state_probs_j_2_max__ = 3;
-            for (size_t j_1__ = 0; j_1__ < state_probs_j_1_max__; ++j_1__) {
-                for (size_t j_2__ = 0; j_2__ < state_probs_j_2_max__; ++j_2__) {
-                    if (stan::math::is_uninitialized(state_probs(j_1__, j_2__))) {
-                        std::stringstream msg__;
-                        msg__ << "Undefined transformed parameter: state_probs" << "(" << j_1__ << ", " << j_2__ << ")";
-                        stan::lang::rethrow_located(std::runtime_error(std::string("Error initializing variable state_probs: ") + msg__.str()), current_statement_begin__, prog_reader__());
+            size_t state_probs_k_0_max__ = (nage + 1);
+            size_t state_probs_k_1_max__ = narea;
+            size_t state_probs_k_2_max__ = ng;
+            size_t state_probs_j_1_max__ = 3;
+            for (size_t k_0__ = 0; k_0__ < state_probs_k_0_max__; ++k_0__) {
+                for (size_t k_1__ = 0; k_1__ < state_probs_k_1_max__; ++k_1__) {
+                    for (size_t k_2__ = 0; k_2__ < state_probs_k_2_max__; ++k_2__) {
+                        for (size_t j_1__ = 0; j_1__ < state_probs_j_1_max__; ++j_1__) {
+                            if (stan::math::is_uninitialized(state_probs[k_0__][k_1__][k_2__](j_1__))) {
+                                std::stringstream msg__;
+                                msg__ << "Undefined transformed parameter: state_probs" << "[" << k_0__ << "]" << "[" << k_1__ << "]" << "[" << k_2__ << "]" << "(" << j_1__ << ")";
+                                stan::lang::rethrow_located(std::runtime_error(std::string("Error initializing variable state_probs: ") + msg__.str()), current_statement_begin__, prog_reader__());
+                            }
+                        }
                     }
                 }
             }
@@ -2914,6 +2922,8 @@ public:
         dimss__.push_back(dims__);
         dims__.resize(0);
         dims__.push_back((nage + 1));
+        dims__.push_back(narea);
+        dims__.push_back(ng);
         dims__.push_back(3);
         dimss__.push_back(dims__);
         dims__.resize(0);
@@ -3221,9 +3231,11 @@ public:
             stan::math::initialize(rem_prob, DUMMY_VAR__);
             stan::math::fill(rem_prob, DUMMY_VAR__);
             current_statement_begin__ = 200;
-            validate_non_negative_index("state_probs", "(nage + 1)", (nage + 1));
             validate_non_negative_index("state_probs", "3", 3);
-            Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> state_probs((nage + 1), 3);
+            validate_non_negative_index("state_probs", "(nage + 1)", (nage + 1));
+            validate_non_negative_index("state_probs", "narea", narea);
+            validate_non_negative_index("state_probs", "ng", ng);
+            std::vector<std::vector<std::vector<Eigen::Matrix<double, 1, Eigen::Dynamic> > > > state_probs((nage + 1), std::vector<std::vector<Eigen::Matrix<double, 1, Eigen::Dynamic> > >(narea, std::vector<Eigen::Matrix<double, 1, Eigen::Dynamic> >(ng, Eigen::Matrix<double, 1, Eigen::Dynamic>(3))));
             stan::math::initialize(state_probs, DUMMY_VAR__);
             stan::math::fill(state_probs, DUMMY_VAR__);
             current_statement_begin__ = 201;
@@ -3513,17 +3525,17 @@ public:
                     }
                     current_statement_begin__ = 293;
                     stan::model::assign(state_probs, 
-                                stan::model::cons_list(stan::model::index_uni(1), stan::model::cons_list(stan::model::index_uni(1), stan::model::nil_index_list())), 
+                                stan::model::cons_list(stan::model::index_uni(1), stan::model::cons_list(stan::model::index_uni(j), stan::model::cons_list(stan::model::index_uni(g), stan::model::cons_list(stan::model::index_uni(1), stan::model::nil_index_list())))), 
                                 1, 
                                 "assigning variable state_probs");
                     current_statement_begin__ = 294;
                     stan::model::assign(state_probs, 
-                                stan::model::cons_list(stan::model::index_uni(1), stan::model::cons_list(stan::model::index_uni(2), stan::model::nil_index_list())), 
+                                stan::model::cons_list(stan::model::index_uni(1), stan::model::cons_list(stan::model::index_uni(j), stan::model::cons_list(stan::model::index_uni(g), stan::model::cons_list(stan::model::index_uni(2), stan::model::nil_index_list())))), 
                                 0, 
                                 "assigning variable state_probs");
                     current_statement_begin__ = 295;
                     stan::model::assign(state_probs, 
-                                stan::model::cons_list(stan::model::index_uni(1), stan::model::cons_list(stan::model::index_uni(3), stan::model::nil_index_list())), 
+                                stan::model::cons_list(stan::model::index_uni(1), stan::model::cons_list(stan::model::index_uni(j), stan::model::cons_list(stan::model::index_uni(g), stan::model::cons_list(stan::model::index_uni(3), stan::model::nil_index_list())))), 
                                 0, 
                                 "assigning variable state_probs");
                     current_statement_begin__ = 297;
@@ -3622,14 +3634,14 @@ public:
                             current_statement_begin__ = 337;
                             stan::model::assign(prev_prob, 
                                         stan::model::cons_list(stan::model::index_uni(a), stan::model::cons_list(stan::model::index_uni(j), stan::model::cons_list(stan::model::index_uni(g), stan::model::nil_index_list()))), 
-                                        (get_base1(state_probs, a, 2, "state_probs", 1) / (get_base1(state_probs, a, 1, "state_probs", 1) + get_base1(state_probs, a, 2, "state_probs", 1))), 
+                                        (get_base1(get_base1(get_base1(get_base1(state_probs, a, "state_probs", 1), j, "state_probs", 2), g, "state_probs", 3), 2, "state_probs", 4) / (get_base1(get_base1(get_base1(get_base1(state_probs, a, "state_probs", 1), j, "state_probs", 2), g, "state_probs", 3), 1, "state_probs", 4) + get_base1(get_base1(get_base1(get_base1(state_probs, a, "state_probs", 1), j, "state_probs", 2), g, "state_probs", 3), 2, "state_probs", 4))), 
                                         "assigning variable prev_prob");
                         }
                         current_statement_begin__ = 338;
-                        stan::math::assign(tmp, multiply(stan::model::rvalue(state_probs, stan::model::cons_list(stan::model::index_uni(a), stan::model::cons_list(stan::model::index_min_max(1, 3), stan::model::nil_index_list())), "state_probs"), P));
+                        stan::math::assign(tmp, multiply(stan::model::rvalue(state_probs, stan::model::cons_list(stan::model::index_uni(a), stan::model::cons_list(stan::model::index_uni(j), stan::model::cons_list(stan::model::index_uni(g), stan::model::cons_list(stan::model::index_min_max(1, 3), stan::model::nil_index_list())))), "state_probs"), P));
                         current_statement_begin__ = 339;
                         stan::model::assign(state_probs, 
-                                    stan::model::cons_list(stan::model::index_uni((a + 1)), stan::model::cons_list(stan::model::index_min_max(1, 3), stan::model::nil_index_list())), 
+                                    stan::model::cons_list(stan::model::index_uni((a + 1)), stan::model::cons_list(stan::model::index_uni(j), stan::model::cons_list(stan::model::index_uni(g), stan::model::cons_list(stan::model::index_min_max(1, 3), stan::model::nil_index_list())))), 
                                     tmp, 
                                     "assigning variable state_probs");
                         current_statement_begin__ = 340;
@@ -3836,11 +3848,17 @@ public:
                         }
                     }
                 }
-                size_t state_probs_j_2_max__ = 3;
-                size_t state_probs_j_1_max__ = (nage + 1);
-                for (size_t j_2__ = 0; j_2__ < state_probs_j_2_max__; ++j_2__) {
-                    for (size_t j_1__ = 0; j_1__ < state_probs_j_1_max__; ++j_1__) {
-                        vars__.push_back(state_probs(j_1__, j_2__));
+                size_t state_probs_j_1_max__ = 3;
+                size_t state_probs_k_0_max__ = (nage + 1);
+                size_t state_probs_k_1_max__ = narea;
+                size_t state_probs_k_2_max__ = ng;
+                for (size_t j_1__ = 0; j_1__ < state_probs_j_1_max__; ++j_1__) {
+                    for (size_t k_2__ = 0; k_2__ < state_probs_k_2_max__; ++k_2__) {
+                        for (size_t k_1__ = 0; k_1__ < state_probs_k_1_max__; ++k_1__) {
+                            for (size_t k_0__ = 0; k_0__ < state_probs_k_0_max__; ++k_0__) {
+                                vars__.push_back(state_probs[k_0__][k_1__][k_2__](j_1__));
+                            }
+                        }
                     }
                 }
                 size_t tmp_j_1_max__ = 3;
@@ -4245,13 +4263,19 @@ public:
                     }
                 }
             }
-            size_t state_probs_j_2_max__ = 3;
-            size_t state_probs_j_1_max__ = (nage + 1);
-            for (size_t j_2__ = 0; j_2__ < state_probs_j_2_max__; ++j_2__) {
-                for (size_t j_1__ = 0; j_1__ < state_probs_j_1_max__; ++j_1__) {
-                    param_name_stream__.str(std::string());
-                    param_name_stream__ << "state_probs" << '.' << j_1__ + 1 << '.' << j_2__ + 1;
-                    param_names__.push_back(param_name_stream__.str());
+            size_t state_probs_j_1_max__ = 3;
+            size_t state_probs_k_0_max__ = (nage + 1);
+            size_t state_probs_k_1_max__ = narea;
+            size_t state_probs_k_2_max__ = ng;
+            for (size_t j_1__ = 0; j_1__ < state_probs_j_1_max__; ++j_1__) {
+                for (size_t k_2__ = 0; k_2__ < state_probs_k_2_max__; ++k_2__) {
+                    for (size_t k_1__ = 0; k_1__ < state_probs_k_1_max__; ++k_1__) {
+                        for (size_t k_0__ = 0; k_0__ < state_probs_k_0_max__; ++k_0__) {
+                            param_name_stream__.str(std::string());
+                            param_name_stream__ << "state_probs" << '.' << k_0__ + 1 << '.' << k_1__ + 1 << '.' << k_2__ + 1 << '.' << j_1__ + 1;
+                            param_names__.push_back(param_name_stream__.str());
+                        }
+                    }
                 }
             }
             size_t tmp_j_1_max__ = 3;
@@ -4590,13 +4614,19 @@ public:
                     }
                 }
             }
-            size_t state_probs_j_2_max__ = 3;
-            size_t state_probs_j_1_max__ = (nage + 1);
-            for (size_t j_2__ = 0; j_2__ < state_probs_j_2_max__; ++j_2__) {
-                for (size_t j_1__ = 0; j_1__ < state_probs_j_1_max__; ++j_1__) {
-                    param_name_stream__.str(std::string());
-                    param_name_stream__ << "state_probs" << '.' << j_1__ + 1 << '.' << j_2__ + 1;
-                    param_names__.push_back(param_name_stream__.str());
+            size_t state_probs_j_1_max__ = 3;
+            size_t state_probs_k_0_max__ = (nage + 1);
+            size_t state_probs_k_1_max__ = narea;
+            size_t state_probs_k_2_max__ = ng;
+            for (size_t j_1__ = 0; j_1__ < state_probs_j_1_max__; ++j_1__) {
+                for (size_t k_2__ = 0; k_2__ < state_probs_k_2_max__; ++k_2__) {
+                    for (size_t k_1__ = 0; k_1__ < state_probs_k_1_max__; ++k_1__) {
+                        for (size_t k_0__ = 0; k_0__ < state_probs_k_0_max__; ++k_0__) {
+                            param_name_stream__.str(std::string());
+                            param_name_stream__ << "state_probs" << '.' << k_0__ + 1 << '.' << k_1__ + 1 << '.' << k_2__ + 1 << '.' << j_1__ + 1;
+                            param_names__.push_back(param_name_stream__.str());
+                        }
+                    }
                 }
             }
             size_t tmp_j_1_max__ = 3;

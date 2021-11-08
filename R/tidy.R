@@ -154,12 +154,14 @@ attr(.disbayes_trend_vars, "order") <- c("age", "year", "bias", "state", "term")
         indnames = c("age","area","gender"), 
         varnames =  c("inc","cf","dcf","inc_prob","prev_prob","mort_prob","rem","rem_prob")
     ),
+    ageareagenderstate = list(
+        indnames = c("age","area","gender","state"), 
+        varnames =  c("state_probs")
+    ),
     agegender = list(
         indnames = c("age", "gender"), 
         varnames = c("rem_par")
     ), 
-    agestate = list(indnames = c("age", "state"),
-                    varnames = c("state_probs")),
     termarea = list(indnames = c("term", "area"),
                     varnames = c("barea","bareat")),
     termareagender = list(
@@ -216,7 +218,8 @@ tidy_stansumm <- function(summ, varlist, stats, levs=NULL){
         summ <- summ %>% full_join(summs[[i]], by=joinvars)
     }
     for (i in attr(varlist, "numerics")){
-        summ[[i]] <- as.numeric(summ[[i]])
+        if (i %in% names(summ))
+            summ[[i]] <- as.numeric(summ[[i]])
     }
     summ <- summ %>% relocate(all_of(c("var", attr(varlist, "order"))))
     facs <- attr(varlist, "factors")
@@ -227,8 +230,7 @@ tidy_stansumm <- function(summ, varlist, stats, levs=NULL){
         else summ[[facs$vars[i]]] <- NULL
       }
     }
-    for (i in varlist$redundant)
-        summ[[i]] <- NULL
+    summ <- summ[!(summ$var %in% varlist$redundant),]
     summ$age <- summ$age - 1
     summ
 }
