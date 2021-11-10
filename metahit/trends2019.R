@@ -210,6 +210,7 @@ trendplot <- trends %>%
 
 p <- 
   trendplot %>% 
+  mutate(agegroup = fct_rev(agegroup)) %>%
   mutate(age_gender = sprintf("%s,%s", agegroup, gender)) %>%
   ggplot(aes(x=year, y=inc, 
              col=agegroup, lty=gender, 
@@ -430,6 +431,7 @@ cftrendplot <- cftrends %>%
   mutate(agegroup = sprintf("%s-%s", agefrom, ageto)) %>%
   mutate(age_gender = sprintf("%s,%s", agefrom, gender))
 p <- cftrendplot %>%
+  mutate(agegroup = fct_rev(agegroup)) %>%
   ggplot(aes(x=year, y=cf, 
              col=agegroup, lty=gender)) + 
   #  geom_vline(xintercept=c(1996, 2002, 2011), col="gray", lwd=1) +
