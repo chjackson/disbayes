@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Function reference • disbayes</title>
+<title>Conflict p-values — conflict_disbayes • disbayes</title>
 
 
 <!-- jquery -->
@@ -39,7 +39,11 @@
 
 
 
-<meta property="og:title" content="Function reference" />
+<meta property="og:title" content="Conflict p-values — conflict_disbayes" />
+<meta property="og:description" content="A test of the hypothesis that the direct data on a disease outcome give the same 
+information about that outcome as an indirect evidence synthesis obtained from a fitted disbayes
+model.   The outcome may be annual incidence, mortality, remission probabilities, 
+or prevalence." />
 
 
 
@@ -58,7 +62,7 @@
   </head>
 
   <body data-spy="scroll" data-target="#toc">
-    <div class="container template-reference-index">
+    <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -108,128 +112,56 @@
       </header>
 
 <div class="row">
-  <div class="contents col-md-9">
+  <div class="col-md-9 contents">
     <div class="page-header">
-      <h1>Reference</h1>
+    <h1>Conflict p-values</h1>
+    <small class="dont-index">Source: <a href='https://github.com/chjackson/disbayes/blob/master/R/fit.R'><code>R/fit.R</code></a></small>
+    <div class="hidden name"><code>conflict_disbayes.Rd</code></div>
     </div>
 
-    <table class="ref-index">
+    <div class="ref-description">
+    <p>A test of the hypothesis that the direct data on a disease outcome give the same 
+information about that outcome as an indirect evidence synthesis obtained from a fitted <code><a href='disbayes.html'>disbayes</a></code>
+model.   The outcome may be annual incidence, mortality, remission probabilities, 
+or prevalence.</p>
+    </div>
 
-    <colgroup>
-      
-      <col class="alias" />
-      <col class="title" />
-    </colgroup>
+    <pre class="usage"><span class='fu'>conflict_disbayes</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>varname</span><span class='op'>)</span></pre>
 
-    <tbody>
-      <tr>
-        <th colspan="2">
-          <h2 id="section-all-functions" class="hasAnchor"><a href="#section-all-functions" class="anchor"></a>All functions</h2>
-          <p class="section-desc"></p>
-        </th>
-      </tr>
-      
-      
-    </tbody><tbody>
-      
-      
-      <tr>
-        
-        <td>
-          <p><code><a href="ci2num.html">ci2num()</a></code> </p>
-        </td>
-        <td><p>Convert a proportion and credible interval to a numerator and denominator</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="conflict_disbayes.html">conflict_disbayes()</a></code> </p>
-        </td>
-        <td><p>Conflict p-values</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="disbayes-package.html">disbayes-package</a></code> </p>
-        </td>
-        <td><p>The 'disbayes' package.</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="disbayes.html">disbayes()</a></code> </p>
-        </td>
-        <td><p>Bayesian estimation of chronic disease epidemiology from incomplete data</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="disbayes_hier.html">disbayes_hier()</a></code> </p>
-        </td>
-        <td><p>Bayesian estimation of chronic disease epidemiology from incomplete data -
-hierarchical model for case fatalities.</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="ihdengland.html">ihdengland</a></code> </p>
-        </td>
-        <td><p>Ischemic heart disease in England</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="ihdtrends.html">ihdtrends</a></code> </p>
-        </td>
-        <td><p>Trends in ischemic heart disease in England</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="loo.disbayes.html">loo(<i>&lt;disbayes&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Leave-one-out cross validation for disbayes models</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="loo_indiv.html">loo_indiv()</a></code> <code><a href="loo_indiv.html">looi_disbayes()</a></code> </p>
-        </td>
-        <td><p>Extract observation-specific contributions from a disbayes leave-one-out cross validation</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="plot.disbayes.html">plot(<i>&lt;disbayes&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Quick and dirty plot of estimates from disbayes models against age</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="plot.disbayes_hier.html">plot(<i>&lt;disbayes_hier&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Quick plot of estimates from hierarchical disbayes models against age</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="plotfit_data_disbayes.html">plotfit_data_disbayes()</a></code> </p>
-        </td>
-        <td><p>Create tidy data for a check of observed against fitted outcome probability estimates
-from disbayes</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="plotfit_disbayes.html">plotfit_disbayes()</a></code> </p>
-        </td>
-        <td><p>Graphical check of observed against fitted outcome probabilities from disbayes</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="tidy.disbayes.html">tidy(<i>&lt;disbayes&gt;</i>)</a></code> <code><a href="tidy.disbayes.html">tidy(<i>&lt;disbayes_hier&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Form a tidy data frame from the estimates from a disbayes fit</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="tidy_obsdat.html">tidy_obsdat()</a></code> </p>
-        </td>
-        <td><p>Extract observed data from a disbayes model fit</p></td>
-      </tr>
-    </tbody>
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>x</th>
+      <td><p>A fitted <code><a href='disbayes.html'>disbayes</a></code> model.</p></td>
+    </tr>
+    <tr>
+      <th>varname</th>
+      <td><p>Either <code>inc</code>, <code>prev</code>, <code>mort</code> or <code>rem</code>.</p></td>
+    </tr>
     </table>
-  </div>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>A data frame with columns indicating age, gender and area.</p>
+<p><code>p1</code> is a "one-sided" p-value for the null hypothesis that \(r_{obs}=r_{fit}\) against 
+the alternative that \(r_{obs} &gt; r_{fit}\),</p>
+<p><code>p2</code> is the two-sided p-value for the null hypothesis that \(r_{obs}=r_{fit}\) against 
+the alternative that \(r_{obs}\) is not equal to \(r_{fit}\),</p>
+<p>where \(r_{obs}\) is the rate informed only by direct data, and \(r_{fit}\) is the rate
+informed by evidence synthesis.  Therefore if the evidence synthesis excludes the 
+direct data, then these are interpreted as "conflict" p-values (see Presanis et al. 2013).</p>
+<p>In each case, a small p-value favours the alternative hypothesis.</p>
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>Hierarchical models are not currently supported in this function.</p>
+    <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
+
+    <p>Presanis, A. M., Ohlssen, D., Spiegelhalter, D. J. and De Angelis, D. (2013) 
+Conflict diagnostics in directed acyclic graphs, with applications in Bayesian evidence 
+synthesis. Statistical Science, 28, 376-397.</p>
+
+  </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
       <h2 data-toc-skip>Contents</h2>

@@ -294,7 +294,8 @@ weaker prior information.</p></td>
     </tr>
     <tr>
       <th>age</th>
-      <td><p>Variable in the data indicating the year of age</p></td>
+      <td><p>Variable in the data indicating the year of age.  This must
+start at age zero, but can end at any age.</p></td>
     </tr>
     <tr>
       <th>cf_model</th>
@@ -341,7 +342,7 @@ through calendar time by year of age.  There are <code>nage</code> rows and
 represented in the data. The entry in the ith row and jth column
 represents the ratio between the incidence <code>nage+j</code> years prior to
 the year of the data, year, and the incidence in the year of the data, for
-a person i years of age. For example, if <code>nage=100</code> and the data
+a person i-1 years of age. For example, if <code>nage=100</code> and the data
 refer to the year 2017, then the first column refers to the year 1918 and
 the last (100th) column refers to 2017.  The last column should be all 1,
 unless the current data are supposed to be biased.</p>

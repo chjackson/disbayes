@@ -74,7 +74,7 @@
                         <h4 class="author">Chris Jackson <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk" class="email">chris.jackson@mrc-bsu.cam.ac.uk</a>
 </h4>
             
-            <h4 class="date">2021-11-10</h4>
+            <h4 class="date">2021-11-24</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/chjackson/disbayes/blob/master/vignettes/disbayes.Rmd"><code>vignettes/disbayes.Rmd</code></a></small>
       <div class="hidden name"><code>disbayes.Rmd</code></div>
@@ -339,12 +339,12 @@
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">var</span><span class="op">==</span><span class="st">"cf"</span>, <span class="fu"><a href="https://dplyr.tidyverse.org/reference/between.html">between</a></span><span class="op">(</span><span class="va">age</span>,<span class="fl">60</span>,<span class="fl">65</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">age</span>, <span class="va">`25%`</span>, <span class="va">`50%`</span>, <span class="va">`75%`</span><span class="op">)</span></code></pre></div>
 <pre><code>##   age        25%        50%        75%
-## 1  60 0.01625749 0.01735055 0.01855784
-## 2  61 0.01649538 0.01753955 0.01871462
-## 3  62 0.01663374 0.01765044 0.01880640
-## 4  63 0.01680999 0.01776274 0.01897000
-## 5  64 0.01699305 0.01795429 0.01916054
-## 6  65 0.01716644 0.01818779 0.01934428</code></pre>
+## 1  60 0.01623054 0.01736533 0.01857457
+## 2  61 0.01646106 0.01754744 0.01871479
+## 3  62 0.01667586 0.01772814 0.01880275
+## 4  63 0.01682436 0.01786051 0.01897758
+## 5  64 0.01701706 0.01807526 0.01921131
+## 6  65 0.01723319 0.01831515 0.01944434</code></pre>
 <p>The default <code>plot</code> method for objects returned by <code>disbayes</code> plots the posterior summaries for case fatality, allowing a quick check of the model results. Or do <code>plot(..., variable="inc")</code> for incidence. The function returns a <code>ggplot2</code> object that can be modified with <code>ggplot2</code> functions, e.g. to add axis labels.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span>
