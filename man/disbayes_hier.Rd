@@ -151,7 +151,8 @@ weaker prior information.}
 
 \item{rem_upper}{Upper credible limit for the remission estimate}
 
-\item{age}{Variable in the data indicating the year of age}
+\item{age}{Variable in the data indicating the year of age.  This must
+start at age zero, but can end at any age.}
 
 \item{cf_init}{Initial guess at a typical case fatality value, for an
 average age.}

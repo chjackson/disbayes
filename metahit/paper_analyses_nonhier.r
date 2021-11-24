@@ -26,7 +26,7 @@ db <- disbayes(data=mhi,
                cf_model = if (rundf$increasing[i]) "increasing" else "smooth",
                rem_model = if (rundf$remission[i]) rundf$rem_model[i] else NULL,
                hp_fixed = hpfixed,
-               method = "mcmc", chains=nchains, iter=100, refresh=10,
+               method = "mcmc", chains=nchains, iter=1000, refresh=10,
                stan_control=list(max_treedepth=15)
                )
 
@@ -41,4 +41,8 @@ if (0){
   res %>% filter(var=="cf") %>% select(age, Rhat)
   library(bayesplot)
   mcmc_trace(db$fit, pars=paste0("cf[",70:74,"]"))
+  
+  conflict_disbayes(db, var="inc")
+  conflict_disbayes(db, var="prev")
+  conflict_disbayes(db, var="mort")
 }

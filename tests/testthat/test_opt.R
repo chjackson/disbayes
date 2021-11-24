@@ -11,9 +11,14 @@ test_that("standard disbayes model, optimisation",{
   expect_equal(res$mode[60], 0.0172128687091707, tol=1e-03)
   expect_equal(res$`50%`[60], 0.0173084702459764, tol=1e-03)
   
-  tidy_obsdat(db)
+  od <- tidy_obsdat(db)
+  expect_equal(od$denom[1], ihdbristol$inc_denom[1])
   if (interactive()){
     plotfit_data_disbayes(db)
     plotfit_disbayes(db)
   }
+  
+  cd <- conflict_disbayes(db, varname="inc")
+  expect_lte(cd$p1[1], 1)
+  expect_gte(cd$p1[1], 0)
 })

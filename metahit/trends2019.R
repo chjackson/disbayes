@@ -602,8 +602,8 @@ cftrends <- cftryr_sm_sens %>%
     mutate(outcome = "Case fatality") 
 
 ihdtrends2019 <- rbind(inctrends, cftrends) 
-
-usethis::use_data(ihdtrends2019) 
+saveRDS(ihdtrends2019, file="ihdtrends2019.rds")
+# usethis::use_data(ihdtrends2019) 
 
 
 

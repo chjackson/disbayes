@@ -82,7 +82,8 @@
 ##' @param rem_lower Lower credible limit for the remission estimate
 ##' @param rem_upper Upper credible limit for the remission estimate
 ##'
-##' @param age Variable in the data indicating the year of age
+##' @param age Variable in the data indicating the year of age.  This must
+##' start at age zero, but can end at any age. 
 ##'
 ##' @param cf_model Model for how case fatality rate varies with age.
 ##'
@@ -128,7 +129,7 @@
 ##'   represented in the data. The entry in the ith row and jth column
 ##'   represents the ratio between the incidence \code{nage+j} years prior to
 ##'   the year of the data, year, and the incidence in the year of the data, for
-##'   a person i years of age. For example, if \code{nage=100} and the data
+##'   a person i-1 years of age. For example, if \code{nage=100} and the data
 ##'   refer to the year 2017, then the first column refers to the year 1918 and
 ##'   the last (100th) column refers to 2017.  The last column should be all 1,
 ##'   unless the current data are supposed to be biased.

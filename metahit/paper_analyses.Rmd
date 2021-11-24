@@ -111,7 +111,7 @@ pdf("../../write/prev_data.pdf", height=ht)
 ggplot(gbdplot, aes(x=age, y=prev_prob, col=area, lty=gender, group=areagender)) + 
   facet_wrap(~disease, ncol=3, scales="free_y") + 
   coord_cartesian(xlim = c(50,100)) +
-  ylab("Prevalence probability") + 
+  ylab("Prevalence") + 
   xlab("Year of age") +
   geom_ribbon(aes(ymin=prev_lower, ymax=prev_upper), fill="gray80", col="gray80") +
   geom_line() + 
@@ -153,7 +153,7 @@ resnc <- resnat %>% filter(Rhat > 2)
 table(resnc$disease, resnc$gender)
 ## all converges with national data 
 
-## National results. Nice.
+## National results.
 resnat %>% filter(var=="cf") %>% 
     ggplot(aes(x=`age`,y=`50%`,col=gender)) + 
     geom_line() + 

@@ -89,6 +89,7 @@ i <- 9
 mhi <- gbd %>% filter(disease== "Ischemic heart disease",
                       area==trendrundf$area[i], 
                       gender==trendrundf$gender[i])
+ihdtrends2019 <- readRDS("ihdtrends2019.rds")
 trends <- ihdtrends2019 %>% 
     filter(outcome=="Incidence", gender==trendrundf$gender[i]) %>%
     arrange(age, year) %>% 
@@ -152,6 +153,9 @@ db <- disbayes(data=mhi,
 rnh <- tidy(db) %>%
     mutate(disease="Ischemic heart disease", gender="Male", area="Leeds",
            model="No trends") 
+conflict_disbayes(db, var="inc")
+conflict_disbayes(db, var="prev")
+conflict_disbayes(db, var="mort")
 
 ## Excluding incidence data
 mhi <- gbd %>%
@@ -200,7 +204,7 @@ ggplot(rcplot %>% filter(model!="Observed data",
                                !(var=="Case fatality" & est>0.1)
                                ), 
        aes(x=age, y=est, col=trend, lty=incidence)) + 
-    #geom_ribbon(aes(ymin=lower, ymax=upper, 
+#    geom_ribbon(aes(ymin=lower, ymax=upper, 
     #                fill=trend, col=NA), alpha=0.01) +
     geom_line(lwd = 1.0, alpha=0.8) + 
     scale_colour_manual(values = c("black", hcols[1], hcols[2]),
@@ -219,8 +223,6 @@ ggplot(rcplot %>% filter(model!="Observed data",
 dev.off()
 
 ## Animated plot for Armitage
-## todo 3 x 1 .  can we use facet or lay out by hand? grobs 
-## 
 
 hcols <- scales::hue_pal()(2)
 res_fit_arm <- res_checkfit %>% 
