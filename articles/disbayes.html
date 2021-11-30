@@ -74,7 +74,7 @@
                         <h4 class="author">Chris Jackson <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk" class="email">chris.jackson@mrc-bsu.cam.ac.uk</a>
 </h4>
             
-            <h4 class="date">2021-11-24</h4>
+            <h4 class="date">2021-11-30</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/chjackson/disbayes/blob/master/vignettes/disbayes.Rmd"><code>vignettes/disbayes.Rmd</code></a></small>
       <div class="hidden name"><code>disbayes.Rmd</code></div>
@@ -89,7 +89,8 @@
 <li><p>estimate incidence rates, given prevalence and mortality data.</p></li>
 </ul>
 <p>We might want to know these rates in order to build simulation models for estimating health impacts of interventions.</p>
-<p>The document also serves to illustrate the general principles of likelihood and Bayesian inference for estimating disease rates given indirect data.</p>
+<p>Full details of the methodology is given in the paper (<span class="citation">Jackson, Zapata-Diomedi, and Woodcock (2021)</span>).</p>
+<p>This document gives a brief overview, illustrating the general principles of likelihood and Bayesian inference for estimating disease rates given indirect data.</p>
 <div id="theoretical-disease-model" class="section level1">
 <h1 class="hasAnchor">
 <a href="#theoretical-disease-model" class="anchor"></a>Theoretical disease model</h1>
@@ -339,12 +340,12 @@
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">var</span><span class="op">==</span><span class="st">"cf"</span>, <span class="fu"><a href="https://dplyr.tidyverse.org/reference/between.html">between</a></span><span class="op">(</span><span class="va">age</span>,<span class="fl">60</span>,<span class="fl">65</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">age</span>, <span class="va">`25%`</span>, <span class="va">`50%`</span>, <span class="va">`75%`</span><span class="op">)</span></code></pre></div>
 <pre><code>##   age        25%        50%        75%
-## 1  60 0.01623054 0.01736533 0.01857457
-## 2  61 0.01646106 0.01754744 0.01871479
-## 3  62 0.01667586 0.01772814 0.01880275
-## 4  63 0.01682436 0.01786051 0.01897758
-## 5  64 0.01701706 0.01807526 0.01921131
-## 6  65 0.01723319 0.01831515 0.01944434</code></pre>
+## 1  60 0.01627159 0.01740894 0.01866351
+## 2  61 0.01646366 0.01760042 0.01879352
+## 3  62 0.01661488 0.01769912 0.01886076
+## 4  63 0.01681030 0.01790307 0.01897175
+## 5  64 0.01698369 0.01803267 0.01913649
+## 6  65 0.01718404 0.01826896 0.01940919</code></pre>
 <p>The default <code>plot</code> method for objects returned by <code>disbayes</code> plots the posterior summaries for case fatality, allowing a quick check of the model results. Or do <code>plot(..., variable="inc")</code> for incidence. The function returns a <code>ggplot2</code> object that can be modified with <code>ggplot2</code> functions, e.g. to add axis labels.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span>
@@ -402,6 +403,9 @@
 </div>
 <div id="ref-flaxman2015">
 <p>Flaxman, A. D., T. Vos, and C. J. L. Murray. 2015. <em>An Integrative Metaregression Framework for Descriptive Epidemiology</em>. University of Washington Press.</p>
+</div>
+<div id="ref-disbayes_arxiv">
+<p>Jackson, C. H., B. Zapata-Diomedi, and J. Woodcock. 2021. “Bayesian multistate modelling of incomplete chronic disease burden data.” <em>arXiv Preprint</em>. <a href="http://arxiv.org/abs/2111.14100">http://arxiv.org/abs/2111.14100</a>.</p>
 </div>
 <div id="ref-ohagan:elic">
 <p>O’Hagan, A., C. E. Buck, A. Daneshkhah, J. R. Eiser, P. H. Garthwaite, D. J. Jenkinson, J. E Oakley, and T. Rakow. 2006. <em>Uncertain Judgements: Eliciting Experts’ Probabilities</em>. John Wiley &amp; Sons.</p>
