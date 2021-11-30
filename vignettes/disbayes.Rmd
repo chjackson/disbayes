@@ -26,7 +26,9 @@ This document gives an introduction to the `disbayes` package for estimating rat
 
 We might want to know these rates in order to build simulation models for estimating health impacts of interventions.
 
-The document also serves to illustrate the general principles of likelihood and Bayesian inference for estimating disease rates given indirect data. 
+Full details of the methodology is given in the paper (@disbayes_arxiv). 
+
+This document gives a brief overview, illustrating the general principles of likelihood and Bayesian inference for estimating disease rates given indirect data. 
 
 
 # Theoretical disease model 

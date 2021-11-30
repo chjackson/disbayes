@@ -355,3 +355,8 @@ It is designed to estimate case fatality and incidence, given
 data on mortality and at least one of incidence and prevalence.
 Remission may also be included in the data and modelled.
 }
+\references{
+Jackson C, Zapata-Diomedi B, Woodcock J.
+"Bayesian multistate modelling of incomplete chronic disease burden data"
+\url{http://arxiv.org/abs/2111.14100}
+}

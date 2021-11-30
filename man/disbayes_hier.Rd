@@ -340,6 +340,8 @@ optimisation, in Stan.}
 This is much more computationally
 intensive than the basic model in \code{\link{disbayes}}.
 }
-\details{
-For full details see Jackson et al. (in progress...)
+\references{
+Jackson C, Zapata-Diomedi B, Woodcock J.
+"Bayesian multistate modelling of incomplete chronic disease burden data"
+\url{http://arxiv.org/abs/2111.14100}
 }
