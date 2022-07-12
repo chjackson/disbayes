@@ -13,7 +13,7 @@ The development repository for the `disbayes` R package for chronic disease epid
 
 * Case fatality, incidence or remission rates can be modelled as smooth functions of age, through a spline model, or estimated independently for each age.  Case fatality or remission can also be modelled as age-constant.
 
-* Two alternative estimation methods can be used, both based on the [Stan](http://mc-stan.org) software.
+* Two alternative estimation methods can be used, both based on the [Stan](https://mc-stan.org) software.
 
 	- exact point estimation using optimisation to obtain the posterior mode, with credible intervals based on an approximation to the Bayesian posterior.  This is generally instant to compute, but the uncertainty quantification is approximate. 
 
@@ -29,11 +29,18 @@ The development repository for the `disbayes` R package for chronic disease epid
 
 * It is inspired by the [DisMod II](https://www.epigear.com/index_files/dismod_ii.html) and [DisMod-MR](https://github.com/ihmeuw/dismod_mr) packages used for the Global Burden of Disease studies.   It modifies and extends the formal, fully Bayesian framework described in the [book by Flaxman et al.](https://uwapress.uw.edu/book/9780295991849/an-integrative-metaregression-framework-for-descriptive-epidemiology/). 
 
-* The method is fully described in [Jackson et al. (2021)](http://arxiv.org/abs/2111.14100).
+* The method is fully described in [Jackson et al. (2021)](https://arxiv.org/abs/2111.14100).
 
 * Source code is at the [GitHub repository](https://github.com/chjackson/disbayes)
 
 ## Installation
+
+### CRAN version
+
+Coming soon.
+
+
+### Development version 
 
 ```r
 install.packages("devtools") # if devtools not already installed

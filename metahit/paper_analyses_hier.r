@@ -33,17 +33,19 @@ db <- disbayes_hier(data=mhi,
 
 if (0){
   library(bayesplot) 
-  mcmc_trace(db$fit,pars=c("lambda_smooth","sd_inter"), 
+  mcmc_trace(db$fit,pars=c("sd_inter[1]"), 
              np = nuts_params(db$fit))
   pairs(db$fit, pars=c("sd_inter","sd_slope[1]"))
   color_scheme_set("darkgray")
   mcmc_parcoord(db$fit, np = nuts_params(db$fit), pars=c("sd_inter","sd_slope[1]"))
+  saveRDS(db, file= paste0("results_hier/db", i, ".rds"))
+  db <- readRDS(file= paste0("results_hier/db", i, ".rds"))
 }
 
 res <- tidy(db) %>%
   mutate(gender=hierrundf$gender[i], disease=hierrundf$disease[i])
 
-loo <- looi_disbayes_hier(db) %>%
+loo <- looi_disbayes(db) %>%
     mutate(gender=hierrundf$gender[i], disease=hierrundf$disease[i])
 
 saveRDS(list(res=res,loo=loo), file= paste0("results_hier/res", i, ".rds"))

@@ -62,7 +62,7 @@ if (0){
 res <- tidy(db) %>%
   mutate(disease=hierrungdf$disease[i])
 
-loo <- looi_disbayes_hier(db) %>%
+loo <- looi_disbayes(db) %>%
     mutate(disease=hierrungdf$disease[i])
 
 saveRDS(list(res=res,loo=loo), file= paste0("results_hier_gender/res", i, ".rds"))

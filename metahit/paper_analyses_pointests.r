@@ -170,7 +170,7 @@ rnh_noinc <- tidy(db) %>%
 
 rest_all <- rbind(rest, rest_noinc) %>%
     full_join(rnh) %>% full_join(rnh_noinc) %>% 
-    filter(var %in% c("inc_prob","cf","prev_prob","mort_prob"))
+    filter(var %in% c("inc_prob","cf_prob","prev_prob","mort_prob"))
 
 obsdat <- tidy_obsdat(dbt) %>% 
     mutate(model="Observed data") %>%
@@ -182,8 +182,7 @@ res_checkfit <- rest_all %>%
     rename(est=mode, lower=`2.5%`, upper=`97.5%`) %>%
     full_join(obsdat %>% 
                   mutate(lower=NULL, upper=NULL)) %>%
-    mutate(est = ifelse(var=="cf", 1 - exp(-est), est)) %>%
-    mutate(var = fct_recode(var, "Case fatality"="cf", "Incidence"="inc_prob",
+    mutate(var = fct_recode(var, "Case fatality"="cf_prob", "Incidence"="inc_prob",
                             "Mortality"="mort_prob","Prevalence"="prev_prob")) %>%
     mutate(model = relevel(factor(model), "Observed data")) %>%
     mutate(trend = ifelse(grepl("Time trends", model), "Time trends", "No trends"),
@@ -199,7 +198,7 @@ pdf("~/work/chronic/write/checkfit.pdf", width=6, height=3)
 hcols <- scales::hue_pal()(2)
 rcplot <-  res_checkfit %>% 
     filter(age>50) %>%
-    filter(!(var=="cf" & age > 90)) 
+    filter(!(var=="cf_prob" & age > 90)) 
 ggplot(rcplot %>% filter(model!="Observed data", 
                                !(var=="Case fatality" & est>0.1)
                                ), 
@@ -238,7 +237,7 @@ pobs <- ggplot(res_fit_arm,
                         breaks = c("Observed data", "No trends", "Time trends")) + 
     facet_wrap(~var, nrow=2, ncol=3, scales="free_y") + 
     scale_y_continuous(limits=c(0,NA)) +
-    ylab("Probability") + xlab("Age (years)") + 
+    ylab("Annual case fatality risk") + xlab("Age (years)") + 
     labs(col="", lty="Data sources") + 
     guides(fill="none", 
            lty = guide_legend(order = 2, override.aes = list(col=hcols[1])),
@@ -302,9 +301,8 @@ rest_sensbig <- tidy(dbt_sensbig, startyear=1920) %>%
 rest_sens_all <- rbind(rest %>% mutate(model="2003-2010 trend continues"), 
                        rest_sens, 
                        rest_sensbig) %>%
-    full_join(rnh) %>%
-    rename(est=mode, lower=`2.5%`, upper=`97.5%`) %>%
-    filter(var %in% c("inc","cf")) 
+  full_join(rnh) %>%
+  rename(est=mode, lower=`2.5%`, upper=`97.5%`)
 saveRDS(rest_sens_all, file="res_trend_sens.rds")
 
 rest_sens_all <- readRDS(file="res_trend_sens.rds")
@@ -312,18 +310,24 @@ rest_sens_all <- readRDS(file="res_trend_sens.rds")
 hcols <- c(scales::hue_pal()(2),"black")
 p <- 
     rest_sens_all %>% 
-    filter(age > 60 & age<90 & !(var=="cf" & est>0.1)) %>%
+    filter(var %in% c("inc_prob","cf_prob","prev_prob")) %>%
+    filter(age > 60 & age<90 & !(var=="cf_prob" & est>0.1)) %>%
     mutate(model=relevel(factor(model), "2003-2010 trend continues")) %>%
-    mutate(var=fct_recode(var, "Incidence"="inc", "Case fatality"="cf")) %>%
+    mutate(var=fct_recode(var, 
+                          "Incidence (annual risk)"="inc_prob", 
+                          "Case fatality (annual risk)"="cf_prob",
+                          "Prevalence"="prev_prob")) %>%
     filter(model != "2003-2010 trend accelerates") %>%
     ggplot(aes(x=age, y=est, col=model)) + 
-    #    geom_ribbon(aes(ymin=lower, ymax=upper, fill=model), alpha=0.1) +
     geom_line(lwd=1.2) + 
-    facet_wrap(~var, nrow=1, scales="free_y") +
-    #    ylim(c(0,0.05)) +
+    facet_wrap(~var, nrow=1, scales="free_y", labeller = label_wrap_gen(15)) +
+    theme(strip.text = element_text(size=8),
+          legend.title = element_text(size=10),
+          legend.text = element_text(size=8)
+          ) +
     scale_colour_manual(values=hcols[c(2,3,1)]) +
     scale_y_continuous(limits=c(0,NA)) +
-    ylab("Rate") + xlab("Age (years)") +
+    ylab("") + xlab("Age (years)") +
     labs(col="Assumption about\ncase fatality after 2010")
 
 

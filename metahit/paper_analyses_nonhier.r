@@ -35,7 +35,7 @@ res <- tidy(db) %>%
   mutate(gender=rundf$gender[i], disease=rundf$disease[i], area=rundf$area[i])
 loo <- looi_disbayes(db) %>%
     mutate(gender=rundf$gender[i], disease=rundf$disease[i], area=rundf$area[i])
-saveRDS(list(res=res, loo=loo), file= paste0("results_nonhier_noinc/res", i, ".rds"))
+saveRDS(list(res=res, loo=loo), file= paste0("results_nonhier/res", i, ".rds"))
 
 if (0){
   res %>% filter(var=="cf") %>% select(age, Rhat)

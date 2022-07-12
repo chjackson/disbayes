@@ -5,7 +5,7 @@ data-raw
 ^\.Rproj\.user$
 ^metahit$
 vignettes/render.r
-src/*
+^src/.+$
 dbh.rds
 vignettes/dbh.rds
 ^_pkgdown\.yml$

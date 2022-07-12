@@ -121,7 +121,7 @@
 ##'
 ##' @references Jackson C, Zapata-Diomedi B, Woodcock J. 
 ##' "Bayesian multistate modelling of incomplete chronic disease burden data" 
-##' \url{http://arxiv.org/abs/2111.14100}
+##' \url{https://arxiv.org/abs/2111.14100}
 ##'
 ##' @md
 ##' 

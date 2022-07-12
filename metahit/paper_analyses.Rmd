@@ -83,7 +83,7 @@ pdf("../../write/mort_data.pdf", height=ht)
 ggplot(gbdplot, aes(x=age, y=mort_prob, col=area, lty=gender, group=areagender)) + 
   facet_wrap(~disease, ncol=3, scales="free_y") + 
   coord_cartesian(xlim = c(50,100)) +
-  ylab("Annual mortality probability") + 
+  ylab("Annual mortality risk") + 
   xlab("Year of age") +
   geom_ribbon(aes(ymin=mort_lower, ymax=mort_upper), fill="gray80", col="gray80") +
   geom_line() + 
@@ -97,7 +97,7 @@ pdf("../../write/inc_data.pdf", height=ht)
 ggplot(gbdplot, aes(x=age, y=inc_prob, col=area, lty=gender, group=areagender)) + 
   facet_wrap(~disease, ncol=3, scales="free_y") + 
   coord_cartesian(xlim = c(50,100)) +
-  ylab("Annual incidence probability") + 
+  ylab("Annual incidence risk") + 
   xlab("Year of age") +
   geom_ribbon(aes(ymin=inc_lower, ymax=inc_upper), fill="gray80", col="gray80") +
   geom_line() + 
@@ -180,9 +180,9 @@ resoptnat <- readRDS("resopt_nat.rds")
 resoptcf <- resopt %>%
   full_join(resoptnat) %>% 
   filter(var=="cf") %>%
-  mutate(p50 = 1 - exp(-`mode`),
-         plow = 1 - exp(-`2.5%`),
-         pupp = 1 - exp(-`97.5%`)) %>%
+  mutate(p50 = `mode`,
+         plow = `2.5%`,
+         pupp = `97.5%`) %>%
   filter(area=="Bristol" | area=="England", gender=="Female") %>%
   mutate(disease = fct_recode(disease, !!!disease_shorten),
            disease = factor(disease, levels = disease_order)) %>%
@@ -201,15 +201,15 @@ resp <- resall %>%
 resp %>%
   filter(disease %in% diseases_paper, 
          age %in% c(70, 75, 80, 85, 90)) %>%
-  mutate(par = 1 - exp(-`50%`),
-         plow = 1 - exp(-`2.5%`),
-         pupp = 1 - exp(-`97.5%`)) %>%
+  mutate(par = `50%`,
+         plow = `2.5%`,
+         pupp = `97.5%`) %>%
   ggplot(aes(x=age, y=par, col=Algorithm, lty=Algorithm)) + 
   geom_errorbar(aes(ymin=plow, ymax=pupp), width=1.5,
               position=position_dodge(width=2), lwd=1.3) +
   geom_point(position=position_dodge(width=2), size=1.3) + 
   facet_wrap(vars(disease), ncol=2, scales="free_y") + 
-  xlab("Age (years)") + ylab("Case fatality probability")
+  xlab("Age (years)") + ylab("Case fatality rate")
 
 dev.off()
 
@@ -221,18 +221,14 @@ pdf("../../write/all_cf_indep.pdf",width=6,height=6)
 
 resplotnh <- resnh %>% 
     dplyr::filter(model %in% c("Independent areas","National"), 
-                  var=="cf",
+                  var=="cf_prob",
                 area %in% c(cityregions,"England")) %>%
     mutate(area = forcats::fct_relevel(area, "England", after=Inf)) %>%
     dplyr::filter(! (disease=="Uterine cancer" & age > 90),
-                  disease %in% diseases_paper) %>%
-    mutate(p50 = 1 - exp(-`50%`),
-         plow = 1 - exp(-`2.5%`),
-         pupp = 1 - exp(-`97.5%`)) 
-
+                  disease %in% diseases_paper) 
 gg <- resplotnh %>%
-  ggplot(aes(x=age, y=p50, group=area, col=area)) + 
-  geom_ribbon(aes(ymin=plow, ymax=pupp), 
+  ggplot(aes(x=age, y=`50%`, group=area, col=area)) + 
+  geom_ribbon(aes(ymin=`2.5%`, ymax=`97.5%`), 
               fill="gray80", col="gray80") +
   geom_line() + 
   facet_grid(cols=vars(gender), rows=vars(disease), scales = "free_y", switch = "y") + 
@@ -272,8 +268,10 @@ table(resnc$disease, resnc$gender, resnc$area)
 ```{r,cache=TRUE}
 
 ## UTRC doesn't converge, and STMC estimates noisy, so we use national estimate results 
+## Dementia is only other one where sampling performance is poor.
+## Trace plots for dementia look like convergence to plausible region, but poor mixing
 resnc <- resh %>% filter(Rhat > 2) 
-resnc <- resh %>% filter(Rhat > 1.1) 
+resnc <- resh %>% filter(Rhat > 1.1, age>80, var=="cf") 
 resnc <- resh %>% filter(Rhat > 1.05) 
 table(resnc$disease, resnc$gender)
 
@@ -282,10 +280,9 @@ table(resnc$disease, resnc$gender)
 resh %>% filter(gender=="Male", disease=="Ischemic heart disease", age==60, var=="cf") %>% head
 resh %>% filter(gender=="Male", disease=="Colon and rectum cancer", age==60, var=="cf") %>% head
 
-
 ## Between area variability in age curves, point ests.  All diseases 
 rescfplot <- resall %>% 
-    filter(var=="cf", 
+    filter(var=="cf_prob", 
            disease %in% diseases_paper_short, 
            area %in% c(cityregions, "England"),
            (model %in% c("Independent areas","National")) | 
@@ -295,9 +292,6 @@ rescfplot <- resall %>%
                                     "Colorectal cancer"="Colon and rectum cancer",
                                     "IHD" = "Ischemic heart disease")) %>%
     mutate(model = ifelse(model=="National","Independent areas",model),
-           p50 = 1 - exp(-`50%`),
-           plow = 1 - exp(-`2.5%`),
-           pupp = 1 - exp(-`97.5%`),
            gender_model = paste(gender, model, sep="\n")) %>%
     mutate(gender_model = factor(gender_model, 
                                  levels=c("Female\nIndependent areas",
@@ -306,11 +300,11 @@ rescfplot <- resall %>%
                                           "Male\nHierarchical"))) 
 gg <- rescfplot %>%
     ggplot(aes(x=age, col=area, group=area)) +
-    geom_ribbon(aes(ymin=plow, ymax=pupp), fill="gray80", col="gray80") +
-    geom_line(aes(y=p50)) + 
+    geom_ribbon(aes(ymin=`2.5%`, ymax=`97.5%`), fill="gray80", col="gray80") +
+    geom_line(aes(y=`50%`)) + 
     coord_cartesian(xlim=c(70,  100), ylim=c(0,NA)) +
     scale_x_continuous(breaks=seq(0,100,10)) + 
-    ylab("Annual case fatality probability")  +
+    ylab("Annual case fatality risk")  +
     facet_grid(cols=vars(gender_model), rows=vars(disease),
                scales="free_y", switch = "y") + 
     xlab("Age (years)") + 
@@ -721,3 +715,158 @@ dev.off()
 
 ```
 
+
+
+# Discrete-time approximate estimate of case fatality. 
+
+Mortality divided by prevalence. 
+
+Leeds, female, all diseases.  Use standard disbayes model.
+
+```{r}
+setwd("metahit")
+source("paper_analyses_header.r")
+
+mhi <- gbd %>%
+  mutate(disease = fct_recode(disease, !!!disease_shorten)) %>%
+  filter(disease %in% diseases_paper_short) %>%
+  filter(area=="Leeds", gender=="Female") %>%
+  droplevels() %>%
+  mutate(mort_prob = mort_num / mort_denom, 
+         prev_prob = prev_num / prev_denom,
+         mort_rate = -log(1 - mort_prob),  
+         cf_crude = mort_rate / prev_prob)
+
+db <- resall %>% 
+  filter(model=="Independent areas") %>%
+  filter(area=="Leeds", gender=="Female") %>%
+  filter(disease %in% diseases_paper_short) %>%
+  filter(var=="cf") %>%
+  left_join(mhi %>% select(age, gender, disease, cf_crude))
+
+p1 <- ggplot(db %>% filter(age>60, age <80), 
+             aes(x=age, y=`50%`)) + 
+  facet_grid(rows=vars(disease), scales = "free_y", labeller = label_wrap_gen(15)) +
+  geom_line(lwd=1.5) + 
+  geom_ribbon(aes(ymin=`2.5%`, ymax=`97.5%`), alpha=0.3) + 
+  geom_line(aes(y=cf_crude), col="red", lwd=1.5, alpha=0.6) + 
+  xlab("Age (years)") + 
+  ylab("Case fatality rate") +
+  theme(strip.text = element_text(size=7))
+p1
+
+p2 <- ggplot(db %>% filter(age>=80, age <100), 
+             aes(x=age, y=`50%`)) + 
+  facet_grid(rows=vars(disease), scales = "free_y", labeller = label_wrap_gen(15)) +
+  geom_line(lwd=1.5) + 
+  geom_ribbon(aes(ymin=`2.5%`, ymax=`97.5%`), alpha=0.3) + 
+  geom_line(aes(y=cf_crude), col="red", lwd=1.5, alpha=0.6) + 
+  xlab("Age (years)") + 
+  ylab("Case fatality rate") +
+  theme(strip.text = element_text(size=7))
+p2
+
+pdf("~/work/chronic/write/cf_discrete.pdf")
+gridExtra::grid.arrange(p1, p2, nrow=1)
+dev.off()
+
+```
+
+Estimate is non-smooth, unreliable for older ages, doesn't account for uncertainty. 
+
+
+# Comparison of MCMC and optimisation 
+
+Timings. 
+
+```{r}
+system.time(db <- disbayes(data=mhi,
+               inc_num = "inc_num", inc_denom = "inc_denom",
+               mort_num = "mort_num", mort_denom = "mort_denom",
+               prev_num = "prev_num", prev_denom = "prev_denom",
+               eqage = 40))
+options(mc.cores = 4)
+system.time(db <- disbayes(data=mhi,
+               inc_num = "inc_num", inc_denom = "inc_denom",
+               mort_num = "mort_num", mort_denom = "mort_denom",
+               prev_num = "prev_num", prev_denom = "prev_denom",
+               eqage = 40, method="mcmc",iter=1000))
+```
+
+Compare point estimates and uncertainty, and how these relate to the amount of data, and age. 
+
+```{r}
+source("read_model_results.r")
+rescomp <- resall %>%
+  filter(model=="Independent areas") %>%
+  mutate(method="MCMC",
+         pointest = `50%`) %>%
+  full_join(readRDS("resopt_nonhier.rds") %>% 
+              mutate(method="Optimisation",
+                     pointest = `50%`)) %>%
+  filter(
+         disease %in% diseases_paper,
+         !(disease %in% c("Stomach cancer", "Uterine cancer"))
+         ) %>%
+  mutate(iqr = `75%` - `25%`,
+         ciw = `97.5%` - `2.5%`) %>%
+  filter(var == "cf",
+         age > 50) %>%
+  select(age, gender, disease, area, method, pointest, iqr, ciw) %>%
+  left_join(gbd %>% select(age, gender, disease, area, mort_num), 
+            by=c("age","gender","disease","area"))
+
+resc_bias <- rescomp %>% 
+  select(-iqr, -ciw) %>%
+  pivot_wider(names_from=method, 
+              values_from=pointest, 
+              id_cols = c("age","gender","disease","area","mort_num")) %>%
+  mutate(bias = (Optimisation - MCMC),
+         dga = interaction(disease, gender, area)) 
+
+resc_uncbias <- rescomp %>% 
+  select(-pointest, -iqr) %>%
+  pivot_wider(names_from=method, 
+              values_from=ciw, 
+              id_cols = c("age","gender","disease","area","mort_num")) %>%
+  mutate(bias = 100*(Optimisation - MCMC)/MCMC, 
+         dga = interaction(disease, gender, area)) 
+
+
+library(gridExtra)
+library(ggpubr)
+
+p1 <- ggplot(data=resc_bias, aes(x=age, y=bias, group=dga, col=disease)) + 
+  geom_line(alpha=0.5) +
+  geom_point() +
+  ylab("Median(optimisation) - median(MCMC)") + 
+  xlab("Age (years)") 
+
+p2 <- ggplot(data=resc_uncbias, aes(x=age, y=bias, group=dga, col=disease)) + 
+  geom_line(alpha=0.3) +
+  geom_point(alpha=0.5) +
+  ylab("%Bias in CI width") +
+  xlab("Age (years)") 
+
+p3 <- ggplot(data=resc_bias, aes(x=mort_num, y=bias, group=dga, col=disease)) + 
+  geom_line(alpha=0.3) +
+  geom_point(alpha=0.5) +
+  ylab("Median(optimisation) - median(MCMC)") +
+  xlab("Number of deaths in the subgroup") +
+  theme(legend.title = element_blank(), 
+        legend.text = element_text(size=8),
+        legend.position = "bottom") + 
+  guides(col=guide_legend(nrow=3,byrow=TRUE))
+
+p4 <- ggplot(data=resc_uncbias, aes(x=mort_num, y=bias, group=dga, col=disease)) + 
+  geom_line(alpha=0.3) +
+  geom_point(alpha=0.5) +
+  ylab("%Bias in CI width") + 
+  xlab("Number of deaths in the subgroup") 
+
+p <- ggarrange(p3, p1, p4, p2, common.legend=TRUE, legend="bottom") # assign to object to work around blank page bug
+pdf("~/work/chronic/write/opt_compare_full.pdf")
+p
+dev.off()
+
+```

@@ -50,6 +50,6 @@ The script given in \url{https://github.com/chjackson/disbayes/blob/master/data-
 these steps.
 }
 \references{
-TODO our paper when available
+Jackson C, Zapata-Diomedi B, Woodcock J. "Bayesian multistate modelling of incomplete chronic disease burden data" \url{https://arxiv.org/abs/2111.14100}.
 }
 \keyword{datasets}

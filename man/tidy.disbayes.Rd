@@ -25,8 +25,8 @@ to make it easier to summarise and plot the results, e.g. using \pkg{ggplot2}.
 Model parameters might include, depending on the model specification,
 \itemize{
 \item \code{cf}, \code{inc}, \code{rem}: Case fatality, incidence, remission rates
-\item \code{inc_prob}, \code{rem_prob}, \code{mort_prob}:  Annual incidence, remission and mortality probabilities.
-\item \code{prev_prob} Prevalence probability.
+\item \code{inc_prob}, \code{rem_prob}, \code{mort_prob}, \code{cf_prob}:  Annual incidence, remission, mortality and case fatality risks (probabilities).
+\item \code{prev_prob} Prevalence (probability).
 \item \code{state_probs} State occupancy probabilities.
 \item \code{beta}, \code{beta_inc} Coefficients of the spline basis for case fatality and incidence respectively.
 \item \code{lambda_cf}, \code{lambda_inc} Smoothness parameters of the spline functions.
@@ -50,9 +50,11 @@ Only for hierarchical models:
 }
 }
 \description{
-Simply call this after fitting disbayes, as, e.g.\preformatted{res <- disbayes(...)
+Simply call this after fitting disbayes, as, e.g.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{res <- disbayes(...)
 tidy(res)
-}
+}\if{html}{\out{</div>}}
 }
 \section{Functions}{
 \itemize{

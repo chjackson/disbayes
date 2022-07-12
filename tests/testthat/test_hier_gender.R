@@ -16,7 +16,7 @@ test_that("fixed smoothness for gender effect",{
                       mort_num = "mort_num", mort_denom = "mort_denom",
                       hp_fixed = list(scfmale = TRUE),
                       iter=10, chains=1, method="mcmc", algorithm="Fixed_param")
-  expect_equal(db$hp_fixed[["scfmale"]],  0.5026838, tol=1e-03)
+  expect_equal(db$hp_fixed[["scfmale"]],  0.5026838, tol=1e-01)
 })
 
 test_that("errors in specifying gender model", {

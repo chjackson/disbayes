@@ -85,7 +85,6 @@ init_smooth <- function(y, eqage, eqagehi, s_opts=NULL){
     list(X=X, beta=beta)
 }
 
-## TODO better with model specification variables collected together in a list
 
 ## Form constant initial value list to supply to Stan 
 

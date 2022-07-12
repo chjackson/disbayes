@@ -156,12 +156,12 @@ if (requireNamespace("tempdisagg")) {
    tapply(disagg_smooth, agegroup, sum)
 }
 ```
-See the documentation for the [tempdisagg](https://cran.r-project.org/web/packages/tempdisagg/index.html) package, including the vignettes and the help page for the `td` function in this package, for more information about smooth temporal disaggregation.  It is unclear how far the method generalises, e.g. to intervals of varying lengths.
+See the documentation for the [tempdisagg](https://CRAN.R-project.org/package=tempdisagg) package, including the vignettes and the help page for the `td` function in this package, for more information about smooth temporal disaggregation.  It is unclear how far the method generalises, e.g. to intervals of varying lengths.
 
 
 ## Determining numerators and denominators from point and/or interval estimates
 
-Sometimes a point estimate $\hat{p}$ for a quantity such as incidence is published alongside an (e.g. 95%) interval estimate $(\hat{p}^{(lower)},\hat{p}^{(upper)})$.   The interval estimate can be assumed to express the uncertainty associated with the estimate.   Such information can be converted to an implicit numerator $r$ and denominator $n$  as follows.   We assume the point and interval estimate are summaries of a Beta posterior distribution which has been obtained by combining a vague prior with an observation of $r$ events occurring out of a sample of $n$ individuals.   If a Beta(0,0) prior is used, then the posterior is known to be Beta(r, n-r).  We can then search for the best-fitting Beta(r,n-r)$ distribution which has median $\hat{p}$ and (2.5,97.5) quantiles $(\hat{p}^{(lower)},\hat{p}^{(upper)})$, and set $r=a, n=a+b$.   A utility to perform this search is provided in the [SHELF](https://cran.r-project.org/web/packages/SHELF/index.html) package for expert elicitation (@ohagan:elic). 
+Sometimes a point estimate $\hat{p}$ for a quantity such as incidence is published alongside an (e.g. 95%) interval estimate $(\hat{p}^{(lower)},\hat{p}^{(upper)})$.   The interval estimate can be assumed to express the uncertainty associated with the estimate.   Such information can be converted to an implicit numerator $r$ and denominator $n$  as follows.   We assume the point and interval estimate are summaries of a Beta posterior distribution which has been obtained by combining a vague prior with an observation of $r$ events occurring out of a sample of $n$ individuals.   If a Beta(0,0) prior is used, then the posterior is known to be Beta(r, n-r).  We can then search for the best-fitting Beta(r,n-r)$ distribution which has median $\hat{p}$ and (2.5,97.5) quantiles $(\hat{p}^{(lower)},\hat{p}^{(upper)})$, and set $r=a, n=a+b$.   A utility to perform this search is provided in the [SHELF](https://CRAN.R-project.org/package=SHELF) package for expert elicitation (@ohagan:elic). 
 
 In other applications, the denominators might be directly available, e.g. we might know that the prevalence was estimated from a survey of $r_a^{(prev)}$ people, or we might assume that the incidence and mortality were obtained from a comprehensive registry of the population, in which case the denominator would equal the population size (within the specific stratum, e.g. as defined by age and gender, that the estimate refers to). 
 
@@ -218,7 +218,7 @@ rates.
 
 # Fitting Bayesian models with the Stan software via disbayes
 
-The `disbayes` software works by calling the Stan software ([mc-stan.org](http://mc-stan.org)) that allows any Bayesian model to be written down in the Stan language, and enables the unknown parameters to be estimated through two alternative methods: 
+The `disbayes` software works by calling the Stan software ([mc-stan.org](https://mc-stan.org)) that allows any Bayesian model to be written down in the Stan language, and enables the unknown parameters to be estimated through two alternative methods: 
 
 1. `method="opt"` (the default). Optimisation is used to find the mode of the posterior distribution, which gives a point estimate for the parameters.  An approximate sample from the posterior is then drawn using a normal approximation around the posterior mode.   This sample is summarised to give credible intervals. 
 

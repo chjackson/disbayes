@@ -79,6 +79,7 @@ transformed parameters {
   matrix<lower=0,upper=1>[nage,nbias] inc_prob; // don't bound due to occasional numerical fuzz in Hessian
   vector<lower=0>[nage] rem;
   vector<lower=0,upper=1>[nage*remission] rem_prob;
+  vector<lower=0,upper=1>[nage] cf_prob;
   
   row_vector[3] state_probs[(nage+1)*(1-trend),nbias]; 
   row_vector[3] tmp;
@@ -184,6 +185,7 @@ transformed parameters {
 	prev_prob[a,k] = state_probs_yr[a,nyr,k,2] /
 	  (state_probs_yr[a,nyr,k,1] + state_probs_yr[a,nyr,k,2]);
 	if (k==1) mort_prob[a] = P[1,3]*(1 - prev_prob[a,1]) + P[2,3]*prev_prob[a,1];
+	cf_prob[a] = bound_prob(P[2,3]);
       }
     } else { 
 
@@ -196,6 +198,7 @@ transformed parameters {
 	state_probs[a+1,k,1:3] = tmp;
 	if (k==1) {
 	  mort_prob[a] = P[1,3]*(1 - prev_prob[a,1]) + P[2,3]*prev_prob[a,1];
+	  cf_prob[a] = bound_prob(P[2,3]);
 	  if (remission) 
 	    rem_prob[a] = P[2,1];
 	}

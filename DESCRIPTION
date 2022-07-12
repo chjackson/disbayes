@@ -1,6 +1,7 @@
 Package: disbayes
-Title: Bayesian evidence synthesis for chronic disease epidemiology
-Version: 0.1
+Title: Bayesian Multi-State Modelling of Chronic Disease Burden Data
+Date: 2022-07-05
+Version: 1.0.0
 Author: Chris Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
 Maintainer: Chris Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
 Description: Estimation of incidence and case fatality for a chronic disease, given partial information, using a multi-state model. Given data on age-specific mortality and either incidence or prevalence, Bayesian inference is used to estimate the posterior distributions of incidence, case fatality, and functions of these such as prevalence. 
@@ -40,4 +41,4 @@ VignetteBuilder: knitr
 SystemRequirements: GNU make
 URL: https://github.com/chjackson/disbayes
 BugReports: https://github.com/chjackson/disbayes/issues
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.0

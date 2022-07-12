@@ -31,13 +31,13 @@ tidy_obsdat_hier <- function(x){
   vars <- c("inc","prev","mort")
   if (dat$remission) vars <- c(vars, "rem")
   res <- vector(length(vars), mode="list")
-  for (vi in vars){
+  for (i in seq_along(vars)){
     tdat <- array_indvecs(dims)
     names(tdat) <- c("age", "area", "gender")
     tdat$age <- tdat$age - 1
-    tdat$num <- as.vector(dat[[sprintf("%s_num",vi)]])
-    tdat$denom <- as.vector(dat[[sprintf("%s_denom",vi)]])
-    tdat$var <- vi
+    tdat$num <- as.vector(dat[[sprintf("%s_num",vars[i])]])
+    tdat$denom <- as.vector(dat[[sprintf("%s_denom",vars[i])]])
+    tdat$var <- vars[i]
     tdat$prob <- tdat$num/tdat$denom
     tdat$lower <- qbeta(0.025, tdat$num+0.5, tdat$denom-tdat$num+0.5)
     tdat$upper <- qbeta(0.975, tdat$num+0.5, tdat$denom-tdat$num+0.5)
@@ -103,6 +103,7 @@ plotfit_disbayes <- function(x, agemin=50){
 ## Only implemented currently for parameters with three indices
 
 opt_extract_nonhier <- function(xfit, par){
+  varorig <- NULL
   sam <- xfit$theta_tilde
   parnames <- colnames(sam)
   sam <- sam[,grep(sprintf("^%s\\[.+", par), parnames)]
@@ -126,6 +127,7 @@ opt_extract_nonhier <- function(xfit, par){
 ## Not used currently
 
 opt_extract_hier <- function(xfit, par){
+  varorig <- NULL
   sam <- xfit$theta_tilde
   parnames <- colnames(sam)
   sam <- sam[,grep(sprintf("^%s\\[.+", par), parnames)]

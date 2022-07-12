@@ -98,6 +98,7 @@ transformed parameters {
   real<lower=0> mort_prob[nage,narea,ng];
   real<lower=0> rem[nage,narea,ng];
   real<lower=0> rem_prob[nage*remission,narea,ng];
+  real<lower=0> cf_prob[nage,narea,ng];
   row_vector[3] state_probs[nage+1,narea,ng]; 
   row_vector[3] tmp;
   matrix[3,3] P;
@@ -238,6 +239,7 @@ transformed parameters {
 	  prev_prob[a,j,g] = state_probs[a,j,g,2] / (state_probs[a,j,g,1] + state_probs[a,j,g,2]);
 	tmp = state_probs[a,j,g,1:3] * P;  // temp variable to avoid warning
 	state_probs[a+1,j,g,1:3] = tmp;
+	cf_prob[a,j,g] = bound_prob(P[2,3]);
 	mort_prob[a,j,g] = P[1,3]*(1 - prev_prob[a,j,g]) + P[2,3]*prev_prob[a,j,g];
 	//// work around floating point fuzz
 	mort_prob[a,j,g] = bound_prob(mort_prob[a,j,g]);

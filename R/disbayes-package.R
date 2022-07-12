@@ -7,7 +7,7 @@
 #' @useDynLib disbayes, .registration = TRUE
 #' @import methods
 #' @import Rcpp
-#' @importFrom stats coef lm qbeta qexp qnorm quantile rlnorm rnorm dbinom na.omit
+#' @importFrom stats coef lm qbeta qexp qnorm quantile rlnorm rnorm rbeta dbinom na.omit
 #' @importFrom rstan sampling
 #' @importFrom mgcv smoothCon jagam s
 #' @importFrom matrixStats colQuantiles
@@ -67,7 +67,7 @@ loo::loo
 ##' The script given in \url{https://github.com/chjackson/disbayes/blob/master/data-raw/gbd_process.Rmd} shows
 ##' these steps.
 ##'
-##' @references TODO our paper when available
+##' @references Jackson C, Zapata-Diomedi B, Woodcock J. "Bayesian multistate modelling of incomplete chronic disease burden data" \url{https://arxiv.org/abs/2111.14100}.
 ##' 
 ##' @keywords datasets
 "ihdengland"

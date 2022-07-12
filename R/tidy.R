@@ -23,9 +23,9 @@
 ##'
 ##' * `cf`, `inc`, `rem`: Case fatality, incidence, remission rates
 ##'
-##' * `inc_prob`, `rem_prob`, `mort_prob`:  Annual incidence, remission and mortality probabilities. 
+##' * `inc_prob`, `rem_prob`, `mort_prob`, `cf_prob`:  Annual incidence, remission, mortality and case fatality risks (probabilities). 
 ##'
-##' * `prev_prob` Prevalence probability. 
+##' * `prev_prob` Prevalence (probability). 
 ##'
 ##' * `state_probs` State occupancy probabilities.
 ##'
@@ -117,7 +117,7 @@ tidy_disbayes_full <- function(fit, varlist, method, levs=NULL, ...) {
 .disbayes_vars <- list(
     age = list(indnames = "age",
                varnames = c("cf","inc_par","cf_par","rem_par",
-                            "dcf","rem","rem_prob","mort_prob")), 
+                            "dcf","rem","rem_prob","mort_prob","cf_prob")), 
     agebias =  list(indnames = c("age", "bias"),
                     varnames = c("inc", "inc_prob", "prev_prob")),
     agebiasstate = list(indnames = c("age", "bias", "state"),
@@ -132,7 +132,8 @@ attr(.disbayes_vars, "order") <- c("age", "bias", "state", "term")
 
 .disbayes_trend_vars <- list(
     age = list(indnames="age",
-               varnames = c("cf", "inc_par", "rem_par", "rem", "rem_prob", "mort_prob")),
+               varnames = c("cf", "inc_par", "rem_par", "rem",
+                            "rem_prob", "mort_prob","cf_prob")),
     ageyear = list(indnames = c("age", "year"),
                    varnames = c("cf_yr")),
     agebias = list(indnames = c("age", "bias"),
@@ -152,7 +153,8 @@ attr(.disbayes_trend_vars, "order") <- c("age", "year", "bias", "state", "term")
 .disbayes_hier_vars <- list(
     ageareagender = list(
         indnames = c("age","area","gender"), 
-        varnames =  c("inc","cf","dcf","inc_prob","prev_prob","mort_prob","rem","rem_prob")
+        varnames =  c("inc","cf","dcf","inc_prob","prev_prob",
+                      "mort_prob","cf_prob","rem","rem_prob")
     ),
     ageareagenderstate = list(
         indnames = c("age","area","gender","state"), 
