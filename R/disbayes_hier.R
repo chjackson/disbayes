@@ -1,8 +1,11 @@
 ##' Bayesian estimation of chronic disease epidemiology from incomplete data -
 ##' hierarchical model for case fatalities.  
 ##' 
-##' This is much more computationally 
-##' intensive than the basic model in \code{\link{disbayes}}.
+##' A variant of \code{\link{disbayes}} in which data from different areas can be
+##' related in a hierarchical model and, optionally, the effect of gender can be
+##' treated as additive with the effect of area.  This is much more computationally 
+##' intensive than the basic model in \code{\link{disbayes}}.  Time trends are not
+##' supported in this function.
 ##'
 ##' @param group Variable in the data representing the area (or other grouping
 ##'   factor).

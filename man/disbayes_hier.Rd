@@ -372,8 +372,11 @@ and denominators.
 \code{hp_fixed} Values of any hyperparameters that are fixed during the main model fit.
 }
 \description{
-This is much more computationally
-intensive than the basic model in \code{\link{disbayes}}.
+A variant of \code{\link{disbayes}} in which data from different areas can be
+related in a hierarchical model and, optionally, the effect of gender can be
+treated as additive with the effect of area.  This is much more computationally
+intensive than the basic model in \code{\link{disbayes}}.  Time trends are not
+supported in this function.
 }
 \references{
 Jackson C, Zapata-Diomedi B, Woodcock J.
