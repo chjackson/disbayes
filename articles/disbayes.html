@@ -150,7 +150,7 @@
 </ul>
 <p>and we wish to estimate case fatality by age, given these inputs. A selection of rows from the full data frame are shown here. We select only the data from one area and gender (Bristol, male) for this illustration. Remission rates are assumed to be zero, hence remission data are not included.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/chjackson/disbayes" class="external-link">disbayes</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://chjackson.github.io/disbayes" class="external-link">disbayes</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span>,quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">ihdbristol</span> <span class="op">&lt;-</span> <span class="va">ihdengland</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">area</span><span class="op">==</span><span class="st">"Bristol"</span>, <span class="va">gender</span><span class="op">==</span><span class="st">"Male"</span><span class="op">)</span></span>
 <span><span class="va">ihdbristol</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/between.html" class="external-link">between</a></span><span class="op">(</span><span class="va">age</span>, <span class="fl">50</span>, <span class="fl">55</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -336,12 +336,12 @@
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">var</span><span class="op">==</span><span class="st">"cf"</span>, <span class="fu"><a href="https://dplyr.tidyverse.org/reference/between.html" class="external-link">between</a></span><span class="op">(</span><span class="va">age</span>,<span class="fl">60</span>,<span class="fl">65</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">age</span>, <span class="va">`25%`</span>, <span class="va">`50%`</span>, <span class="va">`75%`</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##   age        25%        50%        75%</span></span>
-<span><span class="co">## 1  60 0.01610950 0.01736010 0.01865742</span></span>
-<span><span class="co">## 2  61 0.01635830 0.01754650 0.01879502</span></span>
-<span><span class="co">## 3  62 0.01650852 0.01772137 0.01893604</span></span>
-<span><span class="co">## 4  63 0.01669048 0.01787525 0.01917229</span></span>
-<span><span class="co">## 5  64 0.01687912 0.01807757 0.01925249</span></span>
-<span><span class="co">## 6  65 0.01716465 0.01834446 0.01945979</span></span></code></pre>
+<span><span class="co">## 1  60 0.01621950 0.01748337 0.01876599</span></span>
+<span><span class="co">## 2  61 0.01643122 0.01765851 0.01888255</span></span>
+<span><span class="co">## 3  62 0.01660473 0.01779660 0.01892318</span></span>
+<span><span class="co">## 4  63 0.01673554 0.01786017 0.01906970</span></span>
+<span><span class="co">## 5  64 0.01690351 0.01799147 0.01923202</span></span>
+<span><span class="co">## 6  65 0.01713804 0.01824373 0.01935304</span></span></code></pre>
 <p>The default <code>plot</code> method for objects returned by <code>disbayes</code> plots the posterior summaries for case fatality, allowing a quick check of the model results. Or do <code>plot(..., variable="inc")</code> for incidence. The function returns a <code>ggplot2</code> object that can be modified with <code>ggplot2</code> functions, e.g. to add axis labels.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
