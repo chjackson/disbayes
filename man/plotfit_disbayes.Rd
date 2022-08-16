@@ -11,6 +11,9 @@ plotfit_disbayes(x, agemin = 50)
 
 \item{agemin}{Minimum age to show on the horizontal axis.}
 }
+\value{
+A \code{ggplot2} object containing the plot.
+}
 \description{
 The data behind the plot can be produced using \code{\link{plotfit_data_disbayes}},
 to enable customised plots to be produced by hand with \code{ggplot2}.

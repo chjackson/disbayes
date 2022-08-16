@@ -86,6 +86,8 @@ plotfit_data_disbayes <- function(x){
 ##'
 ##' @param agemin Minimum age to show on the horizontal axis.
 ##'
+##' @return A \code{ggplot2} object containing the plot.
+##'
 ##' @export
 plotfit_disbayes <- function(x, agemin=50){
     age <- prob <- lower <- upper <- source <- NULL

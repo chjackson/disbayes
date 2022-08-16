@@ -5,12 +5,14 @@ data-raw
 ^\.Rproj\.user$
 ^metahit$
 vignettes/render.r
-^src/.+$
 dbh.rds
 vignettes/dbh.rds
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
+^.+\.dll$
+^.+\.o$
+^.+\.so$
 ^\.github$
 vignettes/disbayes_cache
 vignettes/disbayes_files

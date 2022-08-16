@@ -331,20 +331,18 @@ A list including the following components
 in the \code{stanfit} format returned by the \code{\link[rstan]{stan}}
 function in the \pkg{rstan} package.
 
-\code{dat}: A list containing the input data in the form of numerators
-and denominators.
+\code{method}:  Optimisation method that was chosen.
 
 \code{nage}: Number of years of age in the data
+
+\code{dat}: A list containing the input data in the form of numerators
+and denominators.
 
 \code{stan_data}: Full list of data supplied to Stan
 
 \code{stan_inits}: Full list of parameter initial values supplied to Stan
 
-\code{"method"}:  Optimisation method that was chosen
-
-\code{"trend"}: Whether a time trend was modelled
-
-\code{"hp_fixed"} Values of any hyperparameters that are fixed during the main model fit.
+\code{hp_fixed} Values of any hyperparameters that are fixed during the main model fit.
 
 Use the \code{\link{tidy.disbayes}} method to return summary statistics
 from the fitted models, simply by calling \code{tidy()} on the fitted model.

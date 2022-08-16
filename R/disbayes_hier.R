@@ -10,7 +10,7 @@
 ##' @param gender If \code{NULL} (the default) then the data are one homogenous
 ##'   gender, and there should be one row per year of age.  Otherwise, set
 ##'   \code{gender} to a character string naming the variable in the data
-##'   representing gender (or other binary grouping factor).  Gender will then
+##'   representing gender (or other categorical grouping factor).  Gender will then
 ##'   treated as a fixed additive effect, so the linear effect of gender on log
 ##'   case fatality is the same in each area.  The data should have one row per
 ##'   year of age and gender.
@@ -118,7 +118,41 @@
 ##'   of gender on the linear age slope of log case fatality
 ##'
 ##' @inheritParams disbayes
+##' 
+##' @return  A list including the following components
 ##'
+##'  \code{call}: Function call that was used. 
+##'
+##'  \code{fit}: An object containing posterior samples from the fitted model,
+##'   in the \code{stanfit} format returned by the \code{\link[rstan]{stan}}
+##'   function in the \pkg{rstan} package.
+##'
+##'  \code{method}:  Optimisation method that was chosen.
+##'
+##'  \code{nage}: Number of years of age in the data
+##'  
+##'  \code{narea}: Number of areas (or other grouping variable that defines the hierarchical model).
+##'
+##'  \code{ng}: Number of genders (or other categorical variable whose effect is treated as 
+##'  additive with the area effect).
+##'
+##'  \code{groups}: Names of the areas (or other grouping variable), taken from the factor levels in the
+##'  original data.
+##'
+##'  \code{genders}: Names of the genders (or other categorical variable), taken from the factor levels in the
+##'  original data. 
+##'  
+##'  \code{dat}: A list containing the input data in the form of numerators
+##'   and denominators.
+##' 
+##'  \code{stan_data}: Full list of data supplied to Stan
+##' 
+##'  \code{stan_inits}: Full list of parameter initial values supplied to Stan
+##'
+##'  \code{trend}: Whether a time trend was modelled
+##'
+##'  \code{hp_fixed} Values of any hyperparameters that are fixed during the main model fit. 
+##'  
 ##' @references Jackson C, Zapata-Diomedi B, Woodcock J. 
 ##' "Bayesian multistate modelling of incomplete chronic disease burden data" 
 ##' \url{https://arxiv.org/abs/2111.14100}
