@@ -70,7 +70,7 @@
                         <h4 data-toc-skip class="author">Chris Jackson <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk" class="email">chris.jackson@mrc-bsu.cam.ac.uk</a>
 </h4>
             
-            <h4 data-toc-skip class="date">2022-07-12</h4>
+            <h4 data-toc-skip class="date">2022-08-16</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/chjackson/disbayes/blob/HEAD/vignettes/disbayes.Rmd" class="external-link"><code>vignettes/disbayes.Rmd</code></a></small>
       <div class="hidden name"><code>disbayes.Rmd</code></div>
@@ -336,12 +336,12 @@
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">var</span><span class="op">==</span><span class="st">"cf"</span>, <span class="fu"><a href="https://dplyr.tidyverse.org/reference/between.html" class="external-link">between</a></span><span class="op">(</span><span class="va">age</span>,<span class="fl">60</span>,<span class="fl">65</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">age</span>, <span class="va">`25%`</span>, <span class="va">`50%`</span>, <span class="va">`75%`</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##   age        25%        50%        75%</span></span>
-<span><span class="co">## 1  60 0.01616649 0.01742769 0.01863429</span></span>
-<span><span class="co">## 2  61 0.01638514 0.01761122 0.01881331</span></span>
-<span><span class="co">## 3  62 0.01656127 0.01772560 0.01896926</span></span>
-<span><span class="co">## 4  63 0.01669832 0.01787692 0.01910474</span></span>
-<span><span class="co">## 5  64 0.01693947 0.01806911 0.01922437</span></span>
-<span><span class="co">## 6  65 0.01712999 0.01827623 0.01941769</span></span></code></pre>
+<span><span class="co">## 1  60 0.01610950 0.01736010 0.01865742</span></span>
+<span><span class="co">## 2  61 0.01635830 0.01754650 0.01879502</span></span>
+<span><span class="co">## 3  62 0.01650852 0.01772137 0.01893604</span></span>
+<span><span class="co">## 4  63 0.01669048 0.01787525 0.01917229</span></span>
+<span><span class="co">## 5  64 0.01687912 0.01807757 0.01925249</span></span>
+<span><span class="co">## 6  65 0.01716465 0.01834446 0.01945979</span></span></code></pre>
 <p>The default <code>plot</code> method for objects returned by <code>disbayes</code> plots the posterior summaries for case fatality, allowing a quick check of the model results. Or do <code>plot(..., variable="inc")</code> for incidence. The function returns a <code>ggplot2</code> object that can be modified with <code>ggplot2</code> functions, e.g. to add axis labels.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
@@ -425,12 +425,12 @@
 
       <footer><div class="copyright">
   <p></p>
-<p>Developed by Chris Jackson.</p>
+<p>Developed by Christopher Jackson.</p>
 </div>
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer>

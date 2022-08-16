@@ -442,11 +442,14 @@ in the <code>stanfit</code> format returned by the <code><a href="https://mc-sta
 <p>function in the <span class="pkg">rstan</span> package.</p>
 
 
-<p><code>dat</code>: A list containing the input data in the form of numerators
-and denominators.</p>
+<p><code>method</code>:  Optimisation method that was chosen.</p>
 
 
 <p><code>nage</code>: Number of years of age in the data</p>
+
+
+<p><code>dat</code>: A list containing the input data in the form of numerators
+and denominators.</p>
 
 
 <p><code>stan_data</code>: Full list of data supplied to Stan</p>
@@ -455,13 +458,7 @@ and denominators.</p>
 <p><code>stan_inits</code>: Full list of parameter initial values supplied to Stan</p>
 
 
-<p><code>"method"</code>:  Optimisation method that was chosen</p>
-
-
-<p><code>"trend"</code>: Whether a time trend was modelled</p>
-
-
-<p><code>"hp_fixed"</code> Values of any hyperparameters that are fixed during the main model fit.</p>
+<p><code>hp_fixed</code> Values of any hyperparameters that are fixed during the main model fit.</p>
 
 
 <p>Use the <code><a href="tidy.disbayes.html">tidy.disbayes</a></code> method to return summary statistics
@@ -482,11 +479,11 @@ from the fitted models, simply by calling <code><a href="https://generics.r-lib.
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by Chris Jackson.</p>
+  <p></p><p>Developed by Christopher Jackson.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>
