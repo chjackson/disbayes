@@ -1,6 +1,6 @@
 Package: disbayes
 Title: Bayesian Multi-State Modelling of Chronic Disease Burden Data
-Date: 2022-08-16
+Date: 2022-08-18
 Version: 1.0.0
 Authors@R: 
     person("Christopher", "Jackson", , "chris.jackson@mrc-bsu.cam.ac.uk", role = c("aut", "cre", "cph"),
@@ -40,6 +40,6 @@ Suggests: knitr,
     testthat
 VignetteBuilder: knitr
 SystemRequirements: GNU make
-URL: https://chjackson.github.io/disbayes
-BugReports: https://github.com/chjackson/disbayes/issues
+URL: https://chjackson.github.io/disbayes/
+BugReports: https://github.com/chjackson/disbayes/issues/
 RoxygenNote: 7.2.0
