@@ -336,12 +336,12 @@
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">var</span><span class="op">==</span><span class="st">"cf"</span>, <span class="fu"><a href="https://dplyr.tidyverse.org/reference/between.html" class="external-link">between</a></span><span class="op">(</span><span class="va">age</span>,<span class="fl">60</span>,<span class="fl">65</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">age</span>, <span class="va">`25%`</span>, <span class="va">`50%`</span>, <span class="va">`75%`</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##   age        25%        50%        75%</span></span>
-<span><span class="co">## 1  60 0.01616383 0.01740865 0.01880775</span></span>
-<span><span class="co">## 2  61 0.01631720 0.01756957 0.01884814</span></span>
-<span><span class="co">## 3  62 0.01649200 0.01772694 0.01896370</span></span>
-<span><span class="co">## 4  63 0.01673193 0.01789170 0.01905491</span></span>
-<span><span class="co">## 5  64 0.01698867 0.01804274 0.01923039</span></span>
-<span><span class="co">## 6  65 0.01723179 0.01827433 0.01946278</span></span></code></pre>
+<span><span class="co">## 1  60 0.01639810 0.01756159 0.01877349</span></span>
+<span><span class="co">## 2  61 0.01655640 0.01772050 0.01884273</span></span>
+<span><span class="co">## 3  62 0.01658678 0.01782520 0.01894921</span></span>
+<span><span class="co">## 4  63 0.01673057 0.01794266 0.01907736</span></span>
+<span><span class="co">## 5  64 0.01684881 0.01807729 0.01922506</span></span>
+<span><span class="co">## 6  65 0.01710085 0.01823517 0.01944627</span></span></code></pre>
 <p>The default <code>plot</code> method for objects returned by <code>disbayes</code> plots the posterior summaries for case fatality, allowing a quick check of the model results. Or do <code>plot(..., variable="inc")</code> for incidence. The function returns a <code>ggplot2</code> object that can be modified with <code>ggplot2</code> functions, e.g. to add axis labels.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
