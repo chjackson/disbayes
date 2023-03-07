@@ -33,6 +33,6 @@ Extract observation-specific contributions from a disbayes leave-one-out cross v
 }
 \section{Functions}{
 \itemize{
-\item \code{looi_disbayes}: Observation-level leave-one-out cross validation statistics for a disbayes model
-}}
+\item \code{looi_disbayes()}: Observation-level leave-one-out cross validation statistics for a disbayes model
 
+}}

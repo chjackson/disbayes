@@ -298,9 +298,10 @@
 ##'   Use the \code{\link{tidy.disbayes}} method to return summary statistics
 ##'   from the fitted models, simply by calling \code{tidy()} on the fitted model. 
 ##'   
-##' @references Jackson C, Zapata-Diomedi B, Woodcock J. 
-##' "Bayesian multistate modelling of incomplete chronic disease burden data" 
-##' \url{https://arxiv.org/abs/2111.14100}
+##' @references Jackson C, Zapata-Diomedi B, Woodcock J. (2023)
+##' "Bayesian multistate modelling of incomplete chronic disease burden data"
+##' Journal of the Royal Statistical Society, Series A, 186(1), 1-19
+##' \url{https://doi.org/10.1093/jrsssa/qnac015}
 ##'
 ##' @export
 disbayes <- function(data,

@@ -42,4 +42,4 @@ VignetteBuilder: knitr
 SystemRequirements: GNU make
 URL: https://chjackson.github.io/disbayes/
 BugReports: https://github.com/chjackson/disbayes/issues
-RoxygenNote: 7.2.0
+RoxygenNote: 7.2.3

@@ -58,6 +58,6 @@ tidy(res)
 }
 \section{Functions}{
 \itemize{
-\item \code{tidy.disbayes_hier}: Tidy method for hierarchical disbayes models
-}}
+\item \code{tidy(disbayes_hier)}: Tidy method for hierarchical disbayes models
 
+}}
