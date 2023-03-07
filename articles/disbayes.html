@@ -63,14 +63,16 @@
 
       
 
-      </header><script src="disbayes_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
+      </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
-      <h1 data-toc-skip>Bayesian estimation of chronic disease epidemiology from incomplete data: the disbayes package</h1>
-                        <h4 data-toc-skip class="author">Chris Jackson <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk" class="email">chris.jackson@mrc-bsu.cam.ac.uk</a>
+      <h1 data-toc-skip>Bayesian estimation of chronic disease
+epidemiology from incomplete data: the disbayes package</h1>
+                        <h4 data-toc-skip class="author">Chris Jackson
+<a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk" class="email">chris.jackson@mrc-bsu.cam.ac.uk</a>
 </h4>
             
-            <h4 data-toc-skip class="date">2022-08-22</h4>
+            <h4 data-toc-skip class="date">2023-03-07</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/chjackson/disbayes/blob/HEAD/vignettes/disbayes.Rmd" class="external-link"><code>vignettes/disbayes.Rmd</code></a></small>
       <div class="hidden name"><code>disbayes.Rmd</code></div>
@@ -79,61 +81,129 @@
 
     
     
-<p>This document gives an introduction to the <code>disbayes</code> package for estimating rates of disease given indirect data. For example, we might want to</p>
+<p>This document gives an introduction to the <code>disbayes</code>
+package for estimating rates of disease given indirect data. For
+example, we might want to</p>
 <ul>
-<li><p>estimate case fatality rates, given mortality and prevalence and/or incidence data</p></li>
-<li><p>estimate incidence rates, given prevalence and mortality data.</p></li>
+<li><p>estimate case fatality rates, given mortality and prevalence
+and/or incidence data</p></li>
+<li><p>estimate incidence rates, given prevalence and mortality
+data.</p></li>
 </ul>
-<p>We might want to know these rates in order to build simulation models for estimating health impacts of interventions.</p>
-<p>Full details of the methodology is given in the paper (<span class="citation">Jackson, Zapata-Diomedi, and Woodcock (2021)</span>).</p>
-<p>This document gives a brief overview, illustrating the general principles of likelihood and Bayesian inference for estimating disease rates given indirect data.</p>
+<p>We might want to know these rates in order to build simulation models
+for estimating health impacts of interventions.</p>
+<p>Full details of the methodology is given in the paper (<span class="citation">Jackson, Zapata-Diomedi, and Woodcock
+(2023)</span>).</p>
+<p>This document gives a brief overview, illustrating the general
+principles of likelihood and Bayesian inference for estimating disease
+rates given indirect data.</p>
 <div class="section level2">
 <h2 id="theoretical-disease-model">Theoretical disease model<a class="anchor" aria-label="anchor" href="#theoretical-disease-model"></a>
 </h2>
-<p>We represent a disease as a continuous-time, multi-state process with three states:</p>
+<p>We represent a disease as a continuous-time, multi-state process with
+three states:</p>
 <ol style="list-style-type: decimal">
 <li>disease-free</li>
 <li>disease</li>
 <li>dead from the disease.</li>
 </ol>
-<p>If we assume that mortality from other causes is independent of disease status, deaths from other causes are uninformative and can be ignored.</p>
+<p>If we assume that mortality from other causes is independent of
+disease status, deaths from other causes are uninformative and can be
+ignored.</p>
 <p>The disease process is then fully defined by the</p>
 <ul>
-<li><p>disease incidence <span class="math inline">\(i(a)\)</span>, and the</p></li>
+<li><p>disease incidence <span class="math inline">\(i(a)\)</span>, and
+the</p></li>
 <li><p>case fatality rate <span class="math inline">\(f(a)\)</span>,</p></li>
 </ul>
-<p>which are both assumed to depend on age <span class="math inline">\(a\)</span>. Remission is also possible for some diseases, with rate <span class="math inline">\(r(a)\)</span>. Assume further that the rates are constant within integer years of age <span class="math inline">\(a\)</span>, so they can be written <span class="math inline">\(i_a\)</span>, <span class="math inline">\(f_a\)</span>.</p>
-<p>From these, we can determine the <em>transition probability matrix</em> <span class="math inline">\(P_a\)</span>, whose <span class="math inline">\(r,s\)</span> entry <span class="math inline">\(P_{ars}\)</span> is the probability that a person is in state <span class="math inline">\(s\)</span> at age <span class="math inline">\(a+1\)</span> given they are in state <span class="math inline">\(r\)</span> at age <span class="math inline">\(a\)</span>. The matrix <span class="math inline">\(P_a\)</span> is defined as a function of <span class="math inline">\(i_a\)</span> and <span class="math inline">\(f_a\)</span>, which is the solution to a differential equation, and is written out explicitly in the DisMod II paper (<span class="citation">Barendregt et al. (2003)</span>).</p>
-<p>Further, let <span class="math inline">\(S_a\)</span> be the “state occupancy probabilities”, or the proportion of individuals in a hypothetical birth cohort (of infinite size) who are in each state at age <span class="math inline">\(a\)</span>. This is a row vector with three elements <span class="math inline">\(S_{ar}\)</span>, one for each state <span class="math inline">\(r\)</span>. Assume everyone is disease-free at age 0. The state occupancy probabilities at each subsequent age <span class="math inline">\(a+1\)</span> are then determined by mutiplying by the transition probability matrix:</p>
+<p>which are both assumed to depend on age <span class="math inline">\(a\)</span>. Remission is also possible for some
+diseases, with rate <span class="math inline">\(r(a)\)</span>. Assume
+further that the rates are constant within integer years of age <span class="math inline">\(a\)</span>, so they can be written <span class="math inline">\(i_a\)</span>, <span class="math inline">\(f_a\)</span>.</p>
+<p>From these, we can determine the <em>transition probability
+matrix</em> <span class="math inline">\(P_a\)</span>, whose <span class="math inline">\(r,s\)</span> entry <span class="math inline">\(P_{ars}\)</span> is the probability that a person
+is in state <span class="math inline">\(s\)</span> at age <span class="math inline">\(a+1\)</span> given they are in state <span class="math inline">\(r\)</span> at age <span class="math inline">\(a\)</span>. The matrix <span class="math inline">\(P_a\)</span> is defined as a function of <span class="math inline">\(i_a\)</span> and <span class="math inline">\(f_a\)</span>, which is the solution to a
+differential equation, and is written out explicitly in the DisMod II
+paper (<span class="citation">Barendregt et al. (2003)</span>).</p>
+<p>Further, let <span class="math inline">\(S_a\)</span> be the “state
+occupancy probabilities”, or the proportion of individuals in a
+hypothetical birth cohort (of infinite size) who are in each state at
+age <span class="math inline">\(a\)</span>. This is a row vector with
+three elements <span class="math inline">\(S_{ar}\)</span>, one for each
+state <span class="math inline">\(r\)</span>. Assume everyone is
+disease-free at age 0. The state occupancy probabilities at each
+subsequent age <span class="math inline">\(a+1\)</span> are then
+determined by mutiplying by the transition probability matrix:</p>
 <p><span class="math display">\[ S_{a+1} = S_a P_a \]</span></p>
-<p>The prevalence of disease (among people who are alive) at each age <span class="math inline">\(a\)</span> is then obtained as <span class="math inline">\(pr_a = S_{a2} / (S_{a1} + S_{a2})\)</span>.</p>
-<p>The disease-specific mortality rate at age <span class="math inline">\(a\)</span>, or the probability that a person alive at age <span class="math inline">\(a\)</span> dies from the disease before age <span class="math inline">\(a+1\)</span>, can also be expressed in terms of the disease prevalence at age <span class="math inline">\(a\)</span> and the transition probabilities between ages <span class="math inline">\(a\)</span> and <span class="math inline">\(a+1\)</span>, as</p>
-<p><span class="math display">\[ dm_a = P_{a23} pr_a + P_{a13} (1 - pr_a) \]</span></p>
+<p>The prevalence of disease (among people who are alive) at each age
+<span class="math inline">\(a\)</span> is then obtained as <span class="math inline">\(pr_a = S_{a2} / (S_{a1} + S_{a2})\)</span>.</p>
+<p>The disease-specific mortality rate at age <span class="math inline">\(a\)</span>, or the probability that a person alive
+at age <span class="math inline">\(a\)</span> dies from the disease
+before age <span class="math inline">\(a+1\)</span>, can also be
+expressed in terms of the disease prevalence at age <span class="math inline">\(a\)</span> and the transition probabilities
+between ages <span class="math inline">\(a\)</span> and <span class="math inline">\(a+1\)</span>, as</p>
+<p><span class="math display">\[ dm_a = P_{a23} pr_a + P_{a13} (1 -
+pr_a) \]</span></p>
 </div>
 <div class="section level2">
 <h2 id="bayesian-approach-to-estimating-the-model-from-data">Bayesian approach to estimating the model from data<a class="anchor" aria-label="anchor" href="#bayesian-approach-to-estimating-the-model-from-data"></a>
 </h2>
-<p>Data are observed which give information about some, but not all, of the parameters in the theoretical disease model. The form of the data available may be different in each application. We then wish to estimate any remaining unknown parameters. The Bayesian approach to estimating these unknowns can be described as four steps:</p>
+<p>Data are observed which give information about some, but not all, of
+the parameters in the theoretical disease model. The form of the data
+available may be different in each application. We then wish to estimate
+any remaining unknown parameters. The Bayesian approach to estimating
+these unknowns can be described as four steps:</p>
 <ol style="list-style-type: decimal">
-<li><p>write down a theoretical model for underlying disease progression (as done above)</p></li>
-<li><p>write down a statistical model for the observed data given the parameters of the underlying disease model. In this model, observed data need to be expressed as counts of individuals and associated denominators, e.g. </p></li>
+<li><p>write down a theoretical model for underlying disease progression
+(as done above)</p></li>
+<li><p>write down a statistical model for the observed data given the
+parameters of the underlying disease model. In this model, observed data
+need to be expressed as counts of individuals and associated
+denominators, e.g. </p></li>
 </ol>
 <ul>
-<li><p>(incidence): given a population of size <span class="math inline">\(n_a^{(mort)}\)</span>, <span class="math inline">\(r_a^{(inc)}\)</span> of these are observed to get the disease within the next year</p></li>
-<li><p>(mortality): given a population of size <span class="math inline">\(n_a^{(mort)}\)</span> (with or without the disease), <span class="math inline">\(r_a^{(mort)}\)</span> of these are observed to die from the disease within the next year</p></li>
-<li><p>(prevalence): from a sample of <span class="math inline">\(n_a^{(prev)}\)</span> individuals, <span class="math inline">\(r_a^{(prev)}\)</span> are known to have the disease at age <span class="math inline">\(a\)</span> (and <span class="math inline">\(n_a^{(prev)} - r_a^{(prev)}\)</span> are known to not have the disease</p></li>
-<li><p>(remission): from a sample of <span class="math inline">\(n_a^{(rem)}\)</span> individuals, <span class="math inline">\(r_a^{(rem)}\)</span> are known to recover from the disease in the following year.</p></li>
+<li><p>(incidence): given a population of size <span class="math inline">\(n_a^{(mort)}\)</span>, <span class="math inline">\(r_a^{(inc)}\)</span> of these are observed to get
+the disease within the next year</p></li>
+<li><p>(mortality): given a population of size <span class="math inline">\(n_a^{(mort)}\)</span> (with or without the
+disease), <span class="math inline">\(r_a^{(mort)}\)</span> of these are
+observed to die from the disease within the next year</p></li>
+<li><p>(prevalence): from a sample of <span class="math inline">\(n_a^{(prev)}\)</span> individuals, <span class="math inline">\(r_a^{(prev)}\)</span> are known to have the
+disease at age <span class="math inline">\(a\)</span> (and <span class="math inline">\(n_a^{(prev)} - r_a^{(prev)}\)</span> are known to
+not have the disease</p></li>
+<li><p>(remission): from a sample of <span class="math inline">\(n_a^{(rem)}\)</span> individuals, <span class="math inline">\(r_a^{(rem)}\)</span> are known to recover from the
+disease in the following year.</p></li>
 </ul>
-<p>The next section discusses how these data can be derived, given the typical forms of data available from burden of disease studies. The data are expressed as numerators and denominators, rather than simply point estimates of rates, so that formal statistical methods (likelihood and Bayesian inference) can be used. The denominator is related to the uncertainty around the estimate, e.g. lower denominators imply that the estimate was obtained from observing the disease outcome of a smaller sample of people, hence there is more uncertainty.</p>
+<p>The next section discusses how these data can be derived, given the
+typical forms of data available from burden of disease studies. The data
+are expressed as numerators and denominators, rather than simply point
+estimates of rates, so that formal statistical methods (likelihood and
+Bayesian inference) can be used. The denominator is related to the
+uncertainty around the estimate, e.g. lower denominators imply that the
+estimate was obtained from observing the disease outcome of a smaller
+sample of people, hence there is more uncertainty.</p>
 <ol start="3" style="list-style-type: decimal">
-<li><p>write down prior distributions for the unknowns. These may express prior ignorance, as in the example below.</p></li>
-<li><p>compute the (unique) posterior distribution of the unknown parameters in the joint model, given the observed data.</p></li>
+<li><p>write down prior distributions for the unknowns. These may
+express prior ignorance, as in the example below.</p></li>
+<li><p>compute the (unique) posterior distribution of the unknown
+parameters in the joint model, given the observed data.</p></li>
 </ol>
-<p>This approach is used in the DisMod-MR package, as explained by <span class="citation">Flaxman, Vos, and Murray (2015)</span>, however the software itself is not fully documented. The older (published) DisMod II (<span class="citation">Barendregt et al. (2003)</span>) used an ad-hoc optimisation approach to estimate parameters.</p>
-<p>Advantages of the Bayesian method, as implemented in <code>disbayes</code>, include</p>
+<p>This approach is used in the DisMod-MR package, as explained by <span class="citation">Flaxman, Vos, and Murray (2015)</span>, however the
+software itself is not fully documented. The older (published) DisMod II
+(<span class="citation">Barendregt et al. (2003)</span>) used an ad-hoc
+optimisation approach to estimate parameters.</p>
+<p>Advantages of the Bayesian method, as implemented in
+<code>disbayes</code>, include</p>
 <ul>
-<li><p>uncertainty about any quantity is quantified automatically through the posterior distribution, given the data, model assumptions and prior distributions supplied.</p></li>
-<li><p>the ease of including multiple sources of direct/indirect data. This is enabled by the generic computational methods and available software for Bayesian modelling, specifically the Stan package, illustrated below. This allows the approach to generalise to settings with different forms of data available. Currently implemented models include hierarchical models, models with additive area and gender effects, and models with age-specific time trends. In contrast, DisMod II only allows limited forms of data.</p></li>
+<li><p>uncertainty about any quantity is quantified automatically
+through the posterior distribution, given the data, model assumptions
+and prior distributions supplied.</p></li>
+<li><p>the ease of including multiple sources of direct/indirect data.
+This is enabled by the generic computational methods and available
+software for Bayesian modelling, specifically the Stan package,
+illustrated below. This allows the approach to generalise to settings
+with different forms of data available. Currently implemented models
+include hierarchical models, models with additive area and gender
+effects, and models with age-specific time trends. In contrast, DisMod
+II only allows limited forms of data.</p></li>
 </ul>
 </div>
 <div class="section level2">
@@ -142,13 +212,21 @@
 <div class="section level3">
 <h3 id="given-estimates-and-denominators">…Given estimates and denominators<a class="anchor" aria-label="anchor" href="#given-estimates-and-denominators"></a>
 </h3>
-<p>The following data are given in the R data frame <code>ihdengland</code> supplied in the package.</p>
+<p>The following data are given in the R data frame
+<code>ihdengland</code> supplied in the package.</p>
 <ul>
-<li><p><code>inc_num</code>,<code>inc_denom</code>: incidence of IHD by age</p></li>
-<li><p><code>mort_num</code>,<code>mort_denom</code>: estimates of IHD-specific mortality by age</p></li>
-<li><p><code>prev_num</code>,<code>prev_denom</code>: estimates of prevalence by age</p></li>
+<li><p><code>inc_num</code>,<code>inc_denom</code>: incidence of IHD by
+age</p></li>
+<li><p><code>mort_num</code>,<code>mort_denom</code>: estimates of
+IHD-specific mortality by age</p></li>
+<li><p><code>prev_num</code>,<code>prev_denom</code>: estimates of
+prevalence by age</p></li>
 </ul>
-<p>and we wish to estimate case fatality by age, given these inputs. A selection of rows from the full data frame are shown here. We select only the data from one area and gender (Bristol, male) for this illustration. Remission rates are assumed to be zero, hence remission data are not included.</p>
+<p>and we wish to estimate case fatality by age, given these inputs. A
+selection of rows from the full data frame are shown here. We select
+only the data from one area and gender (Bristol, male) for this
+illustration. Remission rates are assumed to be zero, hence remission
+data are not included.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://chjackson.github.io/disbayes/" class="external-link">disbayes</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span>,quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
@@ -163,16 +241,38 @@
 <span><span class="co">## <span style="color: #BCBCBC;">4</span>    53 Male   Bristol      30      <span style="text-decoration: underline;">7</span>245      144       <span style="text-decoration: underline;">3</span>985        5       <span style="text-decoration: underline;">7</span>498</span></span>
 <span><span class="co">## <span style="color: #BCBCBC;">5</span>    54 Male   Bristol      28      <span style="text-decoration: underline;">6</span>223      150       <span style="text-decoration: underline;">3</span>699        5       <span style="text-decoration: underline;">7</span>274</span></span>
 <span><span class="co">## <span style="color: #BCBCBC;">6</span>    55 Male   Bristol      23      <span style="text-decoration: underline;">4</span>874      158       <span style="text-decoration: underline;">3</span>574        5       <span style="text-decoration: underline;">6</span>990</span></span></code></pre>
-<p>These data were obtained from the Global Burden of Disease, 2017, and transformed in three ways to obtain the data seen here.</p>
-<p>Firstly, the published point estimates and confidence intervals for each annual risk probability were converted to an implicit numerator and denominator. This is done by assuming that</p>
+<p>These data were obtained from the Global Burden of Disease, 2017, and
+transformed in three ways to obtain the data seen here.</p>
+<p>Firstly, the published point estimates and confidence intervals for
+each annual risk probability were converted to an implicit numerator and
+denominator. This is done by assuming that</p>
 <ul>
-<li><p>the incidence has been estimated as <span class="math inline">\(r_a^{(inc)}/n_a^{(inc)}\)</span>, where out of <span class="math inline">\(n_a^{(inc)}\)</span> people who are alive at age <span class="math inline">\(a\)</span>, <span class="math inline">\(r_a^{(inc)}\)</span> of these get IHD before age <span class="math inline">\(a+1\)</span>.</p></li>
-<li><p>the mortality has been estimated as <span class="math inline">\(r_a^{(mort)}/n_a^{(mort)}\)</span>, where out of <span class="math inline">\(n_a^{(mort)}\)</span> people who are alive at age <span class="math inline">\(a\)</span>, <span class="math inline">\(r_a^{(mort)}\)</span> of these die of IHD before age <span class="math inline">\(a+1\)</span>. These ratios are estimates of the true, underlying disease-specific mortalities <span class="math inline">\(dm_a\)</span>.</p></li>
-<li><p>the prevalence has been estimated as <span class="math inline">\(r_a^{(prev)}/n_a^{(prev)}\)</span>, where out of <span class="math inline">\(n_a^{(prev)}\)</span> people who are alive at age <span class="math inline">\(a\)</span>, <span class="math inline">\(r_a^{(prev)}\)</span> of them have IHD.</p></li>
+<li><p>the incidence has been estimated as <span class="math inline">\(r_a^{(inc)}/n_a^{(inc)}\)</span>, where out of
+<span class="math inline">\(n_a^{(inc)}\)</span> people who are alive at
+age <span class="math inline">\(a\)</span>, <span class="math inline">\(r_a^{(inc)}\)</span> of these get IHD before age
+<span class="math inline">\(a+1\)</span>.</p></li>
+<li><p>the mortality has been estimated as <span class="math inline">\(r_a^{(mort)}/n_a^{(mort)}\)</span>, where out of
+<span class="math inline">\(n_a^{(mort)}\)</span> people who are alive
+at age <span class="math inline">\(a\)</span>, <span class="math inline">\(r_a^{(mort)}\)</span> of these die of IHD before
+age <span class="math inline">\(a+1\)</span>. These ratios are estimates
+of the true, underlying disease-specific mortalities <span class="math inline">\(dm_a\)</span>.</p></li>
+<li><p>the prevalence has been estimated as <span class="math inline">\(r_a^{(prev)}/n_a^{(prev)}\)</span>, where out of
+<span class="math inline">\(n_a^{(prev)}\)</span> people who are alive
+at age <span class="math inline">\(a\)</span>, <span class="math inline">\(r_a^{(prev)}\)</span> of them have IHD.</p></li>
 </ul>
-<p>The published estimates and uncertainty interval are then used to derive the implicit denominator and numerator, using the method described in the next subsection.</p>
-<p>Secondly, estimates for five-year age groups were converted to one-year groups. Most simply this could be done by assuming the counts are equal for each year of age, but a more sophisticated method was used based on “temporal disaggregation” using one of the methods implemented by Sax and Steiner in the <code>tempdisagg</code> R package (<span class="citation">Sax and Steiner (2013)</span>). This ensures that the disaggregated counts vary smoothly with age, while preserving the aggregate totals.</p>
-<p>Thirdly, counts from smaller geographical areas were simply added up to obtain the corresponding counts for the larger areas (English city regions) required in this analysis.</p>
+<p>The published estimates and uncertainty interval are then used to
+derive the implicit denominator and numerator, using the method
+described in the next subsection.</p>
+<p>Secondly, estimates for five-year age groups were converted to
+one-year groups. Most simply this could be done by assuming the counts
+are equal for each year of age, but a more sophisticated method was used
+based on “temporal disaggregation” using one of the methods implemented
+by Sax and Steiner in the <code>tempdisagg</code> R package (<span class="citation">Sax and Steiner (2013)</span>). This ensures that the
+disaggregated counts vary smoothly with age, while preserving the
+aggregate totals.</p>
+<p>Thirdly, counts from smaller geographical areas were simply added up
+to obtain the corresponding counts for the larger areas (English city
+regions) required in this analysis.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ihdbristol</span><span class="op">[</span><span class="va">ihdbristol</span><span class="op">$</span><span class="va">age</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fl">50</span><span class="op">:</span><span class="fl">55</span>, <span class="op">]</span></span></code></pre></div>
 <pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 6 × 9</span></span></span>
@@ -188,7 +288,9 @@
 <div class="section level3">
 <h3 id="smoothly-disaggregating-data-from-age-groups-to-years-of-age">Smoothly disaggregating data from age groups to years of age<a class="anchor" aria-label="anchor" href="#smoothly-disaggregating-data-from-age-groups-to-years-of-age"></a>
 </h3>
-<p>As an aside, here we show how the temporal disaggregation procedure is done in R. We have a disease count outcome that is measured for 5-year age groups, as in the following data frame.</p>
+<p>As an aside, here we show how the temporal disaggregation procedure
+is done in R. We have a disease count outcome that is measured for
+5-year age groups, as in the following data frame.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>agefrom<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">20</span>,<span class="fl">5</span><span class="op">)</span>, ageto<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">4</span>,<span class="fl">24</span>,<span class="fl">5</span><span class="op">)</span>,</span>
 <span>                  measure<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">15</span>,<span class="fl">20</span>,<span class="fl">24</span>,<span class="fl">35</span>,<span class="fl">29</span><span class="op">)</span><span class="op">)</span></span>
@@ -199,7 +301,12 @@
 <span><span class="co">## 3      10    14      24</span></span>
 <span><span class="co">## 4      15    19      35</span></span>
 <span><span class="co">## 5      20    24      29</span></span></code></pre>
-<p>The following code shows how to produce a smoothly disaggregated version of this count, and compares the smooth disaggregation to a crude disaggregation where the 5-year counts are simply divided by 5 to estimate one-year counts. We can check that the smoothly-disaggregated measures add up to the original data that were provided for the 5-year age groups.</p>
+<p>The following code shows how to produce a smoothly disaggregated
+version of this count, and compares the smooth disaggregation to a crude
+disaggregation where the 5-year counts are simply divided by 5 to
+estimate one-year counts. We can check that the smoothly-disaggregated
+measures add up to the original data that were provided for the 5-year
+age groups.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"tempdisagg"</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span> </span>
 <span>   <span class="va">disagg_crude</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">dat</span><span class="op">$</span><span class="va">measure</span><span class="op">/</span><span class="fl">5</span>, each<span class="op">=</span><span class="fl">5</span><span class="op">)</span></span>
@@ -214,86 +321,223 @@
 <p><img src="disbayes_files/figure-html/unnamed-chunk-5-1.png" width="672"></p>
 <pre><code><span><span class="co">##   [0,5)  [5,10) [10,15) [15,20) [20,25) </span></span>
 <span><span class="co">##      15      20      24      35      29</span></span></code></pre>
-<p>See the documentation for the <a href="https://CRAN.R-project.org/package=tempdisagg" class="external-link">tempdisagg</a> package, including the vignettes and the help page for the <code>td</code> function in this package, for more information about smooth temporal disaggregation. It is unclear how far the method generalises, e.g. to intervals of varying lengths.</p>
+<p>See the documentation for the <a href="https://CRAN.R-project.org/package=tempdisagg" class="external-link">tempdisagg</a>
+package, including the vignettes and the help page for the
+<code>td</code> function in this package, for more information about
+smooth temporal disaggregation. It is unclear how far the method
+generalises, e.g. to intervals of varying lengths.</p>
 </div>
 <div class="section level3">
-<h3 id="determining-numerators-and-denominators-from-point-andor-interval-estimates">Determining numerators and denominators from point and/or interval estimates<a class="anchor" aria-label="anchor" href="#determining-numerators-and-denominators-from-point-andor-interval-estimates"></a>
+<h3 id="determining-numerators-and-denominators-from-point-andor-interval-estimates">Determining numerators and denominators from point and/or interval
+estimates<a class="anchor" aria-label="anchor" href="#determining-numerators-and-denominators-from-point-andor-interval-estimates"></a>
 </h3>
-<p>Sometimes a point estimate <span class="math inline">\(\hat{p}\)</span> for a quantity such as incidence is published alongside an (e.g. 95%) interval estimate <span class="math inline">\((\hat{p}^{(lower)},\hat{p}^{(upper)})\)</span>. The interval estimate can be assumed to express the uncertainty associated with the estimate. Such information can be converted to an implicit numerator <span class="math inline">\(r\)</span> and denominator <span class="math inline">\(n\)</span> as follows. We assume the point and interval estimate are summaries of a Beta posterior distribution which has been obtained by combining a vague prior with an observation of <span class="math inline">\(r\)</span> events occurring out of a sample of <span class="math inline">\(n\)</span> individuals. If a Beta(0,0) prior is used, then the posterior is known to be Beta(r, n-r). We can then search for the best-fitting Beta(r,n-r)$ distribution which has median <span class="math inline">\(\hat{p}\)</span> and (2.5,97.5) quantiles <span class="math inline">\((\hat{p}^{(lower)},\hat{p}^{(upper)})\)</span>, and set <span class="math inline">\(r=a, n=a+b\)</span>. A utility to perform this search is provided in the <a href="https://CRAN.R-project.org/package=SHELF" class="external-link">SHELF</a> package for expert elicitation (<span class="citation">O’Hagan et al. (2006)</span>).</p>
-<p>In other applications, the denominators might be directly available, e.g. we might know that the prevalence was estimated from a survey of <span class="math inline">\(r_a^{(prev)}\)</span> people, or we might assume that the incidence and mortality were obtained from a comprehensive registry of the population, in which case the denominator would equal the population size (within the specific stratum, e.g. as defined by age and gender, that the estimate refers to).</p>
-<p>The uncertainty inherent in the information supplied about each of incidence, prevalence and mortality is measured by the denominator. In the example above, this is equated to the size of the population used to produce the estimate. However, if we also suspected that one of the data sources may be biased, but were unsure about the direction of bias, we could downweight that data source by multiplying both the numerator and denominator by the same amount, e.g. 0.5 if we wanted to give a data source half its original weight. Note that if counts are scaled in this way, they should then be rounded to the nearest integer.</p>
+<p>Sometimes a point estimate <span class="math inline">\(\hat{p}\)</span> for a quantity such as incidence
+is published alongside an (e.g. 95%) interval estimate <span class="math inline">\((\hat{p}^{(lower)},\hat{p}^{(upper)})\)</span>.
+The interval estimate can be assumed to express the uncertainty
+associated with the estimate. Such information can be converted to an
+implicit numerator <span class="math inline">\(r\)</span> and
+denominator <span class="math inline">\(n\)</span> as follows. We assume
+the point and interval estimate are summaries of a Beta posterior
+distribution which has been obtained by combining a vague prior with an
+observation of <span class="math inline">\(r\)</span> events occurring
+out of a sample of <span class="math inline">\(n\)</span> individuals.
+If a Beta(0,0) prior is used, then the posterior is known to be Beta(r,
+n-r). We can then search for the best-fitting Beta(r,n-r)$ distribution
+which has median <span class="math inline">\(\hat{p}\)</span> and
+(2.5,97.5) quantiles <span class="math inline">\((\hat{p}^{(lower)},\hat{p}^{(upper)})\)</span>,
+and set <span class="math inline">\(r=a, n=a+b\)</span>. A utility to
+perform this search is provided in the <a href="https://CRAN.R-project.org/package=SHELF" class="external-link">SHELF</a> package for
+expert elicitation (<span class="citation">O’Hagan et al.
+(2006)</span>).</p>
+<p>In other applications, the denominators might be directly available,
+e.g. we might know that the prevalence was estimated from a survey of
+<span class="math inline">\(r_a^{(prev)}\)</span> people, or we might
+assume that the incidence and mortality were obtained from a
+comprehensive registry of the population, in which case the denominator
+would equal the population size (within the specific stratum, e.g. as
+defined by age and gender, that the estimate refers to).</p>
+<p>The uncertainty inherent in the information supplied about each of
+incidence, prevalence and mortality is measured by the denominator. In
+the example above, this is equated to the size of the population used to
+produce the estimate. However, if we also suspected that one of the data
+sources may be biased, but were unsure about the direction of bias, we
+could downweight that data source by multiplying both the numerator and
+denominator by the same amount, e.g. 0.5 if we wanted to give a data
+source half its original weight. Note that if counts are scaled in this
+way, they should then be rounded to the nearest integer.</p>
 </div>
 <div class="section level3">
 <h3 id="bayesian-modelling-process">Bayesian modelling process<a class="anchor" aria-label="anchor" href="#bayesian-modelling-process"></a>
 </h3>
-<p>The four steps of the Bayesian modelling process are then implemented as follows:</p>
+<p>The four steps of the Bayesian modelling process are then implemented
+as follows:</p>
 <ol style="list-style-type: decimal">
 <li><p>write down the theoretical disease model, as given above</p></li>
 <li>
-<p>write down the statistical model for the data. All count data are assumed to arise from a Binomial distribution with the corresponding denominator, and a probability parameter which is a function of the parameters in the theoretical disease model.</p>
+<p>write down the statistical model for the data. All count data are
+assumed to arise from a Binomial distribution with the corresponding
+denominator, and a probability parameter which is a function of the
+parameters in the theoretical disease model.</p>
 <ul>
-<li><p>(incidence) <span class="math inline">\(r_a^{(inc)} \sim ~ Binomial(n_a, 1 - P_{a11})\)</span>, where <span class="math inline">\(P_{a11}\)</span> is the annual probability of remaining free of the disease.</p></li>
-<li><p>(mortality) <span class="math inline">\(r_a^{(mort)} \sim ~ Binomial(n_a, dm_a)\)</span>, where the disease-specific mortality <span class="math inline">\(dm_a\)</span> is a deterministic function of the incidences and case fatalities <span class="math inline">\(\{i_j,f_j\}\)</span> for ages <span class="math inline">\(j\)</span> up to <span class="math inline">\(a\)</span>, as described in the theoretical disease model.</p></li>
-<li><p>(prevalence) <span class="math inline">\(r_a^{(prev)} \sim ~ Binomial(n_a^{(prev)}, pr_a)\)</span>, where <span class="math inline">\(pr_a\)</span> is the true prevalence, defined as a deterministic function of the incidences and case fatalities.</p></li>
-<li><p>(remission, if assumed possible) <span class="math inline">\(r_a^{(rem)} \sim ~ Binomial(n_a^{(rem)}, P_{a21})\)</span>, where <span class="math inline">\(P_{a21}\)</span> is the probability that someone with the disease will have recovered from the disease one year from now, defined as a deterministic function of the remission rates, case fatalities and incidences.</p></li>
+<li><p>(incidence) <span class="math inline">\(r_a^{(inc)} \sim ~
+Binomial(n_a, 1 - P_{a11})\)</span>, where <span class="math inline">\(P_{a11}\)</span> is the annual probability of
+remaining free of the disease.</p></li>
+<li><p>(mortality) <span class="math inline">\(r_a^{(mort)} \sim ~
+Binomial(n_a, dm_a)\)</span>, where the disease-specific mortality <span class="math inline">\(dm_a\)</span> is a deterministic function of the
+incidences and case fatalities <span class="math inline">\(\{i_j,f_j\}\)</span> for ages <span class="math inline">\(j\)</span> up to <span class="math inline">\(a\)</span>, as described in the theoretical
+disease model.</p></li>
+<li><p>(prevalence) <span class="math inline">\(r_a^{(prev)} \sim ~
+Binomial(n_a^{(prev)}, pr_a)\)</span>, where <span class="math inline">\(pr_a\)</span> is the true prevalence, defined as a
+deterministic function of the incidences and case fatalities.</p></li>
+<li><p>(remission, if assumed possible) <span class="math inline">\(r_a^{(rem)} \sim ~ Binomial(n_a^{(rem)},
+P_{a21})\)</span>, where <span class="math inline">\(P_{a21}\)</span> is
+the probability that someone with the disease will have recovered from
+the disease one year from now, defined as a deterministic function of
+the remission rates, case fatalities and incidences.</p></li>
 </ul>
 </li>
-<li><p>define prior distributions for the unknown parameters, as explained in the next section.</p></li>
-<li><p>compute the posterior distribution <span class="math inline">\(p(\theta | \mathbf{y})\)</span> for parameters <span class="math inline">\(\theta = \{i_a,f_a\}\)</span> given data <span class="math inline">\(\mathbf{y} = \{i_a, r_a, n_a\}\)</span></p></li>
+<li><p>define prior distributions for the unknown parameters, as
+explained in the next section.</p></li>
+<li><p>compute the posterior distribution <span class="math inline">\(p(\theta | \mathbf{y})\)</span> for parameters
+<span class="math inline">\(\theta = \{i_a,f_a\}\)</span> given data
+<span class="math inline">\(\mathbf{y} = \{i_a, r_a,
+n_a\}\)</span></p></li>
 </ol>
 </div>
 <div class="section level3">
 <h3 id="alternative-models-prior-assumptions">Alternative models / prior assumptions<a class="anchor" aria-label="anchor" href="#alternative-models-prior-assumptions"></a>
 </h3>
-<p>In example such as this one, where latent quantities are estimated from indirect data, it is important to consider what substantive prior information is available about the unknown quantities, and what influence the assumed prior has on the resulting estimates.</p>
-<p>In these examples, the case fatality is only informed indirectly. The <code>disbayes</code> package implements alternative models for how case fatality depends on age. The same methods can be used for how incidence depends on age.</p>
+<p>In example such as this one, where latent quantities are estimated
+from indirect data, it is important to consider what substantive prior
+information is available about the unknown quantities, and what
+influence the assumed prior has on the resulting estimates.</p>
+<p>In these examples, the case fatality is only informed indirectly. The
+<code>disbayes</code> package implements alternative models for how case
+fatality depends on age. The same methods can be used for how incidence
+depends on age.</p>
 <ol style="list-style-type: decimal">
-<li><p>the case fatality rate <span class="math inline">\(f_a\)</span> for each year of age <span class="math inline">\(a\)</span> is assumed to have an independent vague prior distribution.</p></li>
-<li><p>the case fatality rate is assumed to be a smooth function <span class="math inline">\(g()\)</span> of age, <span class="math inline">\(f_a = g(a)\)</span>. This smooth function is defined by a spline basis <span class="math inline">\(log(f_a) = \sum_k \beta_k g_k(a)\)</span>, where <span class="math inline">\(g_k()\)</span> are basis functions. A “thin plate” spline is used, following the default in the <code>mgcv</code> R package (Wood), and the amount of smoothness is determined automatically through a hierarchical prior on the coefficients.</p></li>
-<li><p>the case fatality rate is a smoothly increasing function of age.</p></li>
+<li><p>the case fatality rate <span class="math inline">\(f_a\)</span>
+for each year of age <span class="math inline">\(a\)</span> is assumed
+to have an independent vague prior distribution.</p></li>
+<li><p>the case fatality rate is assumed to be a smooth function <span class="math inline">\(g()\)</span> of age, <span class="math inline">\(f_a = g(a)\)</span>. This smooth function is
+defined by a spline basis <span class="math inline">\(log(f_a) = \sum_k
+\beta_k g_k(a)\)</span>, where <span class="math inline">\(g_k()\)</span> are basis functions. A “thin plate”
+spline is used, following the default in the <code>mgcv</code> R package
+(Wood), and the amount of smoothness is determined automatically through
+a hierarchical prior on the coefficients.</p></li>
+<li><p>the case fatality rate is a smoothly increasing function of
+age.</p></li>
 <li><p>the case fatality rate is constant with age.</p></li>
 </ol>
-<p>In addition, for all ages below a given cut-off age <span class="math inline">\(a_{base}\)</span>, case fatalities are assumed to be equal to a constant <span class="math inline">\(f_{base}\)</span>. This cut-off age <span class="math inline">\(a_{base}\)</span> needs to be supplied when calling the <code>disbayes</code> function. <span class="math inline">\(f_{base}\)</span> does not need to be supplied however, and is estimated from the data under the assumption that the dependence on age is a smooth function.</p>
-<p>Model (2) is more realistic. However it may not give sensible estimates if the information provided by the data is too weak. The results of fitting Model (1) can help to diagnose where the indirect information on case fatality provided by the rest of the data is weaker or stronger. If the information on <span class="math inline">\(f_a\)</span> for a particular age is too weak, then the posterior distribution will be identical to the prior. In those cases, substantive prior information about case fatality at that age is necessary for the estimates to be meaningful.</p>
-<p>This information might come from nearby ages that are better-informed, through extrapolation from the smoothing model. However extrapolating in this way is only feasible for a limited time span (perhaps around 10-20 years) before stronger assumptions are necessary, e.g. that case fatality is constant below a certain age.</p>
-<p>The increasing model (3) may be required in cases where the data alone are not sufficient to identify an increasing shape with age. A constant model (4) may be necessary if the data on age variations are very weak, or simply if this model is thought to be plausible.</p>
-<p>Alternative models of how the rates depend on age are also supported for incidence and remission rates.</p>
+<p>In addition, for all ages below a given cut-off age <span class="math inline">\(a_{base}\)</span>, case fatalities are assumed to
+be equal to a constant <span class="math inline">\(f_{base}\)</span>.
+This cut-off age <span class="math inline">\(a_{base}\)</span> needs to
+be supplied when calling the <code>disbayes</code> function. <span class="math inline">\(f_{base}\)</span> does not need to be supplied
+however, and is estimated from the data under the assumption that the
+dependence on age is a smooth function.</p>
+<p>Model (2) is more realistic. However it may not give sensible
+estimates if the information provided by the data is too weak. The
+results of fitting Model (1) can help to diagnose where the indirect
+information on case fatality provided by the rest of the data is weaker
+or stronger. If the information on <span class="math inline">\(f_a\)</span> for a particular age is too weak,
+then the posterior distribution will be identical to the prior. In those
+cases, substantive prior information about case fatality at that age is
+necessary for the estimates to be meaningful.</p>
+<p>This information might come from nearby ages that are
+better-informed, through extrapolation from the smoothing model. However
+extrapolating in this way is only feasible for a limited time span
+(perhaps around 10-20 years) before stronger assumptions are necessary,
+e.g. that case fatality is constant below a certain age.</p>
+<p>The increasing model (3) may be required in cases where the data
+alone are not sufficient to identify an increasing shape with age. A
+constant model (4) may be necessary if the data on age variations are
+very weak, or simply if this model is thought to be plausible.</p>
+<p>Alternative models of how the rates depend on age are also supported
+for incidence and remission rates.</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="fitting-bayesian-models-with-the-stan-software-via-disbayes">Fitting Bayesian models with the Stan software via disbayes<a class="anchor" aria-label="anchor" href="#fitting-bayesian-models-with-the-stan-software-via-disbayes"></a>
 </h2>
-<p>The <code>disbayes</code> software works by calling the Stan software (<a href="https://mc-stan.org" class="external-link">mc-stan.org</a>) that allows any Bayesian model to be written down in the Stan language, and enables the unknown parameters to be estimated through two alternative methods:</p>
+<p>The <code>disbayes</code> software works by calling the Stan software
+(<a href="https://mc-stan.org" class="external-link">mc-stan.org</a>) that allows any Bayesian
+model to be written down in the Stan language, and enables the unknown
+parameters to be estimated through two alternative methods:</p>
 <ol style="list-style-type: decimal">
-<li><p><code>method="opt"</code> (the default). Optimisation is used to find the mode of the posterior distribution, which gives a point estimate for the parameters. An approximate sample from the posterior is then drawn using a normal approximation around the posterior mode. This sample is summarised to give credible intervals.</p></li>
-<li><p><code>method="mcmc"</code>. A sample from the posterior is drawn using Markov Chain Monte Carlo sampling, which is summarised to give a point estimate (median) and credible intervals. This is slower (typically taking a few minutes) but gives a more accurate characterisation of uncertainty.</p></li>
+<li><p><code>method="opt"</code> (the default). Optimisation is used to
+find the mode of the posterior distribution, which gives a point
+estimate for the parameters. An approximate sample from the posterior is
+then drawn using a normal approximation around the posterior mode. This
+sample is summarised to give credible intervals.</p></li>
+<li><p><code>method="mcmc"</code>. A sample from the posterior is drawn
+using Markov Chain Monte Carlo sampling, which is summarised to give a
+point estimate (median) and credible intervals. This is slower
+(typically taking a few minutes) but gives a more accurate
+characterisation of uncertainty.</p></li>
 </ol>
-<p>The <code>disbayes</code> package uses Stan to fit the Bayesian disease model given here to the data <span class="math inline">\(\mathbf{y} = \{i_a, r_a, n_a\}\)</span> supplied in the <code>ihdbristol</code> data frame. The R function <code>disbayes</code> does the work of converting the data to the required format for Stan, and calling the Stan software to run the simulations.</p>
-<p>An overview of using the <code>disbayes</code> function is given here, but see the <a href="https://chjackson.github.io/disbayes/reference/disbayes.html" class="external-link">help page</a> for <code>disbayes</code> for full information about the options of the function.</p>
-<p>The <code>disbayes</code> function requires at least the following arguments</p>
+<p>The <code>disbayes</code> package uses Stan to fit the Bayesian
+disease model given here to the data <span class="math inline">\(\mathbf{y} = \{i_a, r_a, n_a\}\)</span> supplied
+in the <code>ihdbristol</code> data frame. The R function
+<code>disbayes</code> does the work of converting the data to the
+required format for Stan, and calling the Stan software to run the
+simulations.</p>
+<p>An overview of using the <code>disbayes</code> function is given
+here, but see the <a href="https://chjackson.github.io/disbayes/reference/disbayes.html" class="external-link">help
+page</a> for <code>disbayes</code> for full information about the
+options of the function.</p>
+<p>The <code>disbayes</code> function requires at least the following
+arguments</p>
 <ul>
-<li><p><code>data</code>: a data frame where all the variables are stored</p></li>
-<li><p>additional arguments indicating which columns of the data contain which variables.</p></li>
+<li><p><code>data</code>: a data frame where all the variables are
+stored</p></li>
+<li><p>additional arguments indicating which columns of the data contain
+which variables.</p></li>
 </ul>
-<p>The required variables include at least information about incidence and mortality, optionally information about prevalence, and some indication of uncertainty around this information. This information can be supplied in three alternative ways. For example (using incidence as an example):</p>
+<p>The required variables include at least information about incidence
+and mortality, optionally information about prevalence, and some
+indication of uncertainty around this information. This information can
+be supplied in three alternative ways. For example (using incidence as
+an example):</p>
 <ol style="list-style-type: decimal">
-<li><p><em>numerator and denominator</em>, through arguments <code>inc_num</code> and <code>inc_denom</code>. This is what is done in the example here.</p></li>
-<li><p><em>risk probability estimate with denominator</em>: through arguments <code>inc_prob</code> and <code>inc_denom</code>. The numerator is computed automatically, by multiplying the denominator by the risk estimate. Note these refer to annual probabilities of having an event, not rates.</p></li>
-<li><p><em>risk probability estimate with lower and upper 95% credible limits</em>, through arguments <code>inc_prob</code>, <code>inc_lower</code> and <code>inc_upper</code>. The numerator and denominator are computed automatically, as described above.</p></li>
+<li><p><em>numerator and denominator</em>, through arguments
+<code>inc_num</code> and <code>inc_denom</code>. This is what is done in
+the example here.</p></li>
+<li><p><em>risk probability estimate with denominator</em>: through
+arguments <code>inc_prob</code> and <code>inc_denom</code>. The
+numerator is computed automatically, by multiplying the denominator by
+the risk estimate. Note these refer to annual probabilities of having an
+event, not rates.</p></li>
+<li><p><em>risk probability estimate with lower and upper 95% credible
+limits</em>, through arguments <code>inc_prob</code>,
+<code>inc_lower</code> and <code>inc_upper</code>. The numerator and
+denominator are computed automatically, as described above.</p></li>
 </ol>
-<p>The value given for the argument is a character string identifying the corresponding variable in the data. For mortality, prevalence and remission, arguments with names beginning <code>mort</code>, <code>prev</code> and <code>rem</code> are supplied in the same manner.</p>
-<p>If remission data are omitted, it is assumed that there is no remission from the disease. If remission data are included, it is assumed that remission is possible and remission rates are estimated from the data.</p>
+<p>The value given for the argument is a character string identifying
+the corresponding variable in the data. For mortality, prevalence and
+remission, arguments with names beginning <code>mort</code>,
+<code>prev</code> and <code>rem</code> are supplied in the same
+manner.</p>
+<p>If remission data are omitted, it is assumed that there is no
+remission from the disease. If remission data are included, it is
+assumed that remission is possible and remission rates are estimated
+from the data.</p>
 <div class="section level3">
 <h3 id="running-disbayes-optimisation-method">Running <code>disbayes</code>: optimisation method<a class="anchor" aria-label="anchor" href="#running-disbayes-optimisation-method"></a>
 </h3>
-<p>The following call to the <code>disbayes</code> function is then made to fit the model to the <code>ihdbristol</code> data. The argument <code>eqage=40</code> defines an assumption that case fatality is constant for all ages below 40.</p>
+<p>The following call to the <code>disbayes</code> function is then made
+to fit the model to the <code>ihdbristol</code> data. The argument
+<code>eqage=40</code> defines an assumption that case fatality is
+constant for all ages below 40.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dbres</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/disbayes.html">disbayes</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">ihdbristol</span>, age <span class="op">=</span> <span class="st">"age"</span>,</span>
 <span>                 inc_num <span class="op">=</span> <span class="st">"inc_num"</span>, inc_denom <span class="op">=</span> <span class="st">"inc_denom"</span>, </span>
 <span>                 prev_num <span class="op">=</span> <span class="st">"prev_num"</span>, prev_denom <span class="op">=</span> <span class="st">"prev_denom"</span>,</span>
 <span>                 mort_num <span class="op">=</span> <span class="st">"mort_num"</span>, mort_denom <span class="op">=</span> <span class="st">"mort_denom"</span>,</span>
 <span>                 eqage <span class="op">=</span> <span class="fl">40</span><span class="op">)</span></span></code></pre></div>
-<p>For comparison, we also fit an “unsmoothed” version of this model where the age-specific case fatality rates have independent priors, rather than being related through a spline function. This is specified with <code>cf_model="indep"</code>.</p>
+<p>For comparison, we also fit an “unsmoothed” version of this model
+where the age-specific case fatality rates have independent priors,
+rather than being related through a spline function. This is specified
+with <code>cf_model="indep"</code>.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dbresu</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/disbayes.html">disbayes</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">ihdbristol</span>, age <span class="op">=</span> <span class="st">"age"</span>,</span>
 <span>                 inc_num <span class="op">=</span> <span class="st">"inc_num"</span>, inc_denom <span class="op">=</span> <span class="st">"inc_denom"</span>, </span>
@@ -301,13 +545,23 @@
 <span>                 mort_num <span class="op">=</span> <span class="st">"mort_num"</span>, mort_denom <span class="op">=</span> <span class="st">"mort_denom"</span>,</span>
 <span>                 cf_model <span class="op">=</span> <span class="st">"indep"</span>, </span>
 <span>                 eqage <span class="op">=</span> <span class="fl">40</span><span class="op">)</span></span></code></pre></div>
-<p>The optimisation method produces accurate point estimates (defined by the posterior mode), and approximate credible intervals.</p>
-<p>Occasionally the optimisation may produce an error message that mentions <code>chol(H)</code>, but still produce a point estimate. This indicates that the level of uncertainty cannot be determined, and casts doubt on the validity of the point estimate. In these cases it may work if the model is simplified, e.g. by fixing the level of smoothness for the age-dependence of the rates by using the <a href="https://chjackson.github.io/disbayes/reference/disbayes.html" class="external-link"><code>hp_fixed</code></a> option to <code>disbayes</code></p>
+<p>The optimisation method produces accurate point estimates (defined by
+the posterior mode), and approximate credible intervals.</p>
+<p>Occasionally the optimisation may produce an error message that
+mentions <code>chol(H)</code>, but still produce a point estimate. This
+indicates that the level of uncertainty cannot be determined, and casts
+doubt on the validity of the point estimate. In these cases it may work
+if the model is simplified, e.g. by fixing the level of smoothness for
+the age-dependence of the rates by using the <a href="https://chjackson.github.io/disbayes/reference/disbayes.html" class="external-link"><code>hp_fixed</code></a>
+option to <code>disbayes</code></p>
 </div>
 <div class="section level3">
 <h3 id="running-disbayes-mcmc-method">Running <code>disbayes</code>: MCMC method<a class="anchor" aria-label="anchor" href="#running-disbayes-mcmc-method"></a>
 </h3>
-<p>If more accurate credible intervals are desired, then MCMC sampling can be used instead by setting <code>method="mcmc"</code>, as follows. This is more computationally intensive, typically taking a few minutes per fit for the standard <code>disbayes</code> model.</p>
+<p>If more accurate credible intervals are desired, then MCMC sampling
+can be used instead by setting <code>method="mcmc"</code>, as follows.
+This is more computationally intensive, typically taking a few minutes
+per fit for the standard <code>disbayes</code> model.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>mc.cores <span class="op">=</span> <span class="fu">parallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/parallel/detectCores.html" class="external-link">detectCores</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">dbresm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/disbayes.html">disbayes</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">ihdbristol</span>, age <span class="op">=</span> <span class="st">"age"</span>,</span>
@@ -316,8 +570,21 @@
 <span>                 mort_num <span class="op">=</span> <span class="st">"mort_num"</span>, mort_denom <span class="op">=</span> <span class="st">"mort_denom"</span>,</span>
 <span>                 method<span class="op">=</span><span class="st">"mcmc"</span>, chains<span class="op">=</span><span class="fl">2</span>, iter<span class="op">=</span><span class="fl">1000</span>,</span>
 <span>                 eqage <span class="op">=</span> <span class="fl">40</span><span class="op">)</span></span></code></pre></div>
-<p>The sampling by <code>rstan</code> can be controlled, e.g. by setting the number of chains to run (perhaps on parallel cores) and the number of iterations - see <a href="https://chjackson.github.io/disbayes/reference/disbayes.html" class="external-link"><code>help(disbayes)</code></a> and the Stan documentation for full details. The number of iterations <code>iter</code> should be high enough that the results are not affected by Monte Carlo error.</p>
-<p>After using MCMC, we should check that the sampler has converged, by examining the “trace plot” of the simulation progress for selected parameters. The simulated chains should mix together and look like white noise. Also if the <code>disbayes</code> call resulted in many reports of “divergent transitions”, then the chains are unlikely to have converged to a valid posterior. If convergence hasn’t occurred, then the model probably needs to be simplified (e.g. by increasing <code>eqage</code>, or fixing the degree of smoothness using <a href="https://chjackson.github.io/disbayes/reference/disbayes.html" class="external-link"><code>hp_fixed</code></a>), or the data are insufficient.</p>
+<p>The sampling by <code>rstan</code> can be controlled, e.g. by setting
+the number of chains to run (perhaps on parallel cores) and the number
+of iterations - see <a href="https://chjackson.github.io/disbayes/reference/disbayes.html" class="external-link"><code>help(disbayes)</code></a>
+and the Stan documentation for full details. The number of iterations
+<code>iter</code> should be high enough that the results are not
+affected by Monte Carlo error.</p>
+<p>After using MCMC, we should check that the sampler has converged, by
+examining the “trace plot” of the simulation progress for selected
+parameters. The simulated chains should mix together and look like white
+noise. Also if the <code>disbayes</code> call resulted in many reports
+of “divergent transitions”, then the chains are unlikely to have
+converged to a valid posterior. If convergence hasn’t occurred, then the
+model probably needs to be simplified (e.g. by increasing
+<code>eqage</code>, or fixing the degree of smoothness using <a href="https://chjackson.github.io/disbayes/reference/disbayes.html" class="external-link"><code>hp_fixed</code></a>),
+or the data are insufficient.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">rstan</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/rstan/reference/stanfit-method-traceplot.html" class="external-link">traceplot</a></span><span class="op">(</span><span class="va">dbres</span><span class="op">$</span><span class="va">fit</span>, pars<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"cf["</span>, <span class="fl">60</span><span class="op">:</span><span class="fl">65</span>, <span class="st">"]"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -325,29 +592,58 @@
 <div class="section level2">
 <h2 id="ihd-example-results">IHD example: Results<a class="anchor" aria-label="anchor" href="#ihd-example-results"></a>
 </h2>
-<p>The <code>disbayes</code> function returns a list, with components that depend on what estimation method was used. For <code>method="opt"</code> this list has a component <code>fit</code> containing the estimates and draws from the posterior approximation, as returned by the function <code>optimizing</code> in the <code>rstan</code> package. For <code>method="mcmc"</code>, this list has a component <code>fit</code> which is an object in the <code>stanfit</code> format defined by the <code>rstan</code> R interface to Stan. See <code><a href="../reference/disbayes.html">help(disbayes)</a></code> for further details of the returned object. Usually you will not need to deal with this list.</p>
-<p>Instead, the parameter estimates can be easily extracted from a disbayes object using the <code>tidy</code> method. This works whatever optimisation method is used. The point estimates (modes or posterior medians) 95% credible intervals and other quantiles for all parameters of interest are arranged in a data frame, with the variables indicated in the variable called <code>var</code>. Variables include <code>inc</code> (incidence), <code>cf</code> (case fatality), <code>mort</code> (mortality), <code>prev</code> (prevalence), each indexed by year of age given in the <code>age</code> variable.</p>
+<p>The <code>disbayes</code> function returns a list, with components
+that depend on what estimation method was used. For
+<code>method="opt"</code> this list has a component <code>fit</code>
+containing the estimates and draws from the posterior approximation, as
+returned by the function <code>optimizing</code> in the
+<code>rstan</code> package. For <code>method="mcmc"</code>, this list
+has a component <code>fit</code> which is an object in the
+<code>stanfit</code> format defined by the <code>rstan</code> R
+interface to Stan. See <code><a href="../reference/disbayes.html">help(disbayes)</a></code> for further details
+of the returned object. Usually you will not need to deal with this
+list.</p>
+<p>Instead, the parameter estimates can be easily extracted from a
+disbayes object using the <code>tidy</code> method. This works whatever
+optimisation method is used. The point estimates (modes or posterior
+medians) 95% credible intervals and other quantiles for all parameters
+of interest are arranged in a data frame, with the variables indicated
+in the variable called <code>var</code>. Variables include
+<code>inc</code> (incidence), <code>cf</code> (case fatality),
+<code>mort</code> (mortality), <code>prev</code> (prevalence), each
+indexed by year of age given in the <code>age</code> variable.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">summ</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">dbres</span><span class="op">)</span> </span></code></pre></div>
-<p>To extract results for a specific variable and model, it is convenient to use standard <a href="https://www.tidyverse.org/" class="external-link">tidyverse</a> functions, e.g. to get the median and interquartile range of case fatality for people aged between 60 and 65:</p>
+<p>To extract results for a specific variable and model, it is
+convenient to use standard <a href="https://www.tidyverse.org/" class="external-link">tidyverse</a> functions, e.g. to get
+the median and interquartile range of case fatality for people aged
+between 60 and 65:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span>,quietly<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">summ</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">var</span><span class="op">==</span><span class="st">"cf"</span>, <span class="fu"><a href="https://dplyr.tidyverse.org/reference/between.html" class="external-link">between</a></span><span class="op">(</span><span class="va">age</span>,<span class="fl">60</span>,<span class="fl">65</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">age</span>, <span class="va">`25%`</span>, <span class="va">`50%`</span>, <span class="va">`75%`</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##   age        25%        50%        75%</span></span>
-<span><span class="co">## 1  60 0.01639810 0.01756159 0.01877349</span></span>
-<span><span class="co">## 2  61 0.01655640 0.01772050 0.01884273</span></span>
-<span><span class="co">## 3  62 0.01658678 0.01782520 0.01894921</span></span>
-<span><span class="co">## 4  63 0.01673057 0.01794266 0.01907736</span></span>
-<span><span class="co">## 5  64 0.01684881 0.01807729 0.01922506</span></span>
-<span><span class="co">## 6  65 0.01710085 0.01823517 0.01944627</span></span></code></pre>
-<p>The default <code>plot</code> method for objects returned by <code>disbayes</code> plots the posterior summaries for case fatality, allowing a quick check of the model results. Or do <code>plot(..., variable="inc")</code> for incidence. The function returns a <code>ggplot2</code> object that can be modified with <code>ggplot2</code> functions, e.g. to add axis labels.</p>
+<span><span class="co">## 1  60 0.01622946 0.01730631 0.01848901</span></span>
+<span><span class="co">## 2  61 0.01648507 0.01745538 0.01861784</span></span>
+<span><span class="co">## 3  62 0.01664397 0.01767079 0.01875166</span></span>
+<span><span class="co">## 4  63 0.01678879 0.01783074 0.01890753</span></span>
+<span><span class="co">## 5  64 0.01696252 0.01800827 0.01916004</span></span>
+<span><span class="co">## 6  65 0.01715049 0.01823107 0.01942373</span></span></code></pre>
+<p>The default <code>plot</code> method for objects returned by
+<code>disbayes</code> plots the posterior summaries for case fatality,
+allowing a quick check of the model results. Or do
+<code>plot(..., variable="inc")</code> for incidence. The function
+returns a <code>ggplot2</code> object that can be modified with
+<code>ggplot2</code> functions, e.g. to add axis labels.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dbres</span><span class="op">)</span> <span class="op">+</span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ylab</a></span><span class="op">(</span><span class="st">"Case fatality"</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">xlab</a></span><span class="op">(</span><span class="st">"Age"</span><span class="op">)</span> </span></code></pre></div>
 <p><img src="disbayes_files/figure-html/unnamed-chunk-12-1.png" width="672"></p>
-<p>More flexible plots can be built by using <code>ggplot</code> directly on the tidied estimates. The following shows the estimates of case fatality from the unsmoothed model in blue, with the estimates from the smoothed model superimposed in black.</p>
+<p>More flexible plots can be built by using <code>ggplot</code>
+directly on the tidied estimates. The following shows the estimates of
+case fatality from the unsmoothed model in blue, with the estimates from
+the smoothed model superimposed in black.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">summs</span> <span class="op">&lt;-</span> <span class="va">summ</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">var</span><span class="op">==</span><span class="st">"cf"</span><span class="op">)</span></span>
 <span><span class="va">summu</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">dbresu</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">var</span><span class="op">==</span><span class="st">"cf"</span><span class="op">)</span></span>
@@ -357,56 +653,121 @@
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_linerange.html" class="external-link">geom_pointrange</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y<span class="op">=</span><span class="va">`50%`</span>, ymin<span class="op">=</span><span class="va">`2.5%`</span>, ymax<span class="op">=</span><span class="va">`97.5%`</span><span class="op">)</span>,</span>
 <span>                  data<span class="op">=</span><span class="va">summ</span>, col<span class="op">=</span><span class="st">"black"</span>, alpha<span class="op">=</span><span class="fl">0.5</span><span class="op">)</span></span></code></pre></div>
 <p><img src="disbayes_files/figure-html/unnamed-chunk-13-1.png" width="672"></p>
-<p>Under the unsmoothed model, there is no information about case fatality in the youngest ages, hence the estimates are being drawn from the vague prior distribution that take values between about 0 and 60. The smoothed model gives more useful estimates, aided by the assumption that case fatalities are similar between similar ages, and that case fatality is constant under the age of 40, though the wide y-axis limits in this particular plot obscure the estimates of between-age variability from the smoothed model.</p>
+<p>Under the unsmoothed model, there is no information about case
+fatality in the youngest ages, hence the estimates are being drawn from
+the vague prior distribution that take values between about 0 and 60.
+The smoothed model gives more useful estimates, aided by the assumption
+that case fatalities are similar between similar ages, and that case
+fatality is constant under the age of 40, though the wide y-axis limits
+in this particular plot obscure the estimates of between-age variability
+from the smoothed model.</p>
 <div class="section level3">
 <h3 id="other-options-to-disbayes">Other options to <code>disbayes</code><a class="anchor" aria-label="anchor" href="#other-options-to-disbayes"></a>
 </h3>
-<p>Full documentation is given in <a href="https://chjackson.github.io/disbayes/reference/disbayes.html" class="external-link"><code>help(disbayes)</code></a>. Some more useful options include</p>
+<p>Full documentation is given in <a href="https://chjackson.github.io/disbayes/reference/disbayes.html" class="external-link"><code>help(disbayes)</code></a>.
+Some more useful options include</p>
 <ul>
-<li><p><code>cf_model</code>. Model for how case fatality varies with age. As well as the default spline smooth model and unsmoothed models illustrated above, <code>cf_model="increasing"</code> fits a model where case fatality is restricted to increase with age, and <code>cf_model="const"</code> specifies a constant case fatality with age.</p></li>
-<li><p><code>inc_model</code>. By default, incidence rates are smoothed as a function of age using a spline, as with case fatality rates. <code>inc_model="indep"</code> estimates independent incidence rates for each age.</p></li>
-<li><p><code>rem_model</code>. If no remission data are supplied, then the disease is assumed to have zero remission rate. If remission data are supplied, then remission rates are estimated. By default, these are assumed to be a constant function of age (<code>rem_model="const"</code>). To estimate independent remission rates for each age, supply <code>rem_model="indep"</code>. To model remission rates as a smooth spline function of age, use <code>rem_model="smooth"</code>.</p></li>
-<li><p><code>hp_fixed</code>. A list of “hyperparameters” to fix at constant values. If using smooth spline functions, this option may be required if the appropriate level of smoothness for the spline cannot be determined from the data. When using the default optimisation method, this can lead to an error message mentioning <code>"Error in chol.default(-H)"</code>. In these cases, the smoothness can be fixed in advance, e.g. <code>hp_fixed = list(scf=1)</code> to fix the case fatality smoothness parameter to a typical value of 1. Lower values give more smoothness, higher values give wigglier curves. You may need to experiment with different values to determine what gives a plausible degree of smoothness.</p></li>
+<li><p><code>cf_model</code>. Model for how case fatality varies with
+age. As well as the default spline smooth model and unsmoothed models
+illustrated above, <code>cf_model="increasing"</code> fits a model where
+case fatality is restricted to increase with age, and
+<code>cf_model="const"</code> specifies a constant case fatality with
+age.</p></li>
+<li><p><code>inc_model</code>. By default, incidence rates are smoothed
+as a function of age using a spline, as with case fatality rates.
+<code>inc_model="indep"</code> estimates independent incidence rates for
+each age.</p></li>
+<li><p><code>rem_model</code>. If no remission data are supplied, then
+the disease is assumed to have zero remission rate. If remission data
+are supplied, then remission rates are estimated. By default, these are
+assumed to be a constant function of age
+(<code>rem_model="const"</code>). To estimate independent remission
+rates for each age, supply <code>rem_model="indep"</code>. To model
+remission rates as a smooth spline function of age, use
+<code>rem_model="smooth"</code>.</p></li>
+<li><p><code>hp_fixed</code>. A list of “hyperparameters” to fix at
+constant values. If using smooth spline functions, this option may be
+required if the appropriate level of smoothness for the spline cannot be
+determined from the data. When using the default optimisation method,
+this can lead to an error message mentioning
+<code>"Error in chol.default(-H)"</code>. In these cases, the smoothness
+can be fixed in advance, e.g. <code>hp_fixed = list(scf=1)</code> to fix
+the case fatality smoothness parameter to a typical value of 1. Lower
+values give more smoothness, higher values give wigglier curves. You may
+need to experiment with different values to determine what gives a
+plausible degree of smoothness.</p></li>
 </ul>
 </div>
 </div>
 <div class="section level2">
 <h2 id="advanced-models">Advanced models<a class="anchor" aria-label="anchor" href="#advanced-models"></a>
 </h2>
-<p>The <code>disbayes</code> package provides a selection of more advanced models for more complex data structures. These are substantially more computationally intensive than the basic model shown in this vignette. For applications similar to the one shown here, using MCMC will typically take over an hour, while using optimisation will take a minute or less. Further information about how they are defined mathematically will be given in a forthcoming paper. See the <a href="https://chjackson.github.io/disbayes/reference/index.html" class="external-link">R help pages</a> for further information on how to invoke the functions.</p>
+<p>The <code>disbayes</code> package provides a selection of more
+advanced models for more complex data structures. These are
+substantially more computationally intensive than the basic model shown
+in this vignette. For applications similar to the one shown here, using
+MCMC will typically take over an hour, while using optimisation will
+take a minute or less. Further information about how they are defined
+mathematically will be given in a forthcoming paper. See the <a href="https://chjackson.github.io/disbayes/reference/index.html" class="external-link">R help
+pages</a> for further information on how to invoke the functions.</p>
 <div class="section level3">
 <h3 id="hierarchical-models">Hierarchical models<a class="anchor" aria-label="anchor" href="#hierarchical-models"></a>
 </h3>
-<p><a href="https://chjackson.github.io/disbayes/reference/disbayes_hier.html" class="external-link"><code>disbayes_hier</code></a> is used to fit a joint model for data from multiple areas.</p>
+<p><a href="https://chjackson.github.io/disbayes/reference/disbayes_hier.html" class="external-link"><code>disbayes_hier</code></a>
+is used to fit a joint model for data from multiple areas.</p>
 </div>
 <div class="section level3">
 <h3 id="hierarchical-models-with-additive-area-and-gender-effects">Hierarchical models with additive area and gender effects<a class="anchor" aria-label="anchor" href="#hierarchical-models-with-additive-area-and-gender-effects"></a>
 </h3>
-<p><a href="https://chjackson.github.io/disbayes/reference/disbayes_hier.html" class="external-link"><code>disbayes_hier</code></a> can also be used to fit a joint model for data from multiple areas and different genders. It is assumed that the relative case fatality between women and men is the same for each area. While this is labelled <code>gender</code> it can be used for any single binary predictor, though for chronic diseases, we will usually want to consider the effect of gender.</p>
+<p><a href="https://chjackson.github.io/disbayes/reference/disbayes_hier.html" class="external-link"><code>disbayes_hier</code></a>
+can also be used to fit a joint model for data from multiple areas and
+different genders. It is assumed that the relative case fatality between
+women and men is the same for each area. While this is labelled
+<code>gender</code> it can be used for any single binary predictor,
+though for chronic diseases, we will usually want to consider the effect
+of gender.</p>
 </div>
 <div class="section level3">
 <h3 id="trends-through-time-non-hierarchical-models-only">Trends through time (non-hierarchical models only)<a class="anchor" aria-label="anchor" href="#trends-through-time-non-hierarchical-models-only"></a>
 </h3>
-<p><a href="https://chjackson.github.io/disbayes/reference/disbayes.html" class="external-link"><code>disbayes</code></a> can include information about trends through calendar time, which can be age dependent. The ratio of incidence between previous years and the current year (the one represented by the data) can be supplied as a matrix, with one row per year of age and one column per calendar year. See the <a href="https://chjackson.github.io/disbayes/reference/disbayes.html" class="external-link"><code>disbayes</code></a>, arguments <code>inc_trend</code> and <code>cf_trend</code>.</p>
+<p><a href="https://chjackson.github.io/disbayes/reference/disbayes.html" class="external-link"><code>disbayes</code></a>
+can include information about trends through calendar time, which can be
+age dependent. The ratio of incidence between previous years and the
+current year (the one represented by the data) can be supplied as a
+matrix, with one row per year of age and one column per calendar year.
+See the <a href="https://chjackson.github.io/disbayes/reference/disbayes.html" class="external-link"><code>disbayes</code></a>,
+arguments <code>inc_trend</code> and <code>cf_trend</code>.</p>
 </div>
 <div class="section level3">
-<h3 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+<h3 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h3>
-<div id="refs" class="references">
-<div id="ref-dismod2">
-<p>Barendregt, J. J., G. J. Van Oortmarssen, T. Vos, and C. J. L. Murray. 2003. “A generic model for the assessment of disease epidemiology: the computational basis of DisMod II.” <em>Population Health Metrics</em> 1 (1): 4.</p>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-dismod2" class="csl-entry">
+Barendregt, J. J., G. J. Van Oortmarssen, T. Vos, and C. J. L. Murray.
+2003. <span>“<span class="nocase">A generic model for the assessment of
+disease epidemiology: the computational basis of DisMod
+II</span>.”</span> <em>Population Health Metrics</em> 1 (1): 4.
 </div>
-<div id="ref-flaxman2015">
-<p>Flaxman, A. D., T. Vos, and C. J. L. Murray. 2015. <em>An Integrative Metaregression Framework for Descriptive Epidemiology</em>. University of Washington Press.</p>
+<div id="ref-flaxman2015" class="csl-entry">
+Flaxman, A. D., T. Vos, and C. J. L. Murray. 2015. <em>An Integrative
+Metaregression Framework for Descriptive Epidemiology</em>. University
+of Washington Press.
 </div>
-<div id="ref-disbayes_arxiv">
-<p>Jackson, C. H., B. Zapata-Diomedi, and J. Woodcock. 2021. “Bayesian multistate modelling of incomplete chronic disease burden data.” <em>arXiv Preprint</em>. <a href="https://arxiv.org/abs/2111.14100" class="external-link">https://arxiv.org/abs/2111.14100</a>.</p>
+<div id="ref-disbayes_jrssa" class="csl-entry">
+Jackson, C. H., B. Zapata-Diomedi, and J. Woodcock. 2023. <span>“<span class="nocase">Bayesian multistate modelling of incomplete chronic
+disease burden data</span>.”</span> <em>Journal of the Royal Statistical
+Society Series A: Statistics in Society</em> 186 (1): 1–19. <a href="https://doi.org/10.1093/jrsssa/qnac015" class="external-link">https://doi.org/10.1093/jrsssa/qnac015</a>.
 </div>
-<div id="ref-ohagan:elic">
-<p>O’Hagan, A., C. E. Buck, A. Daneshkhah, J. R. Eiser, P. H. Garthwaite, D. J. Jenkinson, J. E Oakley, and T. Rakow. 2006. <em>Uncertain Judgements: Eliciting Experts’ Probabilities</em>. John Wiley &amp; Sons.</p>
+<div id="ref-ohagan:elic" class="csl-entry">
+O’Hagan, A., C. E. Buck, A. Daneshkhah, J. R. Eiser, P. H. Garthwaite,
+D. J. Jenkinson, J. E Oakley, and T. Rakow. 2006. <em><span>Uncertain
+Judgements: Eliciting Experts’ Probabilities</span></em>. John Wiley
+&amp; Sons.
 </div>
-<div id="ref-RJ-2013-028">
-<p>Sax, C., and P. Steiner. 2013. “Temporal disaggregation of time series.” <em>The R Journal</em> 5 (2): 80–87. <a href="https://doi.org/10.32614/RJ-2013-028" class="external-link">https://doi.org/10.32614/RJ-2013-028</a>.</p>
+<div id="ref-RJ-2013-028" class="csl-entry">
+Sax, C., and P. Steiner. 2013. <span>“<span class="nocase">Temporal
+disaggregation of time series</span>.”</span> <em><span>The R
+Journal</span></em> 5 (2): 80–87. <a href="https://doi.org/10.32614/RJ-2013-028" class="external-link">https://doi.org/10.32614/RJ-2013-028</a>.
 </div>
 </div>
 </div>
@@ -430,7 +791,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>
