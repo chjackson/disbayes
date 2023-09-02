@@ -9,18 +9,18 @@ data {
   int<lower=0> eqage;
   int remission;
   int prev_zero;
-  int<lower=0> mort_num[nage,narea,ng];
-  int<lower=0> mort_denom[nage,narea,ng];
-  int<lower=0> prev_num[nage,narea,ng];
-  int<lower=0> prev_denom[nage,narea,ng];
-  int<lower=0> inc_num[nage,narea,ng];
-  int<lower=0> inc_denom[nage,narea,ng];
-  int<lower=0> rem_num[nage,narea,ng];
-  int<lower=0> rem_denom[nage,narea,ng];
+  array[nage,narea,ng] int<lower=0> mort_num;
+  array[nage,narea,ng] int<lower=0> mort_denom;
+  array[nage,narea,ng] int<lower=0> prev_num;
+  array[nage,narea,ng] int<lower=0> prev_denom;
+  array[nage,narea,ng] int<lower=0> inc_num;
+  array[nage,narea,ng] int<lower=0> inc_denom;
+  array[nage,narea,ng] int<lower=0> rem_num;
+  array[nage,narea,ng] int<lower=0> rem_denom;
   
   int<lower=0> K; // number of spline basis variables including the intercept
   matrix[nage,K] X;
-  real<lower=0> sprior[3]; 
+  array[3] real<lower=0> sprior; 
   real mipm;
   real<lower=0> mips;
   real mism;
@@ -46,8 +46,8 @@ data {
   int sd_slope_isfixed;
   real<lower=0> sd_int_fixed;
   real<lower=0> sd_slope_fixed;
-  real<lower=0> inc_prior[2]; 
-  real<lower=0> rem_prior[2]; 
+  array[2] real<lower=0> inc_prior; 
+  array[2] real<lower=0> rem_prior; 
 
   // Empirical Bayes method where smoothing parameters are fixed
   int scf_isfixed;
@@ -61,8 +61,8 @@ data {
 }
 
 parameters {
-  real<lower=0> inc_par[nage*(1 - smooth_inc),narea,ng];
-  real<lower=0> rem_par[remission*(1-smooth_rem)*(nage*(1-const_rem) + 1*const_rem),ng];
+  array[nage*(1 - smooth_inc),narea,ng] real<lower=0> inc_par;
+  array[remission*(1-smooth_rem)*(nage*(1-const_rem) + 1*const_rem),ng] real<lower=0> rem_par;
 
    // standard normal terms contributing to area-specific coefficients in non-centered parameterisation.
   matrix[(K-2)*(1-const_cf), narea*(1 - common) + 1*(common)] barea; 
@@ -74,8 +74,8 @@ parameters {
   // for model with increasing slopes
   vector[(narea*(1-common) + 1*common)*increasing] lcfbase;
 
-  real beta_inc[K*smooth_inc,narea,ng];
-  real beta_rem[K*smooth_rem,narea,ng];
+  array[K*smooth_inc,narea,ng] real beta_inc;
+  array[K*smooth_rem,narea,ng] real beta_rem;
   
   real mean_inter; // random effect mean intercept
   vector<lower=0>[1-sd_int_isfixed] sd_inter; 
@@ -85,28 +85,28 @@ parameters {
   vector<lower=0>[(ng-1)*(1-scfmale_isfixed)] lambda_cf_male;
   vector<lower=0>[smooth_inc*(1-sinc_isfixed)] lambda_inc;
   vector<lower=0>[remission*smooth_rem*(1-srem_isfixed)] lambda_rem;
-  real<lower=0,upper=1> prevzero[narea*prev_zero,ng];
+  array[narea*prev_zero,ng] real<lower=0,upper=1> prevzero;
 }
 
 transformed parameters {
   //// range constraints on these cause problems due to floating point fuzz
-  real<lower=0> inc[nage,narea,ng];   // independent incidence for each area
-  real<lower=0> cf[nage,narea,ng];
-  real<lower=0> dcf[nage*increasing,narea,ng];  // only in increasing model
-  real<lower=0> inc_prob[nage,narea,ng];
-  real<lower=0> prev_prob[nage,narea,ng];
-  real<lower=0> mort_prob[nage,narea,ng];
-  real<lower=0> rem[nage,narea,ng];
-  real<lower=0> rem_prob[nage*remission,narea,ng];
-  real<lower=0> cf_prob[nage,narea,ng];
-  row_vector[3] state_probs[nage+1,narea,ng]; 
+  array[nage,narea,ng] real<lower=0> inc;   // independent incidence for each area
+  array[nage,narea,ng] real<lower=0> cf;
+  array[nage*increasing,narea,ng] real<lower=0> dcf;  // only in increasing model
+  array[nage,narea,ng] real<lower=0> inc_prob;
+  array[nage,narea,ng] real<lower=0> prev_prob;
+  array[nage,narea,ng] real<lower=0> mort_prob;
+  array[nage,narea,ng] real<lower=0> rem;
+  array[nage*remission,narea,ng] real<lower=0> rem_prob;
+  array[nage,narea,ng] real<lower=0> cf_prob;
+  array[nage+1,narea,ng] row_vector[3] state_probs; 
   row_vector[3] tmp;
   matrix[3,3] P;
   real<lower=0> sdint_use;
   real<lower=0> sdslope_use;
   
   matrix[K,narea] bareat;  // area-specific coefficients.
-  real beta[K,narea,ng];
+  array[K,narea,ng] real beta;
   real<lower=0> lambda_cf_use;
   real<lower=0> lambda_cf_male_use;
   real<lower=0> lambda_inc_use;

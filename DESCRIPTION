@@ -20,7 +20,7 @@ Imports:
     generics,
     methods,
     Rcpp (>= 0.12.0),
-    rstan (>= 2.18.1),
+    rstan (>= 2.26.0),
     mgcv,
     SHELF,
     ggplot2,
@@ -31,8 +31,8 @@ LinkingTo:
     Rcpp (>= 0.12.0),
     RcppParallel,
     RcppEigen (>= 0.3.3.3.0),
-    rstan (>= 2.18.1),
-    StanHeaders (>= 2.18.0)
+    rstan (>= 2.26.0),
+    StanHeaders (>= 2.26.0)
 Suggests: knitr,
     rmarkdown,
     rstantools (>= 2.0.0.9000),
