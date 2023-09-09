@@ -61,8 +61,8 @@ data {
 }
 
 parameters {
-  real<lower=0> inc_par[nage*(1 - smooth_inc),narea,ng];
-  real<lower=0> rem_par[remission*(1-smooth_rem)*(nage*(1-const_rem) + 1*const_rem),ng];
+  array[nage*(1 - smooth_inc),narea,ng] real<lower=0> inc_par;
+  array[remission*(1-smooth_rem)*(nage*(1-const_rem) + 1*const_rem),ng] real<lower=0> rem_par;
 
    // standard normal terms contributing to area-specific coefficients in non-centered parameterisation.
   matrix[(K-2)*(1-const_cf), narea*(1 - common) + 1*(common)] barea; 
@@ -99,7 +99,7 @@ transformed parameters {
   array[nage,narea,ng] real<lower=0> rem;
   array[nage*remission,narea,ng] real<lower=0> rem_prob;
   array[nage,narea,ng] real<lower=0> cf_prob;
-  row_vector[3] state_probs[nage+1,narea,ng]; 
+  array[nage+1,narea,ng] row_vector[3] state_probs; 
   row_vector[3] tmp;
   matrix[3,3] P;
   real<lower=0> sdint_use;

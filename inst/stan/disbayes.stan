@@ -81,7 +81,7 @@ transformed parameters {
   vector<lower=0,upper=1>[nage*remission] rem_prob;
   vector<lower=0,upper=1>[nage] cf_prob;
   
-  row_vector[3] state_probs[(nage+1)*(1-trend),nbias]; 
+  array[(nage+1)*(1-trend),nbias] row_vector[3] state_probs; 
   row_vector[3] tmp;
   matrix<lower=0,upper=1>[3,3] P;
   matrix<lower=0>[nage,nbias] prev_prob;
@@ -89,7 +89,7 @@ transformed parameters {
 
   matrix<lower=0>[nage*trend,nyr*trend] cf_yr;
   array[nage*trend,nyr*trend,nbias] real<lower=0> inc_yr;
-  row_vector[3] state_probs_yr[(nage+1)*trend,nyr*trend,nbias];   
+  array[(nage+1)*trend,nyr*trend,nbias] row_vector[3] state_probs_yr;   
 
   real<lower=0> lambda_cf_use;
   real<lower=0> lambda_inc_use;
