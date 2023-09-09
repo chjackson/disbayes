@@ -627,12 +627,12 @@ between 60 and 65:</p>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">var</span><span class="op">==</span><span class="st">"cf"</span>, <span class="fu"><a href="https://dplyr.tidyverse.org/reference/between.html" class="external-link">between</a></span><span class="op">(</span><span class="va">age</span>,<span class="fl">60</span>,<span class="fl">65</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">age</span>, <span class="va">`25%`</span>, <span class="va">`50%`</span>, <span class="va">`75%`</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##   age        25%        50%        75%</span></span>
-<span><span class="co">## 1  60 0.01606119 0.01726661 0.01854115</span></span>
-<span><span class="co">## 2  61 0.01628631 0.01743310 0.01864105</span></span>
-<span><span class="co">## 3  62 0.01648834 0.01760184 0.01882968</span></span>
-<span><span class="co">## 4  63 0.01675752 0.01775604 0.01901101</span></span>
-<span><span class="co">## 5  64 0.01699235 0.01792937 0.01918977</span></span>
-<span><span class="co">## 6  65 0.01719528 0.01820841 0.01943928</span></span></code></pre>
+<span><span class="co">## 1  60 0.01620669 0.01744870 0.01873200</span></span>
+<span><span class="co">## 2  61 0.01636220 0.01757335 0.01887979</span></span>
+<span><span class="co">## 3  62 0.01653526 0.01773856 0.01899947</span></span>
+<span><span class="co">## 4  63 0.01676370 0.01792941 0.01903971</span></span>
+<span><span class="co">## 5  64 0.01699914 0.01808241 0.01918939</span></span>
+<span><span class="co">## 6  65 0.01727724 0.01830404 0.01940089</span></span></code></pre>
 <p>The default <code>plot</code> method for objects returned by
 <code>disbayes</code> plots the posterior summaries for case fatality,
 allowing a quick check of the model results. Or do
