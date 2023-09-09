@@ -1,11 +1,11 @@
 Package: disbayes
 Title: Bayesian Multi-State Modelling of Chronic Disease Burden Data
 Date: 2022-08-18
-Version: 1.0.0
+Version: 1.1.0
 Authors@R: 
     person("Christopher", "Jackson", , "chris.jackson@mrc-bsu.cam.ac.uk", role = c("aut", "cre", "cph"),
            comment = c(ORCID = "0000-0002-6656-8913"))
-Description: Estimation of incidence and case fatality for a chronic disease, given partial information, using a multi-state model. Given data on age-specific mortality and either incidence or prevalence, Bayesian inference is used to estimate the posterior distributions of incidence, case fatality, and functions of these such as prevalence.  The methods are described in Jackson et al. (2021) <arXiv:2111.14100>.
+Description: Estimation of incidence and case fatality for a chronic disease, given partial information, using a multi-state model. Given data on age-specific mortality and either incidence or prevalence, Bayesian inference is used to estimate the posterior distributions of incidence, case fatality, and functions of these such as prevalence.  The methods are described in Jackson et al. (2023) <https://doi.org/10.1093/jrsssa/qnac015>.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
@@ -31,7 +31,7 @@ LinkingTo:
     Rcpp (>= 0.12.0),
     RcppParallel,
     RcppEigen (>= 0.3.3.3.0),
-    rstan (>= 2.18.1),
+    rstan (>= 2.26),
     StanHeaders (>= 2.18.0)
 Suggests: knitr,
     rmarkdown,

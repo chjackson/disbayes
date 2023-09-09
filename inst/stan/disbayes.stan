@@ -11,20 +11,20 @@ data {
   int prev_zero;
   int<lower=0> nage;
   int<lower=0> eqage;
-  int<lower=0> mort_num[nage];
-  int<lower=0> mort_denom[nage];
-  int<lower=0> prev_num[nage];
-  int<lower=0> prev_denom[nage];
-  int<lower=0> inc_num[nage];
-  int<lower=0> inc_denom[nage];
-  int<lower=0> rem_num[nage];
-  int<lower=0> rem_denom[nage];
+  array[nage] int<lower=0> mort_num;
+  array[nage] int<lower=0> mort_denom;
+  array[nage] int<lower=0> prev_num;
+  array[nage] int<lower=0> prev_denom;
+  array[nage] int<lower=0> inc_num;
+  array[nage] int<lower=0> inc_denom;
+  array[nage] int<lower=0> rem_num;
+  array[nage] int<lower=0> rem_denom;
   int<lower=0> nyr;
   
   // only in smoothed model 
   int<lower=0> K; // number of spline basis variables including the intercept
   matrix[nage,K] X;
-  real<lower=0> sprior[3]; 
+  array[3] real<lower=0> sprior; 
 
   // alternative models
   int increasing_cf; // requires smooth_cf 
@@ -41,9 +41,9 @@ data {
   matrix<lower=0>[nage,nyr] inc_trend;
   matrix<lower=0>[nage,nyr] cf_trend;
 
-  real<lower=0> inc_prior[2]; 
-  real<lower=0> cf_prior[2]; 
-  real<lower=0> rem_prior[2]; 
+  array[2] real<lower=0> inc_prior; 
+  array[2] real<lower=0> cf_prior; 
+  array[2] real<lower=0> rem_prior; 
 
   // Empirical Bayes method where smoothing parameters are fixed
   int scf_isfixed;
@@ -85,10 +85,10 @@ transformed parameters {
   row_vector[3] tmp;
   matrix<lower=0,upper=1>[3,3] P;
   matrix<lower=0>[nage,nbias] prev_prob;
-  real<lower=0> mort_prob[nage];
+  array[nage] real<lower=0> mort_prob;
 
   matrix<lower=0>[nage*trend,nyr*trend] cf_yr;
-  real<lower=0> inc_yr[nage*trend,nyr*trend,nbias];
+  array[nage*trend,nyr*trend,nbias] real<lower=0> inc_yr;
   row_vector[3] state_probs_yr[(nage+1)*trend,nyr*trend,nbias];   
 
   real<lower=0> lambda_cf_use;
