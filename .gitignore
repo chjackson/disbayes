@@ -45,3 +45,4 @@ docs
 configure
 *\#*
 vignettes/disbayes_cache
+.Rprofile
