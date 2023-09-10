@@ -75,7 +75,7 @@ epidemiology from incomplete data: the disbayes package</h1>
 <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk" class="email">chris.jackson@mrc-bsu.cam.ac.uk</a>
 </h4>
             
-            <h4 data-toc-skip class="date">2023-09-09</h4>
+            <h4 data-toc-skip class="date">2023-09-10</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/chjackson/disbayes/blob/HEAD/vignettes/disbayes.Rmd" class="external-link"><code>vignettes/disbayes.Rmd</code></a></small>
       <div class="hidden name"><code>disbayes.Rmd</code></div>
@@ -627,12 +627,12 @@ between 60 and 65:</p>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">var</span><span class="op">==</span><span class="st">"cf"</span>, <span class="fu"><a href="https://dplyr.tidyverse.org/reference/between.html" class="external-link">between</a></span><span class="op">(</span><span class="va">age</span>,<span class="fl">60</span>,<span class="fl">65</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">age</span>, <span class="va">`25%`</span>, <span class="va">`50%`</span>, <span class="va">`75%`</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##   age        25%        50%        75%</span></span>
-<span><span class="co">## 1  60 0.01620669 0.01744870 0.01873200</span></span>
-<span><span class="co">## 2  61 0.01636220 0.01757335 0.01887979</span></span>
-<span><span class="co">## 3  62 0.01653526 0.01773856 0.01899947</span></span>
-<span><span class="co">## 4  63 0.01676370 0.01792941 0.01903971</span></span>
-<span><span class="co">## 5  64 0.01699914 0.01808241 0.01918939</span></span>
-<span><span class="co">## 6  65 0.01727724 0.01830404 0.01940089</span></span></code></pre>
+<span><span class="co">## 1  60 0.01617849 0.01743936 0.01873593</span></span>
+<span><span class="co">## 2  61 0.01638336 0.01756277 0.01888948</span></span>
+<span><span class="co">## 3  62 0.01654555 0.01772532 0.01901065</span></span>
+<span><span class="co">## 4  63 0.01678131 0.01791640 0.01911322</span></span>
+<span><span class="co">## 5  64 0.01702248 0.01811405 0.01925488</span></span>
+<span><span class="co">## 6  65 0.01727840 0.01829353 0.01944089</span></span></code></pre>
 <p>The default <code>plot</code> method for objects returned by
 <code>disbayes</code> plots the posterior summaries for case fatality,
 allowing a quick check of the model results. Or do
