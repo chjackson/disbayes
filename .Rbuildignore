@@ -1,6 +1,7 @@
 ^doc$
 ^Meta$
 data-raw
+^.*\.Rprofile$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^metahit$

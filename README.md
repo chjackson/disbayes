@@ -62,4 +62,5 @@ If this fails, make sure that the `rstan` package is set up properly, as [explai
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/chjackson/disbayes/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/chjackson/disbayes/actions/workflows/R-CMD-check.yaml)
 [![test-coverage](https://github.com/chjackson/disbayes/actions/workflows/test-coverage.yaml/badge.svg)](https://app.codecov.io/gh/chjackson/disbayes)
+[![CRAN status](https://www.r-pkg.org/badges/version/disbayes)](https://CRAN.R-project.org/package=disbayes)
 <!-- badges: end -->

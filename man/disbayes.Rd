@@ -357,5 +357,5 @@ Remission may also be included in the data and modelled.
 Jackson C, Zapata-Diomedi B, Woodcock J. (2023)
 "Bayesian multistate modelling of incomplete chronic disease burden data"
 Journal of the Royal Statistical Society, Series A, 186(1), 1-19
-\url{https://doi.org/10.1093/jrsssa/qnac015}
+\doi{10.1093/jrsssa/qnac015}
 }
