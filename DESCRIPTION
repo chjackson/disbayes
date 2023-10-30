@@ -37,7 +37,8 @@ Suggests: knitr,
     rmarkdown,
     rstantools (>= 2.0.0.9000),
     tempdisagg,
-    testthat
+    testthat,
+    codetools
 VignetteBuilder: knitr
 SystemRequirements: GNU make
 URL: https://chjackson.github.io/disbayes/
