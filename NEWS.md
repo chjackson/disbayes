@@ -1,5 +1,13 @@
 -*- text -*-
 
+Version 1.1.1 (development)
+-------------------------
+
+* Updated compatibility with upcoming changes to `loo_compare()` output
+  structure in the `loo` package (> 2.9.0), which now returns a data frame
+  instead of a matrix and includes additional diagnostic columns.
+
+
 Version 1.1.0 (2023-09-09)
 -------------------------
 
