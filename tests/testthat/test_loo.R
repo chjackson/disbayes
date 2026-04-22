@@ -22,7 +22,9 @@ test_that("loo, standard ", {
   suppressWarnings(loo2 <- loo(db2))
   lc <- loo::loo_compare(loo1,loo2)
   if ("model" %in% colnames(lc)) {
-    lc[lc$model == "model1", "elpd_diff"] > lc[lc$model == "model2", "elpd_diff"]
+    expect_true(
+      lc[lc$model == "model1", "elpd_diff"] > lc[lc$model == "model2", "elpd_diff"]
+    )
   } else {
     expect_true(lc["model1","elpd_diff"] > lc["model2","elpd_diff"])
   }
