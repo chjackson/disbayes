@@ -10,3 +10,15 @@ Bayesian evidence synthesis for chronic disease epidemiology
 \references{
 Stan Development Team (2019). RStan: the R interface to Stan. R package version 2.19.2. https://mc-stan.org
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://chjackson.github.io/disbayes/}
+  \item Report bugs at \url{https://github.com/chjackson/disbayes/issues}
+}
+
+}
+\author{
+\strong{Maintainer}: Christopher Jackson \email{chris.jackson@mrc-bsu.cam.ac.uk} (\href{https://orcid.org/0000-0002-6656-8913}{ORCID}) [copyright holder]
+
+}

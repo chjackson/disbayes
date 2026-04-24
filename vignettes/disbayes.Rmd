@@ -353,7 +353,7 @@ Full documentation is given in [`help(disbayes)`](https://chjackson.github.io/di
 
 # Advanced models 
 
-The `disbayes` package provides a selection of more advanced models for more complex data structures.   These are substantially more computationally intensive than the basic model shown in this vignette.  For applications similar to the one shown here, using MCMC will typically take over an hour, while using optimisation will take a minute or less.  Further information about how they are defined mathematically will be given in a forthcoming paper. See the [R help pages](https://chjackson.github.io/disbayes/reference/index.html) for further information on how to invoke the functions.
+The `disbayes` package provides a selection of more advanced models for more complex data structures.   These are substantially more computationally intensive than the basic model shown in this vignette.  For applications similar to the one shown here, using MCMC will typically take over an hour, while using optimisation will take a minute or less.  Further information about how they are defined mathematically is given in the paper (@disbayes_jrssa). See the [R help pages](https://chjackson.github.io/disbayes/reference/index.html) for further information on how to invoke the functions.
 
 
 ## Hierarchical models 

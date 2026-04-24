@@ -33,7 +33,7 @@ model.   The outcome may be annual incidence, mortality, remission probabilities
 or prevalence.
 }
 \details{
-Hierarchical models are not currently supported in this function.
+Hierarchical models are not supported in this function.
 }
 \references{
 Presanis, A. M., Ohlssen, D., Spiegelhalter, D. J. and De Angelis, D. (2013) 

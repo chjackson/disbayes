@@ -102,7 +102,7 @@ plotfit_disbayes <- function(x, agemin=50){
 }
 
 ## Extract samples from optimisation output
-## Only implemented currently for parameters with three indices
+## Only implemented for parameters with three indices
 
 opt_extract_nonhier <- function(xfit, par){
   varorig <- NULL
@@ -155,7 +155,7 @@ opt_extract_hier <- function(xfit, par){
 ##' model.   The outcome may be annual incidence, mortality, remission probabilities, 
 ##' or prevalence. 
 ##' 
-##' Hierarchical models are not currently supported in this function.  
+##' Hierarchical models are not supported in this function.  
 ##' 
 ##' @param x A fitted \code{\link{disbayes}} model.
 ##' 

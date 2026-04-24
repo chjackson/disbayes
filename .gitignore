@@ -46,3 +46,4 @@ configure
 *\#*
 vignettes/disbayes_cache
 .Rprofile
+.positai

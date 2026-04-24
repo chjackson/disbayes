@@ -21,3 +21,5 @@ vignettes/disbayes.html
 data/ihdtrends2019.rda
 R/cfnaive.R
 man/cfnaive.Rd
+^\.positai$
+^\.claude$
