@@ -6,20 +6,19 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bayesian estimation of chronic disease epidemiology from incomplete data: the disbayes package • disbayes</title>
-<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
+<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
 <script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
 <script src="../pkgdown.js"></script><meta property="og:title" content="Bayesian estimation of chronic disease epidemiology from incomplete data: the disbayes package">
-<meta property="og:description" content="disbayes">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -53,7 +52,7 @@
 <li>
   <a href="https://github.com/chjackson/disbayes/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
-     
+
   </a>
 </li>
       </ul>
@@ -64,7 +63,7 @@
 </div>
 <!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="col-md-9 contents">
@@ -75,9 +74,9 @@ epidemiology from incomplete data: the disbayes package</h1>
 <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk" class="email">chris.jackson@mrc-bsu.cam.ac.uk</a>
 </h4>
             
-            <h4 data-toc-skip class="date">2023-09-10</h4>
+            <h4 data-toc-skip class="date">2026-04-24</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/chjackson/disbayes/blob/HEAD/vignettes/disbayes.Rmd" class="external-link"><code>vignettes/disbayes.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/chjackson/disbayes/blob/master/vignettes/disbayes.Rmd" class="external-link"><code>vignettes/disbayes.Rmd</code></a></small>
       <div class="hidden name"><code>disbayes.Rmd</code></div>
 
     </div>
@@ -115,37 +114,79 @@ disease status, deaths from other causes are uninformative and can be
 ignored.</p>
 <p>The disease process is then fully defined by the</p>
 <ul>
-<li><p>disease incidence <span class="math inline">\(i(a)\)</span>, and
-the</p></li>
-<li><p>case fatality rate <span class="math inline">\(f(a)\)</span>,</p></li>
+<li><p>disease incidence
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>a</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">i(a)</annotation></semantics></math>,
+and the</p></li>
+<li><p>case fatality rate
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>a</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">f(a)</annotation></semantics></math>,</p></li>
 </ul>
-<p>which are both assumed to depend on age <span class="math inline">\(a\)</span>. Remission is also possible for some
-diseases, with rate <span class="math inline">\(r(a)\)</span>. Assume
-further that the rates are constant within integer years of age <span class="math inline">\(a\)</span>, so they can be written <span class="math inline">\(i_a\)</span>, <span class="math inline">\(f_a\)</span>.</p>
+<p>which are both assumed to depend on age
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math>.
+Remission is also possible for some diseases, with rate
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>a</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">r(a)</annotation></semantics></math>.
+Assume further that the rates are constant within integer years of age
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math>,
+so they can be written
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>i</mi><mi>a</mi></msub><annotation encoding="application/x-tex">i_a</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>f</mi><mi>a</mi></msub><annotation encoding="application/x-tex">f_a</annotation></semantics></math>.</p>
 <p>From these, we can determine the <em>transition probability
-matrix</em> <span class="math inline">\(P_a\)</span>, whose <span class="math inline">\(r,s\)</span> entry <span class="math inline">\(P_{ars}\)</span> is the probability that a person
-is in state <span class="math inline">\(s\)</span> at age <span class="math inline">\(a+1\)</span> given they are in state <span class="math inline">\(r\)</span> at age <span class="math inline">\(a\)</span>. The matrix <span class="math inline">\(P_a\)</span> is defined as a function of <span class="math inline">\(i_a\)</span> and <span class="math inline">\(f_a\)</span>, which is the solution to a
-differential equation, and is written out explicitly in the DisMod II
-paper (<span class="citation">Barendregt et al. (2003)</span>).</p>
-<p>Further, let <span class="math inline">\(S_a\)</span> be the “state
-occupancy probabilities”, or the proportion of individuals in a
-hypothetical birth cohort (of infinite size) who are in each state at
-age <span class="math inline">\(a\)</span>. This is a row vector with
-three elements <span class="math inline">\(S_{ar}\)</span>, one for each
-state <span class="math inline">\(r\)</span>. Assume everyone is
-disease-free at age 0. The state occupancy probabilities at each
-subsequent age <span class="math inline">\(a+1\)</span> are then
-determined by mutiplying by the transition probability matrix:</p>
-<p><span class="math display">\[ S_{a+1} = S_a P_a \]</span></p>
+matrix</em>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>P</mi><mi>a</mi></msub><annotation encoding="application/x-tex">P_a</annotation></semantics></math>,
+whose
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>,</mo><mi>s</mi></mrow><annotation encoding="application/x-tex">r,s</annotation></semantics></math>
+entry
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>P</mi><mrow><mi>a</mi><mi>r</mi><mi>s</mi></mrow></msub><annotation encoding="application/x-tex">P_{ars}</annotation></semantics></math>
+is the probability that a person is in state
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math>
+at age
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">a+1</annotation></semantics></math>
+given they are in state
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>r</mi><annotation encoding="application/x-tex">r</annotation></semantics></math>
+at age
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math>.
+The matrix
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>P</mi><mi>a</mi></msub><annotation encoding="application/x-tex">P_a</annotation></semantics></math>
+is defined as a function of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>i</mi><mi>a</mi></msub><annotation encoding="application/x-tex">i_a</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>f</mi><mi>a</mi></msub><annotation encoding="application/x-tex">f_a</annotation></semantics></math>,
+which is the solution to a differential equation, and is written out
+explicitly in the DisMod II paper (<span class="citation">Barendregt et
+al. (2003)</span>).</p>
+<p>Further, let
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>S</mi><mi>a</mi></msub><annotation encoding="application/x-tex">S_a</annotation></semantics></math>
+be the “state occupancy probabilities”, or the proportion of individuals
+in a hypothetical birth cohort (of infinite size) who are in each state
+at age
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math>.
+This is a row vector with three elements
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>S</mi><mrow><mi>a</mi><mi>r</mi></mrow></msub><annotation encoding="application/x-tex">S_{ar}</annotation></semantics></math>,
+one for each state
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>r</mi><annotation encoding="application/x-tex">r</annotation></semantics></math>.
+Assume everyone is disease-free at age 0. The state occupancy
+probabilities at each subsequent age
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">a+1</annotation></semantics></math>
+are then determined by mutiplying by the transition probability
+matrix:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>S</mi><mrow><mi>a</mi><mo>+</mo><mn>1</mn></mrow></msub><mo>=</mo><msub><mi>S</mi><mi>a</mi></msub><msub><mi>P</mi><mi>a</mi></msub></mrow><annotation encoding="application/x-tex"> S_{a+1} = S_a P_a </annotation></semantics></math></p>
 <p>The prevalence of disease (among people who are alive) at each age
-<span class="math inline">\(a\)</span> is then obtained as <span class="math inline">\(pr_a = S_{a2} / (S_{a1} + S_{a2})\)</span>.</p>
-<p>The disease-specific mortality rate at age <span class="math inline">\(a\)</span>, or the probability that a person alive
-at age <span class="math inline">\(a\)</span> dies from the disease
-before age <span class="math inline">\(a+1\)</span>, can also be
-expressed in terms of the disease prevalence at age <span class="math inline">\(a\)</span> and the transition probabilities
-between ages <span class="math inline">\(a\)</span> and <span class="math inline">\(a+1\)</span>, as</p>
-<p><span class="math display">\[ dm_a = P_{a23} pr_a + P_{a13} (1 -
-pr_a) \]</span></p>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math>
+is then obtained as
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><msub><mi>r</mi><mi>a</mi></msub><mo>=</mo><msub><mi>S</mi><mrow><mi>a</mi><mn>2</mn></mrow></msub><mi>/</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>S</mi><mrow><mi>a</mi><mn>1</mn></mrow></msub><mo>+</mo><msub><mi>S</mi><mrow><mi>a</mi><mn>2</mn></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">pr_a = S_{a2} / (S_{a1} + S_{a2})</annotation></semantics></math>.</p>
+<p>The disease-specific mortality rate at age
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math>,
+or the probability that a person alive at age
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math>
+dies from the disease before age
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">a+1</annotation></semantics></math>,
+can also be expressed in terms of the disease prevalence at age
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math>
+and the transition probabilities between ages
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">a+1</annotation></semantics></math>,
+as</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><msub><mi>m</mi><mi>a</mi></msub><mo>=</mo><msub><mi>P</mi><mrow><mi>a</mi><mn>23</mn></mrow></msub><mi>p</mi><msub><mi>r</mi><mi>a</mi></msub><mo>+</mo><msub><mi>P</mi><mrow><mi>a</mi><mn>13</mn></mrow></msub><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><msub><mi>r</mi><mi>a</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex"> dm_a = P_{a23} pr_a + P_{a13} (1 - pr_a) </annotation></semantics></math></p>
 </div>
 <div class="section level2">
 <h2 id="bayesian-approach-to-estimating-the-model-from-data">Bayesian approach to estimating the model from data<a class="anchor" aria-label="anchor" href="#bayesian-approach-to-estimating-the-model-from-data"></a>
@@ -164,16 +205,30 @@ need to be expressed as counts of individuals and associated
 denominators, e.g. </p></li>
 </ol>
 <ul>
-<li><p>(incidence): given a population of size <span class="math inline">\(n_a^{(mort)}\)</span>, <span class="math inline">\(r_a^{(inc)}\)</span> of these are observed to get
-the disease within the next year</p></li>
-<li><p>(mortality): given a population of size <span class="math inline">\(n_a^{(mort)}\)</span> (with or without the
-disease), <span class="math inline">\(r_a^{(mort)}\)</span> of these are
-observed to die from the disease within the next year</p></li>
-<li><p>(prevalence): from a sample of <span class="math inline">\(n_a^{(prev)}\)</span> individuals, <span class="math inline">\(r_a^{(prev)}\)</span> are known to have the
-disease at age <span class="math inline">\(a\)</span> (and <span class="math inline">\(n_a^{(prev)} - r_a^{(prev)}\)</span> are known to
-not have the disease</p></li>
-<li><p>(remission): from a sample of <span class="math inline">\(n_a^{(rem)}\)</span> individuals, <span class="math inline">\(r_a^{(rem)}\)</span> are known to recover from the
-disease in the following year.</p></li>
+<li><p>(incidence): given a population of size
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>n</mi><mi>a</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>m</mi><mi>o</mi><mi>r</mi><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><annotation encoding="application/x-tex">n_a^{(mort)}</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>r</mi><mi>a</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>i</mi><mi>n</mi><mi>c</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><annotation encoding="application/x-tex">r_a^{(inc)}</annotation></semantics></math>
+of these are observed to get the disease within the next year</p></li>
+<li><p>(mortality): given a population of size
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>n</mi><mi>a</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>m</mi><mi>o</mi><mi>r</mi><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><annotation encoding="application/x-tex">n_a^{(mort)}</annotation></semantics></math>
+(with or without the disease),
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>r</mi><mi>a</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>m</mi><mi>o</mi><mi>r</mi><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><annotation encoding="application/x-tex">r_a^{(mort)}</annotation></semantics></math>
+of these are observed to die from the disease within the next
+year</p></li>
+<li><p>(prevalence): from a sample of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>n</mi><mi>a</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>p</mi><mi>r</mi><mi>e</mi><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><annotation encoding="application/x-tex">n_a^{(prev)}</annotation></semantics></math>
+individuals,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>r</mi><mi>a</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>p</mi><mi>r</mi><mi>e</mi><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><annotation encoding="application/x-tex">r_a^{(prev)}</annotation></semantics></math>
+are known to have the disease at age
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math>
+(and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>n</mi><mi>a</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>p</mi><mi>r</mi><mi>e</mi><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mo>−</mo><msubsup><mi>r</mi><mi>a</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>p</mi><mi>r</mi><mi>e</mi><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup></mrow><annotation encoding="application/x-tex">n_a^{(prev)} - r_a^{(prev)}</annotation></semantics></math>
+are known to not have the disease</p></li>
+<li><p>(remission): from a sample of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>n</mi><mi>a</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>r</mi><mi>e</mi><mi>m</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><annotation encoding="application/x-tex">n_a^{(rem)}</annotation></semantics></math>
+individuals,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>r</mi><mi>a</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>r</mi><mi>e</mi><mi>m</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><annotation encoding="application/x-tex">r_a^{(rem)}</annotation></semantics></math>
+are known to recover from the disease in the following year.</p></li>
 </ul>
 <p>The next section discusses how these data can be derived, given the
 typical forms of data available from burden of disease studies. The data
@@ -250,18 +305,35 @@ transformed in three ways to obtain the data seen here.</p>
 each annual risk probability were converted to an implicit numerator and
 denominator. This is done by assuming that</p>
 <ul>
-<li><p>the incidence has been estimated as <span class="math inline">\(r_a^{(inc)}/n_a^{(inc)}\)</span>, where out of
-<span class="math inline">\(n_a^{(inc)}\)</span> people who are alive at
-age <span class="math inline">\(a\)</span>, <span class="math inline">\(r_a^{(inc)}\)</span> of these get IHD before age
-<span class="math inline">\(a+1\)</span>.</p></li>
-<li><p>the mortality has been estimated as <span class="math inline">\(r_a^{(mort)}/n_a^{(mort)}\)</span>, where out of
-<span class="math inline">\(n_a^{(mort)}\)</span> people who are alive
-at age <span class="math inline">\(a\)</span>, <span class="math inline">\(r_a^{(mort)}\)</span> of these die of IHD before
-age <span class="math inline">\(a+1\)</span>. These ratios are estimates
-of the true, underlying disease-specific mortalities <span class="math inline">\(dm_a\)</span>.</p></li>
-<li><p>the prevalence has been estimated as <span class="math inline">\(r_a^{(prev)}/n_a^{(prev)}\)</span>, where out of
-<span class="math inline">\(n_a^{(prev)}\)</span> people who are alive
-at age <span class="math inline">\(a\)</span>, <span class="math inline">\(r_a^{(prev)}\)</span> of them have IHD.</p></li>
+<li><p>the incidence has been estimated as
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>r</mi><mi>a</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>i</mi><mi>n</mi><mi>c</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mi>/</mi><msubsup><mi>n</mi><mi>a</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>i</mi><mi>n</mi><mi>c</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup></mrow><annotation encoding="application/x-tex">r_a^{(inc)}/n_a^{(inc)}</annotation></semantics></math>,
+where out of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>n</mi><mi>a</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>i</mi><mi>n</mi><mi>c</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><annotation encoding="application/x-tex">n_a^{(inc)}</annotation></semantics></math>
+people who are alive at age
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>r</mi><mi>a</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>i</mi><mi>n</mi><mi>c</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><annotation encoding="application/x-tex">r_a^{(inc)}</annotation></semantics></math>
+of these get IHD before age
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">a+1</annotation></semantics></math>.</p></li>
+<li><p>the mortality has been estimated as
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>r</mi><mi>a</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>m</mi><mi>o</mi><mi>r</mi><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mi>/</mi><msubsup><mi>n</mi><mi>a</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>m</mi><mi>o</mi><mi>r</mi><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup></mrow><annotation encoding="application/x-tex">r_a^{(mort)}/n_a^{(mort)}</annotation></semantics></math>,
+where out of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>n</mi><mi>a</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>m</mi><mi>o</mi><mi>r</mi><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><annotation encoding="application/x-tex">n_a^{(mort)}</annotation></semantics></math>
+people who are alive at age
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>r</mi><mi>a</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>m</mi><mi>o</mi><mi>r</mi><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><annotation encoding="application/x-tex">r_a^{(mort)}</annotation></semantics></math>
+of these die of IHD before age
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">a+1</annotation></semantics></math>.
+These ratios are estimates of the true, underlying disease-specific
+mortalities
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><msub><mi>m</mi><mi>a</mi></msub></mrow><annotation encoding="application/x-tex">dm_a</annotation></semantics></math>.</p></li>
+<li><p>the prevalence has been estimated as
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>r</mi><mi>a</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>p</mi><mi>r</mi><mi>e</mi><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mi>/</mi><msubsup><mi>n</mi><mi>a</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>p</mi><mi>r</mi><mi>e</mi><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup></mrow><annotation encoding="application/x-tex">r_a^{(prev)}/n_a^{(prev)}</annotation></semantics></math>,
+where out of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>n</mi><mi>a</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>p</mi><mi>r</mi><mi>e</mi><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><annotation encoding="application/x-tex">n_a^{(prev)}</annotation></semantics></math>
+people who are alive at age
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>r</mi><mi>a</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>p</mi><mi>r</mi><mi>e</mi><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><annotation encoding="application/x-tex">r_a^{(prev)}</annotation></semantics></math>
+of them have IHD.</p></li>
 </ul>
 <p>The published estimates and uncertainty interval are then used to
 derive the implicit denominator and numerator, using the method
@@ -313,7 +385,7 @@ age groups.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"tempdisagg"</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span> </span>
 <span>   <span class="va">disagg_crude</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">dat</span><span class="op">$</span><span class="va">measure</span><span class="op">/</span><span class="fl">5</span>, each<span class="op">=</span><span class="fl">5</span><span class="op">)</span></span>
-<span>   <span class="va">disagg_smooth</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="fu">tempdisagg</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/tempdisagg/man/td.html" class="external-link">td</a></span><span class="op">(</span><span class="va">dat</span><span class="op">$</span><span class="va">measure</span> <span class="op">~</span> <span class="fl">1</span>, to<span class="op">=</span><span class="fl">5</span>, method<span class="op">=</span><span class="st">"fast"</span><span class="op">)</span><span class="op">)</span></span>
+<span>   <span class="va">disagg_smooth</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="fu">tempdisagg</span><span class="fu">::</span><span class="fu"><a href="http://cynkra.github.io/tempdisagg/reference/td.html" class="external-link">td</a></span><span class="op">(</span><span class="va">dat</span><span class="op">$</span><span class="va">measure</span> <span class="op">~</span> <span class="fl">1</span>, to<span class="op">=</span><span class="fl">5</span>, method<span class="op">=</span><span class="st">"fast"</span><span class="op">)</span><span class="op">)</span></span>
 <span>   <span class="va">ageyr</span> <span class="op">&lt;-</span> <span class="fl">0</span><span class="op">:</span><span class="fl">24</span></span>
 <span>   <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ageyr</span>, <span class="va">disagg_crude</span>, type<span class="op">=</span><span class="st">"l"</span>, xlab<span class="op">=</span><span class="st">"Age"</span>, ylab<span class="op">=</span><span class="st">"Measure"</span>, ylim<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">8</span><span class="op">)</span><span class="op">)</span></span>
 <span>   <span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">ageyr</span>, <span class="va">disagg_smooth</span>, col<span class="op">=</span><span class="st">"blue"</span><span class="op">)</span></span>
@@ -321,7 +393,7 @@ age groups.</p>
 <span>   <span class="fu"><a href="https://rdrr.io/r/base/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="va">disagg_smooth</span>, <span class="va">agegroup</span>, <span class="va">sum</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
 <pre><code><span><span class="co">## Loading required namespace: tempdisagg</span></span></code></pre>
-<p><img src="disbayes_files/figure-html/unnamed-chunk-5-1.png" width="672"></p>
+<p><img src="disbayes_files/figure-html/unnamed-chunk-5-1.png" class="r-plt" alt="" width="672"></p>
 <pre><code><span><span class="co">##   [0,5)  [5,10) [10,15) [15,20) [20,25) </span></span>
 <span><span class="co">##      15      20      24      35      29</span></span></code></pre>
 <p>See the documentation for the <a href="https://CRAN.R-project.org/package=tempdisagg" class="external-link">tempdisagg</a>
@@ -334,31 +406,42 @@ generalises, e.g. to intervals of varying lengths.</p>
 <h3 id="determining-numerators-and-denominators-from-point-andor-interval-estimates">Determining numerators and denominators from point and/or interval
 estimates<a class="anchor" aria-label="anchor" href="#determining-numerators-and-denominators-from-point-andor-interval-estimates"></a>
 </h3>
-<p>Sometimes a point estimate <span class="math inline">\(\hat{p}\)</span> for a quantity such as incidence
-is published alongside an (e.g. 95%) interval estimate <span class="math inline">\((\hat{p}^{(lower)},\hat{p}^{(upper)})\)</span>.
+<p>Sometimes a point estimate
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>p</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat{p}</annotation></semantics></math>
+for a quantity such as incidence is published alongside an (e.g. 95%)
+interval estimate
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">(</mo><msup><mover><mi>p</mi><mo accent="true">̂</mo></mover><mrow><mo stretchy="true" form="prefix">(</mo><mi>l</mi><mi>o</mi><mi>w</mi><mi>e</mi><mi>r</mi><mo stretchy="true" form="postfix">)</mo></mrow></msup><mo>,</mo><msup><mover><mi>p</mi><mo accent="true">̂</mo></mover><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mi>p</mi><mi>p</mi><mi>e</mi><mi>r</mi><mo stretchy="true" form="postfix">)</mo></mrow></msup><mo stretchy="true" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(\hat{p}^{(lower)},\hat{p}^{(upper)})</annotation></semantics></math>.
 The interval estimate can be assumed to express the uncertainty
 associated with the estimate. Such information can be converted to an
-implicit numerator <span class="math inline">\(r\)</span> and
-denominator <span class="math inline">\(n\)</span> as follows. We assume
-the point and interval estimate are summaries of a Beta posterior
-distribution which has been obtained by combining a vague prior with an
-observation of <span class="math inline">\(r\)</span> events occurring
-out of a sample of <span class="math inline">\(n\)</span> individuals.
-If a Beta(0,0) prior is used, then the posterior is known to be Beta(r,
-n-r). We can then search for the best-fitting Beta(r,n-r)$ distribution
-which has median <span class="math inline">\(\hat{p}\)</span> and
-(2.5,97.5) quantiles <span class="math inline">\((\hat{p}^{(lower)},\hat{p}^{(upper)})\)</span>,
-and set <span class="math inline">\(r=a, n=a+b\)</span>. A utility to
-perform this search is provided in the <a href="https://CRAN.R-project.org/package=SHELF" class="external-link">SHELF</a> package for
+implicit numerator
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>r</mi><annotation encoding="application/x-tex">r</annotation></semantics></math>
+and denominator
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
+as follows. We assume the point and interval estimate are summaries of a
+Beta posterior distribution which has been obtained by combining a vague
+prior with an observation of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>r</mi><annotation encoding="application/x-tex">r</annotation></semantics></math>
+events occurring out of a sample of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
+individuals. If a Beta(0,0) prior is used, then the posterior is known
+to be Beta(r, n-r). We can then search for the best-fitting Beta(r,n-r)$
+distribution which has median
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>p</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat{p}</annotation></semantics></math>
+and (2.5,97.5) quantiles
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">(</mo><msup><mover><mi>p</mi><mo accent="true">̂</mo></mover><mrow><mo stretchy="true" form="prefix">(</mo><mi>l</mi><mi>o</mi><mi>w</mi><mi>e</mi><mi>r</mi><mo stretchy="true" form="postfix">)</mo></mrow></msup><mo>,</mo><msup><mover><mi>p</mi><mo accent="true">̂</mo></mover><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mi>p</mi><mi>p</mi><mi>e</mi><mi>r</mi><mo stretchy="true" form="postfix">)</mo></mrow></msup><mo stretchy="true" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(\hat{p}^{(lower)},\hat{p}^{(upper)})</annotation></semantics></math>,
+and set
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>=</mo><mi>a</mi><mo>,</mo><mi>n</mi><mo>=</mo><mi>a</mi><mo>+</mo><mi>b</mi></mrow><annotation encoding="application/x-tex">r=a, n=a+b</annotation></semantics></math>.
+A utility to perform this search is provided in the <a href="https://CRAN.R-project.org/package=SHELF" class="external-link">SHELF</a> package for
 expert elicitation (<span class="citation">O’Hagan et al.
 (2006)</span>).</p>
 <p>In other applications, the denominators might be directly available,
 e.g. we might know that the prevalence was estimated from a survey of
-<span class="math inline">\(r_a^{(prev)}\)</span> people, or we might
-assume that the incidence and mortality were obtained from a
-comprehensive registry of the population, in which case the denominator
-would equal the population size (within the specific stratum, e.g. as
-defined by age and gender, that the estimate refers to).</p>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>r</mi><mi>a</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>p</mi><mi>r</mi><mi>e</mi><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><annotation encoding="application/x-tex">r_a^{(prev)}</annotation></semantics></math>
+people, or we might assume that the incidence and mortality were
+obtained from a comprehensive registry of the population, in which case
+the denominator would equal the population size (within the specific
+stratum, e.g. as defined by age and gender, that the estimate refers
+to).</p>
 <p>The uncertainty inherent in the information supplied about each of
 incidence, prevalence and mortality is measured by the denominator. In
 the example above, this is equated to the size of the population used to
@@ -382,29 +465,45 @@ assumed to arise from a Binomial distribution with the corresponding
 denominator, and a probability parameter which is a function of the
 parameters in the theoretical disease model.</p>
 <ul>
-<li><p>(incidence) <span class="math inline">\(r_a^{(inc)} \sim ~
-Binomial(n_a, 1 - P_{a11})\)</span>, where <span class="math inline">\(P_{a11}\)</span> is the annual probability of
-remaining free of the disease.</p></li>
-<li><p>(mortality) <span class="math inline">\(r_a^{(mort)} \sim ~
-Binomial(n_a, dm_a)\)</span>, where the disease-specific mortality <span class="math inline">\(dm_a\)</span> is a deterministic function of the
-incidences and case fatalities <span class="math inline">\(\{i_j,f_j\}\)</span> for ages <span class="math inline">\(j\)</span> up to <span class="math inline">\(a\)</span>, as described in the theoretical
-disease model.</p></li>
-<li><p>(prevalence) <span class="math inline">\(r_a^{(prev)} \sim ~
-Binomial(n_a^{(prev)}, pr_a)\)</span>, where <span class="math inline">\(pr_a\)</span> is the true prevalence, defined as a
-deterministic function of the incidences and case fatalities.</p></li>
-<li><p>(remission, if assumed possible) <span class="math inline">\(r_a^{(rem)} \sim ~ Binomial(n_a^{(rem)},
-P_{a21})\)</span>, where <span class="math inline">\(P_{a21}\)</span> is
-the probability that someone with the disease will have recovered from
-the disease one year from now, defined as a deterministic function of
-the remission rates, case fatalities and incidences.</p></li>
+<li><p>(incidence)
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>r</mi><mi>a</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>i</mi><mi>n</mi><mi>c</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mo>∼</mo><mspace width="0.222em"></mspace><mi>B</mi><mi>i</mi><mi>n</mi><mi>o</mi><mi>m</mi><mi>i</mi><mi>a</mi><mi>l</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>n</mi><mi>a</mi></msub><mo>,</mo><mn>1</mn><mo>−</mo><msub><mi>P</mi><mrow><mi>a</mi><mn>11</mn></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">r_a^{(inc)} \sim ~ Binomial(n_a, 1 - P_{a11})</annotation></semantics></math>,
+where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>P</mi><mrow><mi>a</mi><mn>11</mn></mrow></msub><annotation encoding="application/x-tex">P_{a11}</annotation></semantics></math>
+is the annual probability of remaining free of the disease.</p></li>
+<li><p>(mortality)
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>r</mi><mi>a</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>m</mi><mi>o</mi><mi>r</mi><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mo>∼</mo><mspace width="0.222em"></mspace><mi>B</mi><mi>i</mi><mi>n</mi><mi>o</mi><mi>m</mi><mi>i</mi><mi>a</mi><mi>l</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>n</mi><mi>a</mi></msub><mo>,</mo><mi>d</mi><msub><mi>m</mi><mi>a</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">r_a^{(mort)} \sim ~ Binomial(n_a, dm_a)</annotation></semantics></math>,
+where the disease-specific mortality
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><msub><mi>m</mi><mi>a</mi></msub></mrow><annotation encoding="application/x-tex">dm_a</annotation></semantics></math>
+is a deterministic function of the incidences and case fatalities
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">{</mo><msub><mi>i</mi><mi>j</mi></msub><mo>,</mo><msub><mi>f</mi><mi>j</mi></msub><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">\{i_j,f_j\}</annotation></semantics></math>
+for ages
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>
+up to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math>,
+as described in the theoretical disease model.</p></li>
+<li><p>(prevalence)
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>r</mi><mi>a</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>p</mi><mi>r</mi><mi>e</mi><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mo>∼</mo><mspace width="0.222em"></mspace><mi>B</mi><mi>i</mi><mi>n</mi><mi>o</mi><mi>m</mi><mi>i</mi><mi>a</mi><mi>l</mi><mrow><mo stretchy="true" form="prefix">(</mo><msubsup><mi>n</mi><mi>a</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>p</mi><mi>r</mi><mi>e</mi><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mo>,</mo><mi>p</mi><msub><mi>r</mi><mi>a</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">r_a^{(prev)} \sim ~ Binomial(n_a^{(prev)}, pr_a)</annotation></semantics></math>,
+where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><msub><mi>r</mi><mi>a</mi></msub></mrow><annotation encoding="application/x-tex">pr_a</annotation></semantics></math>
+is the true prevalence, defined as a deterministic function of the
+incidences and case fatalities.</p></li>
+<li><p>(remission, if assumed possible)
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>r</mi><mi>a</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>r</mi><mi>e</mi><mi>m</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mo>∼</mo><mspace width="0.222em"></mspace><mi>B</mi><mi>i</mi><mi>n</mi><mi>o</mi><mi>m</mi><mi>i</mi><mi>a</mi><mi>l</mi><mrow><mo stretchy="true" form="prefix">(</mo><msubsup><mi>n</mi><mi>a</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>r</mi><mi>e</mi><mi>m</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mo>,</mo><msub><mi>P</mi><mrow><mi>a</mi><mn>21</mn></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">r_a^{(rem)} \sim ~ Binomial(n_a^{(rem)}, P_{a21})</annotation></semantics></math>,
+where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>P</mi><mrow><mi>a</mi><mn>21</mn></mrow></msub><annotation encoding="application/x-tex">P_{a21}</annotation></semantics></math>
+is the probability that someone with the disease will have recovered
+from the disease one year from now, defined as a deterministic function
+of the remission rates, case fatalities and incidences.</p></li>
 </ul>
 </li>
 <li><p>define prior distributions for the unknown parameters, as
 explained in the next section.</p></li>
-<li><p>compute the posterior distribution <span class="math inline">\(p(\theta | \mathbf{y})\)</span> for parameters
-<span class="math inline">\(\theta = \{i_a,f_a\}\)</span> given data
-<span class="math inline">\(\mathbf{y} = \{i_a, r_a,
-n_a\}\)</span></p></li>
+<li><p>compute the posterior distribution
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>θ</mi><mo stretchy="false" form="prefix">|</mo><mi>𝐲</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">p(\theta | \mathbf{y})</annotation></semantics></math>
+for parameters
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>θ</mi><mo>=</mo><mo stretchy="false" form="prefix">{</mo><msub><mi>i</mi><mi>a</mi></msub><mo>,</mo><msub><mi>f</mi><mi>a</mi></msub><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">\theta = \{i_a,f_a\}</annotation></semantics></math>
+given data
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐲</mi><mo>=</mo><mo stretchy="false" form="prefix">{</mo><msub><mi>i</mi><mi>a</mi></msub><mo>,</mo><msub><mi>r</mi><mi>a</mi></msub><mo>,</mo><msub><mi>n</mi><mi>a</mi></msub><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">\mathbf{y} = \{i_a, r_a, n_a\}</annotation></semantics></math></p></li>
 </ol>
 </div>
 <div class="section level3">
@@ -419,33 +518,48 @@ influence the assumed prior has on the resulting estimates.</p>
 fatality depends on age. The same methods can be used for how incidence
 depends on age.</p>
 <ol style="list-style-type: decimal">
-<li><p>the case fatality rate <span class="math inline">\(f_a\)</span>
-for each year of age <span class="math inline">\(a\)</span> is assumed
-to have an independent vague prior distribution.</p></li>
-<li><p>the case fatality rate is assumed to be a smooth function <span class="math inline">\(g()\)</span> of age, <span class="math inline">\(f_a = g(a)\)</span>. This smooth function is
-defined by a spline basis <span class="math inline">\(log(f_a) = \sum_k
-\beta_k g_k(a)\)</span>, where <span class="math inline">\(g_k()\)</span> are basis functions. A “thin plate”
-spline is used, following the default in the <code>mgcv</code> R package
-(Wood), and the amount of smoothness is determined automatically through
-a hierarchical prior on the coefficients.</p></li>
+<li><p>the case fatality rate
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>f</mi><mi>a</mi></msub><annotation encoding="application/x-tex">f_a</annotation></semantics></math>
+for each year of age
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math>
+is assumed to have an independent vague prior distribution.</p></li>
+<li><p>the case fatality rate is assumed to be a smooth function
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>g</mi><mrow><mo stretchy="true" form="prefix">(</mo><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">g()</annotation></semantics></math>
+of age,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>f</mi><mi>a</mi></msub><mo>=</mo><mi>g</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>a</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">f_a = g(a)</annotation></semantics></math>.
+This smooth function is defined by a spline basis
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>l</mi><mi>o</mi><mi>g</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>f</mi><mi>a</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msub><mo>∑</mo><mi>k</mi></msub><msub><mi>β</mi><mi>k</mi></msub><msub><mi>g</mi><mi>k</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>a</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">log(f_a) = \sum_k \beta_k g_k(a)</annotation></semantics></math>,
+where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>g</mi><mi>k</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">g_k()</annotation></semantics></math>
+are basis functions. A “thin plate” spline is used, following the
+default in the <code>mgcv</code> R package (Wood), and the amount of
+smoothness is determined automatically through a hierarchical prior on
+the coefficients.</p></li>
 <li><p>the case fatality rate is a smoothly increasing function of
 age.</p></li>
 <li><p>the case fatality rate is constant with age.</p></li>
 </ol>
-<p>In addition, for all ages below a given cut-off age <span class="math inline">\(a_{base}\)</span>, case fatalities are assumed to
-be equal to a constant <span class="math inline">\(f_{base}\)</span>.
-This cut-off age <span class="math inline">\(a_{base}\)</span> needs to
-be supplied when calling the <code>disbayes</code> function. <span class="math inline">\(f_{base}\)</span> does not need to be supplied
-however, and is estimated from the data under the assumption that the
-dependence on age is a smooth function.</p>
+<p>In addition, for all ages below a given cut-off age
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>a</mi><mrow><mi>b</mi><mi>a</mi><mi>s</mi><mi>e</mi></mrow></msub><annotation encoding="application/x-tex">a_{base}</annotation></semantics></math>,
+case fatalities are assumed to be equal to a constant
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>f</mi><mrow><mi>b</mi><mi>a</mi><mi>s</mi><mi>e</mi></mrow></msub><annotation encoding="application/x-tex">f_{base}</annotation></semantics></math>.
+This cut-off age
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>a</mi><mrow><mi>b</mi><mi>a</mi><mi>s</mi><mi>e</mi></mrow></msub><annotation encoding="application/x-tex">a_{base}</annotation></semantics></math>
+needs to be supplied when calling the <code>disbayes</code> function.
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>f</mi><mrow><mi>b</mi><mi>a</mi><mi>s</mi><mi>e</mi></mrow></msub><annotation encoding="application/x-tex">f_{base}</annotation></semantics></math>
+does not need to be supplied however, and is estimated from the data
+under the assumption that the dependence on age is a smooth
+function.</p>
 <p>Model (2) is more realistic. However it may not give sensible
 estimates if the information provided by the data is too weak. The
 results of fitting Model (1) can help to diagnose where the indirect
 information on case fatality provided by the rest of the data is weaker
-or stronger. If the information on <span class="math inline">\(f_a\)</span> for a particular age is too weak,
-then the posterior distribution will be identical to the prior. In those
-cases, substantive prior information about case fatality at that age is
-necessary for the estimates to be meaningful.</p>
+or stronger. If the information on
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>f</mi><mi>a</mi></msub><annotation encoding="application/x-tex">f_a</annotation></semantics></math>
+for a particular age is too weak, then the posterior distribution will
+be identical to the prior. In those cases, substantive prior information
+about case fatality at that age is necessary for the estimates to be
+meaningful.</p>
 <p>This information might come from nearby ages that are
 better-informed, through extrapolation from the smoothing model. However
 extrapolating in this way is only feasible for a limited time span
@@ -479,8 +593,9 @@ point estimate (median) and credible intervals. This is slower
 characterisation of uncertainty.</p></li>
 </ol>
 <p>The <code>disbayes</code> package uses Stan to fit the Bayesian
-disease model given here to the data <span class="math inline">\(\mathbf{y} = \{i_a, r_a, n_a\}\)</span> supplied
-in the <code>ihdbristol</code> data frame. The R function
+disease model given here to the data
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐲</mi><mo>=</mo><mo stretchy="false" form="prefix">{</mo><msub><mi>i</mi><mi>a</mi></msub><mo>,</mo><msub><mi>r</mi><mi>a</mi></msub><mo>,</mo><msub><mi>n</mi><mi>a</mi></msub><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">\mathbf{y} = \{i_a, r_a, n_a\}</annotation></semantics></math>
+supplied in the <code>ihdbristol</code> data frame. The R function
 <code>disbayes</code> does the work of converting the data to the
 required format for Stan, and calling the Stan software to run the
 simulations.</p>
@@ -627,12 +742,12 @@ between 60 and 65:</p>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">var</span><span class="op">==</span><span class="st">"cf"</span>, <span class="fu"><a href="https://dplyr.tidyverse.org/reference/between.html" class="external-link">between</a></span><span class="op">(</span><span class="va">age</span>,<span class="fl">60</span>,<span class="fl">65</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">age</span>, <span class="va">`25%`</span>, <span class="va">`50%`</span>, <span class="va">`75%`</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##   age        25%        50%        75%</span></span>
-<span><span class="co">## 1  60 0.01606369 0.01722528 0.01846326</span></span>
-<span><span class="co">## 2  61 0.01626686 0.01734981 0.01860774</span></span>
-<span><span class="co">## 3  62 0.01644838 0.01753525 0.01880895</span></span>
-<span><span class="co">## 4  63 0.01664303 0.01775133 0.01899770</span></span>
-<span><span class="co">## 5  64 0.01687737 0.01802444 0.01912984</span></span>
-<span><span class="co">## 6  65 0.01714281 0.01827939 0.01940317</span></span></code></pre>
+<span><span class="co">## 1  60 0.01617494 0.01734871 0.01866212</span></span>
+<span><span class="co">## 2  61 0.01636226 0.01749507 0.01875589</span></span>
+<span><span class="co">## 3  62 0.01659435 0.01769011 0.01890152</span></span>
+<span><span class="co">## 4  63 0.01674229 0.01783388 0.01908378</span></span>
+<span><span class="co">## 5  64 0.01702321 0.01805059 0.01934203</span></span>
+<span><span class="co">## 6  65 0.01719037 0.01830394 0.01950478</span></span></code></pre>
 <p>The default <code>plot</code> method for objects returned by
 <code>disbayes</code> plots the posterior summaries for case fatality,
 allowing a quick check of the model results. Or do
@@ -642,7 +757,7 @@ returns a <code>ggplot2</code> object that can be modified with
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dbres</span><span class="op">)</span> <span class="op">+</span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ylab</a></span><span class="op">(</span><span class="st">"Case fatality"</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">xlab</a></span><span class="op">(</span><span class="st">"Age"</span><span class="op">)</span> </span></code></pre></div>
-<p><img src="disbayes_files/figure-html/unnamed-chunk-12-1.png" width="672"></p>
+<p><img src="disbayes_files/figure-html/unnamed-chunk-12-1.png" class="r-plt" alt="" width="672"></p>
 <p>More flexible plots can be built by using <code>ggplot</code>
 directly on the tidied estimates. The following shows the estimates of
 case fatality from the unsmoothed model in blue, with the estimates from
@@ -655,7 +770,7 @@ the smoothed model superimposed in black.</p>
 <span>                  data<span class="op">=</span><span class="va">summu</span>, col<span class="op">=</span><span class="st">"blue"</span>, alpha<span class="op">=</span><span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_linerange.html" class="external-link">geom_pointrange</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y<span class="op">=</span><span class="va">`50%`</span>, ymin<span class="op">=</span><span class="va">`2.5%`</span>, ymax<span class="op">=</span><span class="va">`97.5%`</span><span class="op">)</span>,</span>
 <span>                  data<span class="op">=</span><span class="va">summ</span>, col<span class="op">=</span><span class="st">"black"</span>, alpha<span class="op">=</span><span class="fl">0.5</span><span class="op">)</span></span></code></pre></div>
-<p><img src="disbayes_files/figure-html/unnamed-chunk-13-1.png" width="672"></p>
+<p><img src="disbayes_files/figure-html/unnamed-chunk-13-1.png" class="r-plt" alt="" width="672"></p>
 <p>Under the unsmoothed model, there is no information about case
 fatality in the youngest ages, hence the estimates are being drawn from
 the vague prior distribution that take values between about 0 and 60.
@@ -711,7 +826,8 @@ substantially more computationally intensive than the basic model shown
 in this vignette. For applications similar to the one shown here, using
 MCMC will typically take over an hour, while using optimisation will
 take a minute or less. Further information about how they are defined
-mathematically will be given in a forthcoming paper. See the <a href="https://chjackson.github.io/disbayes/reference/index.html" class="external-link">R help
+mathematically is given in the paper (<span class="citation">Jackson,
+Zapata-Diomedi, and Woodcock (2023)</span>). See the <a href="https://chjackson.github.io/disbayes/reference/index.html" class="external-link">R help
 pages</a> for further information on how to invoke the functions.</p>
 <div class="section level3">
 <h3 id="hierarchical-models">Hierarchical models<a class="anchor" aria-label="anchor" href="#hierarchical-models"></a>
@@ -744,7 +860,7 @@ arguments <code>inc_trend</code> and <code>cf_trend</code>.</p>
 <div class="section level3">
 <h3 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h3>
-<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
 <div id="ref-dismod2" class="csl-entry">
 Barendregt, J. J., G. J. Van Oortmarssen, T. Vos, and C. J. L. Murray.
 2003. <span>“<span class="nocase">A generic model for the assessment of
@@ -779,9 +895,7 @@ Journal</span></em> 5 (2): 80–87. <a href="https://doi.org/10.32614/RJ-2013-02
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
 
-        <nav id="toc" data-toggle="toc"><h2 data-toc-skip>Contents</h2>
-    </nav>
-</div>
+      </div>
 
 </div>
 
@@ -794,16 +908,16 @@ Journal</span></em> 5 (2): 80–87. <a href="https://doi.org/10.32614/RJ-2013-02
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
       </footer>
 </div>
 
-  
 
 
-  
+
+
 
   </body>
 </html>
