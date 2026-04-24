@@ -308,7 +308,7 @@ Instead, the parameter estimates can be easily extracted from a disbayes object 
 summ <- tidy(dbres) 
 ```
 
-To extract results for a specific variable and model, it is convenient to use standard [tidyverse](https://www.tidyverse.org/) functions, e.g. to get the median and interquartile range of case fatality for people aged between 60 and 65: 
+To extract results for a specific variable and model, it is convenient to use standard "tidyverse" R functions, e.g. to get the median and interquartile range of case fatality for people aged between 60 and 65: 
 
 ```{r,eval=TRUE}
 library(dplyr,quietly=TRUE)

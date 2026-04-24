@@ -1,3 +1,4 @@
-base
 disbayes
 dplyr
+usethis
+devtools
