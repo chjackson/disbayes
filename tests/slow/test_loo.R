@@ -20,7 +20,13 @@ test_that("loo, MCMC", {
   loo1 <- loo(db1)
   loo2 <- loo(db2)
   lc <- loo::loo_compare(loo1,loo2)
-  expect_true(lc["model1","elpd_diff"] > lc["model2","elpd_diff"])
+  if ("model" %in% colnames(lc)) {
+    expect_true(
+      lc[lc$model == "model1", "elpd_diff"] > lc[lc$model == "model2", "elpd_diff"]
+    )
+  } else {
+    expect_true(lc["model1","elpd_diff"] > lc["model2","elpd_diff"])
+  }
   
   ## Individual contributions  
   li <- loo_indiv(loo1)
@@ -55,7 +61,13 @@ test_that("loo, hierarchical",{
   loo1 <- loo(db1)
   loo2 <- loo(db2)
   lc <- loo::loo_compare(loo1,loo2)
-  expect_true(lc["model1","elpd_diff"] > lc["model2","elpd_diff"])
+  if ("model" %in% colnames(lc)) {
+    expect_true(
+      lc[lc$model == "model1", "elpd_diff"] > lc[lc$model == "model2", "elpd_diff"]
+    )
+  } else {
+    expect_true(lc["model1","elpd_diff"] > lc["model2","elpd_diff"])
+  }
   
   li <- loo_indiv(loo1)
   expect_equal(table(li$var)[[1]], 1700)
